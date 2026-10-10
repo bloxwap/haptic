@@ -105,4 +105,4 @@ npm run docs:preview
 
 ## License
 
-MIT. `web-haptics` is independently distributed under MIT; website fonts retain their OFL licenses.
+MIT. `web-haptics` is independently distributed under MIT; website fonts retain their [OFL license notice](apps/docs/public/licenses/bloxwap-font-OFL.txt), which is included in the static site.
