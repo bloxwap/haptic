@@ -2,6 +2,8 @@
 
 <p align="center"><strong>Haptic feedback for React.<br>Physical taps on iOS, patterns on vibration-capable browsers.</strong></p>
 
+<p align="center"><a href="https://bloxwap.github.io/haptic/">Documentation and demo</a> · <a href="https://github.com/bloxwap/haptic">Source</a> · <a href="https://github.com/bloxwap/haptic/blob/main/LICENSE">MIT license</a></p>
+
 ## Installation
 
 ```sh
