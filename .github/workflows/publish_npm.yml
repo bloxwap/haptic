@@ -38,6 +38,7 @@ jobs:
       - run: npm run docs:check
       - run: npm run docs:build
       - run: npx playwright install --with-deps chromium firefox webkit
+      - run: bash .github/scripts/start-test-audio.sh
       - run: npm run test:browser
       - run: npm run docs:smoke
       - run: npm run pack:haptic
