@@ -1,0 +1,27 @@
+{
+  "name": "bloxwap-haptic-workspace",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/*", "apps/*"],
+  "engines": { "node": ">=24" },
+  "overrides": { "esbuild": "0.28.2" },
+  "scripts": {
+    "dev": "npm run docs:dev",
+    "build": "npm --workspace @bloxwap/haptic run build",
+    "typecheck": "npm --workspace @bloxwap/haptic run typecheck",
+    "test": "npm --workspace @bloxwap/haptic run test",
+    "coverage": "npm --workspace @bloxwap/haptic run coverage",
+    "test:matrix": "npm --workspace @bloxwap/haptic run test:matrix",
+    "size": "npm --workspace @bloxwap/haptic run size",
+    "test:browser": "npm --workspace @bloxwap/haptic run test:browser",
+    "pack:check": "npm --workspace @bloxwap/haptic run pack:check",
+    "pack:haptic": "npm pack --workspace @bloxwap/haptic",
+    "release:check": "node .github/scripts/release-check.mjs",
+    "registry:check": "node .github/scripts/registry-check.mjs",
+    "docs:dev": "npm --workspace @bloxwap/haptic-docs run dev",
+    "docs:build": "npm --workspace @bloxwap/haptic-docs run build",
+    "docs:check": "npm --workspace @bloxwap/haptic-docs run check",
+    "docs:preview": "npm --workspace @bloxwap/haptic-docs run preview",
+    "docs:smoke": "npm --workspace @bloxwap/haptic-docs run smoke"
+  }
+}

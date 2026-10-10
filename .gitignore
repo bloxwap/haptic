@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.next/
+out/
+.source/
+.release-artifacts/
+.snippet-check-*/
+coverage/
+test-results/
+playwright-report/
+*.tgz
+*.tsbuildinfo
+.DS_Store
+.env*
+!.env.example

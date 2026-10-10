@@ -1,0 +1,86 @@
+name: Publish npm
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+concurrency:
+  group: publish-npm
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      dist_tag: ${{ steps.release.outputs.dist_tag }}
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
+      NEXT_PUBLIC_BASE_PATH: /haptic
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm run release:check
+        id: release
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run test:matrix
+      - run: npm run size
+      - run: npm run pack:check
+      - run: npm audit --audit-level=high
+      - run: npm run docs:check
+      - run: npm run docs:build
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run test:browser
+      - run: npm run docs:smoke
+      - run: npm run pack:haptic
+      - run: sha256sum bloxwap-haptic-*.tgz > SHA256SUMS
+      - uses: actions/upload-artifact@v7
+        with:
+          name: npm-package
+          path: |
+            bloxwap-haptic-*.tgz
+            SHA256SUMS
+          if-no-files-found: error
+  publish:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
+      HAPTIC_REGISTRY_VERSION: ${{ needs.validate.outputs.version }}
+      DIST_TAG: ${{ needs.validate.outputs.dist_tag }}
+      HAPTIC_EXPECTED_COMMIT: ${{ github.sha }}
+      HAPTIC_EXPECTED_TARBALL: .release-artifacts/bloxwap-haptic-${{ needs.validate.outputs.version }}.tgz
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm install --global npm@11.6.1
+      - run: npm ci
+      - uses: actions/download-artifact@v8
+        with:
+          name: npm-package
+          path: .release-artifacts
+      - run: sha256sum --check SHA256SUMS
+        working-directory: .release-artifacts
+      - run: npm run release:check
+      - run: npm publish "$HAPTIC_EXPECTED_TARBALL" --access public --provenance --tag "$DIST_TAG"
+      - run: npx playwright install --with-deps chromium
+      - run: npm run registry:check

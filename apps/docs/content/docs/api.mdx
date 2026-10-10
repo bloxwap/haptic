@@ -1,0 +1,68 @@
+---
+title: API
+description: Every component, prop, helper, and public type.
+---
+
+## Components
+
+`Haptic` and `HapticTarget` are aliases of the same component. Both wrap one React element. A custom component must render one host target; forwarding its ref remains the custom component's responsibility.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `children` | One target React element | Required |
+| `enabled` | `boolean` | `true` |
+| `disabled` | `boolean` | `false` |
+| `feedback` | `HapticInput` | `'selection'` |
+| `triggerOptions` | `TriggerOptions` | Unspecified |
+| `webHapticsOptions` | `WebHapticsOptions` | Unspecified |
+| `className` | `string` | Unspecified |
+| `style` | React `CSSProperties` | Wrapper uses `inline-grid` |
+
+`triggerOptions.intensity` adjusts vibration intensity from 0 to 1. It does not change the iOS system tick. `webHapticsOptions.debug` enables desktop preview audio; `showSwitch` controls the dependency's visible feedback switch.
+
+```tsx
+<Haptic
+  feedback="light"
+  triggerOptions={{ intensity: 0.7 }}
+  webHapticsOptions={{ debug: false, showSwitch: false }}
+  style={{ display: 'grid', width: '100%' }}
+>
+  <button>Continue</button>
+</Haptic>
+```
+
+## Platform helper
+
+`isIOSWebKitWithoutVibration(navigatorLike?: Navigator): boolean` recognizes iOS WebKit identities without the Vibration API. The default argument uses the browser navigator when available. In a server environment without it, the helper returns false.
+
+It recognizes iPadOS desktop-mode identities, but routing recognition does not establish vibration hardware. A supplied `navigator.vibrate` takes priority over the native-switch path.
+
+## Hook
+
+`useIOSNativeHaptics(): boolean` returns false on the server and initial render, then resolves platform routing after mount. Use it only inside a React component or hook. It does not detect whether the user can physically feel the feedback.
+
+## Public types
+
+```ts
+import type {
+  HapticTargetProps, HapticInput, HapticPattern, HapticPreset,
+  TriggerOptions, Vibration, WebHapticsOptions,
+} from '@bloxwap/haptic';
+```
+
+- `HapticInput`: a duration number, preset string, `HapticPattern`, or `HapticPreset`.
+- `HapticPattern`: alternating on/off `number[]` durations, or `Vibration[]`.
+- `Vibration`: `duration: number`, `delay?: number`, `intensity?: number`.
+- `HapticPreset`: `{ pattern: Vibration[] }`.
+- `TriggerOptions`: `{ intensity?: number }`.
+- `WebHapticsOptions`: `{ debug?: boolean; showSwitch?: boolean }`.
+
+Feedback types come from the retained `web-haptics` dependency. All timings use milliseconds.
+
+## Lifecycle and events
+
+The original target element is rendered intact. Feedback runs before its React click handler, including handlers that stop propagation or prevent default. Original handlers still control bubbling and browser defaults.
+
+Engine resources are created when first used and released on unmount or construction-option changes. Ordinary renders and feedback/intensity changes do not recreate the engine. Unmounting ends pending feedback. Feedback errors leave the original action available.
+
+The positioning wrapper is a `span`. Target fragments containing multiple hosts are outside the single-target contract; invalid children are rejected by React's single-element check.

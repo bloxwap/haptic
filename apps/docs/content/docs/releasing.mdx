@@ -1,0 +1,26 @@
+---
+title: Releasing
+description: Prepare and verify a public npm artifact from the release source.
+---
+
+The initial release is tracked in [issue #14](https://github.com/bloxwap/haptic/issues/14). Physical-device certification and npm account/trusted-publisher configuration remain explicit prerequisites.
+
+Follow the [release runbook](https://github.com/bloxwap/haptic/blob/main/.github/RELEASING.md) and [physical-device procedure](https://github.com/bloxwap/haptic/blob/main/.github/DEVICE_TESTING.md). The release workflow validates a versioned source tag and the recorded certification before publishing. Its final registry check installs actual registry bytes into fresh React 18/19 consumers and verifies provenance and browser actions.
+
+## Before publishing
+
+Run the package, coverage, browser, packed-consumer, size, and documentation checks. Record hardware results against the same source commit. Update the package version, root lockfile, changelog, and release notes together.
+
+Only `packages/haptic` is publishable. The root and documentation app are private. Packed consumers must work outside the workspace in ESM, CommonJS, TypeScript, React 18/19, and server rendering.
+
+## npm setup
+
+Verify permission to publish under the `@bloxwap` organization. A publicly unavailable package name is not a permission check. Establish a first-publish bootstrap using the reviewed real artifact, then configure the npm-side GitHub trusted publisher for `bloxwap/haptic` and `publish_npm.yml`.
+
+Check the publisher's allowed action: direct `npm publish` and staged publication are separate choices. Use hosted GitHub runners, matching workflow identity, OIDC permission, and currently supported npm/Node versions. See [npm's current documentation](https://docs.npmjs.com/trusted-publishers/).
+
+## Verify the release
+
+The GitHub tag must match the library version. Publish the exact validated package with the intended dist-tag and provenance. Install that exact version from the public registry into fresh consumer projects, then repeat format/type/React/browser smoke checks and verify package metadata and attestation source.
+
+Confirm the deployed docs under `/haptic/`, snippets, links, and badges refer to the actual release. Do not close the release tracker on a workflow configuration, packed tarball, or manual publish alone; retain the final registry, OIDC, docs, and device evidence.
