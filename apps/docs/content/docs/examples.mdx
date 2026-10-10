@@ -1,0 +1,30 @@
+---
+title: Interaction examples
+description: Try actions, refs, forms, disabled targets, links, and drawer handling.
+---
+
+<InteractionDemo />
+
+## Refs and focus
+
+The target remains the same DOM element. A button ref still points to that button, and an iOS action focuses the original target.
+
+```tsx
+const ref = useRef<HTMLButtonElement>(null);
+
+<Haptic>
+  <button ref={ref} onClick={save}>Save</button>
+</Haptic>
+```
+
+## Forms and links
+
+Use normal control attributes: `type="submit"`, `type="reset"`, and `href`. A handler's `preventDefault()` still cancels navigation or submission; `stopPropagation()` still suppresses ancestor clicks. The wrapper requests feedback independently.
+
+## Drawer targets
+
+The iOS interaction avoids sending its overlay pointer-down into an ancestor marked `data-vaul-drawer`. Ordinary ancestor pointer handling is retained outside that integration. Use the real drawer's public markup rather than a second copy of haptic logic.
+
+## Custom components
+
+A custom component should render one host target and forward its ref when needed. Keep the control's action and accessibility attributes on that host. Do not wrap multiple independent buttons in one `Haptic`.

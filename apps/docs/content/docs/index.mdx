@@ -1,0 +1,52 @@
+---
+title: Get started
+description: Add feedback to a React target without replacing its behavior.
+---
+
+The package is being prepared for its first public release. The library, build, and release work are tracked on [GitHub](https://github.com/bloxwap/haptic/issues/1).
+
+## Install
+
+Once released:
+
+```sh
+npm install @bloxwap/haptic
+```
+
+React and React DOM are peers. Use matching versions, React 18 or newer. The package provides ESM, CommonJS, and TypeScript declarations.
+
+## Wrap one target
+
+```tsx
+import { Haptic } from '@bloxwap/haptic';
+
+export function SaveButton() {
+  return (
+    <Haptic feedback="success">
+      <button onClick={() => console.log('Saved')}>Save</button>
+    </Haptic>
+  );
+}
+```
+
+Your element keeps its handlers, ref, focus, and accessibility attributes. The wrapper defaults to `inline-grid`; `className` and `style` control its layout.
+
+## Device behavior
+
+On supported physical iOS devices, tapping the target uses the system tick. Vibration-capable browsers use the selected preset or pattern. On a desktop without vibration hardware, `webHapticsOptions={{ debug: true }}` enables the dependency's audio preview.
+
+Physical feedback depends on device support and settings. The [platform guide](/docs/platforms) separates interaction tests from physical-device certification.
+
+## Disable feedback
+
+```tsx
+<Haptic enabled={false}>
+  <button onClick={save}>Save without feedback</button>
+</Haptic>
+```
+
+Disabling feedback leaves the original action available. A target with `disabled` or `aria-disabled="true"` does not request feedback.
+
+## Next.js
+
+Put interactive examples in a client component with `'use client'`. The published build preserves its client boundary and still renders safely through React server rendering. Platform detection resolves after mounting to keep initial markup compatible with hydration.

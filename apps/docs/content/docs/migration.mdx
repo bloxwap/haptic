@@ -1,0 +1,18 @@
+---
+title: Migration
+description: Move existing @joeblau/haptic usage to the independent Bloxwap package.
+---
+
+After the public release, replace the GitHub dependency with `@bloxwap/haptic` and update imports:
+
+```tsx
+import { Haptic, HapticTarget, useIOSNativeHaptics } from '@bloxwap/haptic';
+```
+
+Both component names, their prop defaults, the platform helper and hook, and the six feedback/options types remain available. Both ESM and CommonJS consumption are supported.
+
+The first build retains `web-haptics` at `0.0.6` for the existing presets and input forms. The React target wrapper and platform logic are independently implemented from the public contract and black-box observations.
+
+The new workspace separates `packages/haptic` from private `apps/docs`. Feedback remains optional, and unavailable hardware must not remove the original action. Native iOS feedback still requires a physical tap and uses the platform tick.
+
+Compared with the reference, the new wrapper deliberately keeps its engine across ordinary rerenders, handles failed feedback requests without removing the host action, and explicitly cancels moved/canceled overlay gestures. These changes strengthen the target-preservation contract rather than removing an input or consumption mode.

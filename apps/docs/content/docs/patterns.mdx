@@ -1,0 +1,40 @@
+---
+title: Presets and patterns
+description: Eleven feedback presets and four ways to describe custom vibration.
+---
+
+| Preset | Response |
+| --- | --- |
+| `selection` | Small tick |
+| `light` | Gentle tap |
+| `medium` | Firmer tap |
+| `heavy` | Strong tap |
+| `soft` | Softer response |
+| `rigid` | Short, crisp tap |
+| `success` | Confirmation pattern |
+| `warning` | Two-tap warning |
+| `error` | Three taps |
+| `nudge` | Strong tap followed by soft tap |
+| `buzz` | Longer vibration |
+
+Presets use the pinned `web-haptics` engine. Duration, patterns, and intensity apply on vibration-capable browsers. Native iOS interactions use the same system tick for every preset.
+
+```tsx
+// One duration in milliseconds.
+<Haptic feedback={80}><button>Single</button></Haptic>;
+
+// Alternating vibration, pause, vibration.
+<Haptic feedback={[30, 60, 30]}><button>Two taps</button></Haptic>;
+
+// Event durations with delay and intensity.
+<Haptic feedback={[{ duration: 30, intensity: 0.8 }, { delay: 60, duration: 30 }]}>
+  <button>Custom events</button>
+</Haptic>;
+
+// A reusable preset object.
+<Haptic feedback={{ pattern: [{ duration: 30 }, { delay: 60, duration: 30 }] }}>
+  <button>Custom preset</button>
+</Haptic>;
+```
+
+Hardware and browser limits can alter a pattern's physical response. Intensity is an engine approximation, not a promise of precise actuator amplitude. Keep feedback brief and optional for users.

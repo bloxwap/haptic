@@ -1,0 +1,111 @@
+{
+  "upstream": "87cb02a702b862f5c79a976b4de17453d93ef866",
+  "cases": [
+    {
+      "browser": "chromium",
+      "nativeRoute": false,
+      "actions": "2",
+      "parent": "2",
+      "submits": "1",
+      "hash": "#destination",
+      "formData": [
+        [
+          "token",
+          "original"
+        ]
+      ],
+      "vibration": [
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          6
+        ]
+      ],
+      "errors": []
+    },
+    {
+      "browser": "chromium",
+      "nativeRoute": true,
+      "actions": "2",
+      "parent": "2",
+      "submits": "1",
+      "hash": "#destination",
+      "formData": [
+        [
+          "token",
+          "original"
+        ]
+      ],
+      "vibration": [],
+      "errors": []
+    },
+    {
+      "browser": "webkit",
+      "nativeRoute": false,
+      "actions": "2",
+      "parent": "2",
+      "submits": "1",
+      "hash": "#destination",
+      "formData": [
+        [
+          "token",
+          "original"
+        ]
+      ],
+      "vibration": [
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          2,
+          6
+        ]
+      ],
+      "errors": []
+    },
+    {
+      "browser": "webkit",
+      "nativeRoute": true,
+      "actions": "2",
+      "parent": "2",
+      "submits": "1",
+      "hash": "#destination",
+      "formData": [
+        [
+          "token",
+          "original"
+        ]
+      ],
+      "vibration": [],
+      "errors": []
+    }
+  ]
+}

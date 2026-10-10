@@ -1,0 +1,7 @@
+{
+  "status": "pending",
+  "testedCommit": null,
+  "checkedAt": null,
+  "observations": [],
+  "notes": "Physical iPhone/Safari, Android/Chrome, iPadOS, and VoiceOver checks are required in issue #9. Automated WebKit and recorded navigator.vibrate calls do not prove tactile output."
+}

@@ -1,0 +1,233 @@
+{
+  "upstream": "87cb02a702b862f5c79a976b4de17453d93ef866",
+  "cases": [
+    {
+      "name": "vibration-custom-forward-ref",
+      "actions": 1,
+      "ref": true,
+      "focus": false,
+      "vibration": [
+        [
+          2,
+          6
+        ]
+      ]
+    },
+    {
+      "name": "vibration-live-host-mutation",
+      "states": [
+        {
+          "attribute": "disabled",
+          "value": "",
+          "auxiliary": false,
+          "actions": 0,
+          "vibration": []
+        },
+        {
+          "attribute": "disabled",
+          "value": null,
+          "auxiliary": false,
+          "actions": 1,
+          "vibration": [
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "attribute": "aria-disabled",
+          "value": "true",
+          "auxiliary": false,
+          "actions": 2,
+          "vibration": []
+        },
+        {
+          "attribute": "aria-disabled",
+          "value": null,
+          "auxiliary": false,
+          "actions": 3,
+          "vibration": [
+            [
+              2,
+              6
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ios-custom-forward-ref",
+      "actions": 1,
+      "ref": true,
+      "focus": true,
+      "vibration": []
+    },
+    {
+      "name": "ios-live-host-mutation",
+      "states": [
+        {
+          "attribute": "disabled",
+          "value": "",
+          "auxiliary": false,
+          "actions": 0,
+          "vibration": []
+        },
+        {
+          "attribute": "disabled",
+          "value": null,
+          "auxiliary": true,
+          "actions": 1,
+          "vibration": []
+        },
+        {
+          "attribute": "aria-disabled",
+          "value": "true",
+          "auxiliary": false,
+          "actions": 2,
+          "vibration": []
+        },
+        {
+          "attribute": "aria-disabled",
+          "value": null,
+          "auxiliary": true,
+          "actions": 3,
+          "vibration": []
+        }
+      ]
+    },
+    {
+      "name": "engine-lifecycle-and-options",
+      "states": [
+        {
+          "step": "mount",
+          "destroy": 0,
+          "auxiliaryInputs": 0,
+          "labels": 0,
+          "vibration": []
+        },
+        {
+          "step": "click",
+          "destroy": 0,
+          "auxiliaryInputs": 0,
+          "labels": 0,
+          "vibration": [
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "step": "feedback-change",
+          "destroy": 0,
+          "auxiliaryInputs": 0,
+          "labels": 0,
+          "vibration": [
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "step": "showSwitch-change",
+          "destroy": 1,
+          "auxiliaryInputs": 0,
+          "labels": 0,
+          "vibration": [
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "step": "second-click",
+          "destroy": 1,
+          "auxiliaryInputs": 0,
+          "labels": 0,
+          "vibration": [
+            [
+              4,
+              4
+            ],
+            [
+              5,
+              5
+            ]
+          ]
+        },
+        {
+          "step": "unmount",
+          "destroy": 2,
+          "auxiliaryInputs": 0,
+          "labels": 0,
+          "vibration": [
+            [
+              4,
+              4
+            ],
+            [
+              5,
+              5
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "child-null",
+      "error": "HapticTarget expects exactly one React element child.",
+      "buttons": 0
+    },
+    {
+      "name": "child-text",
+      "error": "HapticTarget expects exactly one React element child.",
+      "buttons": 0
+    },
+    {
+      "name": "child-array",
+      "error": "HapticTarget expects exactly one React element child.",
+      "buttons": 0
+    },
+    {
+      "name": "child-fragment-one",
+      "error": null,
+      "buttons": 1
+    },
+    {
+      "name": "child-fragment-two",
+      "error": null,
+      "buttons": 2
+    },
+    {
+      "name": "child-empty-custom",
+      "error": null,
+      "buttons": 0
+    },
+    {
+      "name": "vibration-fragment-actions",
+      "actions": [
+        1,
+        1
+      ],
+      "vibration": []
+    },
+    {
+      "name": "ios-fragment-actions",
+      "actions": [
+        1,
+        1
+      ],
+      "vibration": []
+    },
+    {
+      "name": "vibration-api-removed-after-import",
+      "actions": 1,
+      "rejected": [
+        "navigator.vibrate is not a function"
+      ]
+    }
+  ]
+}

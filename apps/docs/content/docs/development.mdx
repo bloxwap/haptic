@@ -1,0 +1,33 @@
+---
+title: Development
+description: Build the package and docs from one workspace.
+---
+
+Use Node 24 or newer and npm. One lockfile installs the library and the documentation app.
+
+```sh
+npm ci
+npm run build
+npm run typecheck
+npm run test
+npm run coverage
+npm run test:matrix
+npm run size
+npm run pack:check
+npm run test:browser
+npm run dev
+```
+
+The docs run at `http://localhost:3904`. `bun run dev` invokes the same development script; npm remains the lockfile authority.
+
+The library is consolidated in `packages/haptic/src`: public exports in `index.ts`, the React target in `haptic.tsx`, and platform routing in `platform.ts`. Tests and package verification belong to that package. Next.js, Fumadocs, branding, and interactive examples belong to private `apps/docs`.
+
+The docs use package-name imports, so a build checks the same public interface consumers receive.
+
+```sh
+NEXT_PUBLIC_BASE_PATH=/haptic npm run docs:build
+npm run docs:check
+npm run docs:preview
+```
+
+The preview serves the static export, including its configured base path. Coverage gates runtime source; browser checks and physical-device observations supply separate evidence for interaction and hardware.

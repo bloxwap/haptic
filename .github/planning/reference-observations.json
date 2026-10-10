@@ -1,0 +1,451 @@
+{
+  "upstream": "87cb02a702b862f5c79a976b4de17453d93ef866",
+  "dependency": "0.0.6",
+  "exports": [
+    "Haptic",
+    "HapticTarget",
+    "isIOSWebKitWithoutVibration",
+    "useIOSNativeHaptics"
+  ],
+  "alias": true,
+  "cases": [
+    {
+      "name": "vibration-default",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [
+        [
+          2,
+          6
+        ]
+      ],
+      "sequence": [
+        "feedback",
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "vibration-light",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [
+        [
+          6,
+          9
+        ]
+      ],
+      "sequence": [
+        "feedback",
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "vibration-number",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [
+        [
+          4,
+          4
+        ]
+      ],
+      "sequence": [
+        "feedback",
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "vibration-number-array",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [
+        [
+          4,
+          8,
+          4,
+          4
+        ]
+      ],
+      "sequence": [
+        "feedback",
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "vibration-objects",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [
+        [
+          2,
+          6
+        ]
+      ],
+      "sequence": [
+        "feedback",
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "vibration-preset-object",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [
+        [
+          4,
+          4
+        ]
+      ],
+      "sequence": [
+        "feedback",
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "vibration-disabled-prop",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [],
+      "sequence": [
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "vibration-enabled-false",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [],
+      "sequence": [
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "vibration-aria-disabled",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [],
+      "sequence": [
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "vibration-prevent-default",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [
+        [
+          2,
+          6
+        ]
+      ],
+      "sequence": [
+        "feedback",
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "vibration-stop-propagation",
+      "action": 1,
+      "parent": 0,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [
+        [
+          2,
+          6
+        ]
+      ],
+      "sequence": [
+        "feedback",
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "ios-default",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": true,
+      "focus": true,
+      "ref": true,
+      "vibration": [],
+      "sequence": [
+        "action"
+      ],
+      "switchTabIndex": -1,
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "ios-disabled-prop",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [],
+      "sequence": [
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "ios-disabled-host",
+      "action": 0,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [],
+      "sequence": [],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "ios-aria-disabled",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [],
+      "sequence": [
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "ios-aria-disabled-boolean",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": false,
+      "focus": false,
+      "ref": true,
+      "vibration": [],
+      "sequence": [
+        "action"
+      ],
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "ios-prevent-default",
+      "action": 1,
+      "parent": 1,
+      "auxiliary": true,
+      "focus": true,
+      "ref": true,
+      "vibration": [],
+      "sequence": [
+        "action"
+      ],
+      "switchTabIndex": -1,
+      "wrapperDisplay": "inline-grid"
+    },
+    {
+      "name": "ios-stop-propagation",
+      "action": 1,
+      "parent": 0,
+      "auxiliary": true,
+      "focus": true,
+      "ref": true,
+      "vibration": [],
+      "sequence": [
+        "action",
+        "feedback",
+        "feedback",
+        "feedback",
+        "feedback",
+        "feedback",
+        "feedback",
+        "feedback",
+        "feedback",
+        "feedback",
+        "feedback",
+        "feedback"
+      ],
+      "switchTabIndex": -1,
+      "wrapperDisplay": "inline-grid"
+    }
+  ],
+  "ssr": {
+    "auxiliary": false
+  },
+  "platforms": {
+    "missing": true,
+    "ipad": true,
+    "touchMacWithoutMobile": true,
+    "withVibration": false
+  },
+  "presets": [
+    {
+      "name": "success",
+      "vibration": [
+        [
+          10,
+          10,
+          5,
+          65,
+          40
+        ]
+      ]
+    },
+    {
+      "name": "warning",
+      "vibration": [
+        [
+          16,
+          4,
+          16,
+          104,
+          12,
+          8,
+          12,
+          8
+        ]
+      ]
+    },
+    {
+      "name": "error",
+      "vibration": [
+        [
+          18,
+          2,
+          18,
+          42,
+          18,
+          2,
+          18,
+          42,
+          18,
+          2,
+          18,
+          2
+        ]
+      ]
+    },
+    {
+      "name": "light",
+      "vibration": [
+        [
+          6,
+          9
+        ]
+      ]
+    },
+    {
+      "name": "medium",
+      "vibration": [
+        [
+          14,
+          6,
+          4,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "heavy",
+      "vibration": [
+        [
+          35
+        ]
+      ]
+    },
+    {
+      "name": "soft",
+      "vibration": [
+        [
+          10,
+          10,
+          10,
+          10
+        ]
+      ]
+    },
+    {
+      "name": "rigid",
+      "vibration": [
+        [
+          10
+        ]
+      ]
+    },
+    {
+      "name": "selection",
+      "vibration": [
+        [
+          2,
+          6
+        ]
+      ]
+    },
+    {
+      "name": "nudge",
+      "vibration": [
+        [
+          16,
+          4,
+          16,
+          4,
+          16,
+          4,
+          16,
+          84,
+          6,
+          14,
+          6,
+          14,
+          3,
+          7
+        ]
+      ]
+    },
+    {
+      "name": "buzz",
+      "vibration": [
+        [
+          1000
+        ]
+      ]
+    }
+  ]
+}

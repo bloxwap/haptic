@@ -1,0 +1,30 @@
+---
+title: Platforms and accessibility
+description: Physical iOS taps, browser vibration, hydration, and device verification.
+---
+
+## iOS
+
+Eligible iOS WebKit targets use a native switch interaction. A physical tap can produce the platform's system tick. Synthetic clicks, timers, and asynchronous callbacks cannot promise physical iOS feedback. Choosing a preset or intensity does not change that tick.
+
+WebKit introduced its switch control in Safari 17.4. That is a control baseline, not a claim that every device or OS version has been physically tested. System-haptic settings and hardware capability still matter.
+
+## Vibration-capable browsers
+
+Browsers exposing `navigator.vibrate` use `web-haptics` for the selected input and options. If that API exists on an iOS-like device, it takes priority. An accepted API call does not prove that hardware physically vibrated.
+
+## Other devices
+
+Targets keep their original action even when feedback is unavailable. Desktop audio preview is opt-in through `webHapticsOptions.debug`. An iPadOS identity can choose the native routing path without proving that the iPad has suitable haptic hardware.
+
+## Accessibility and interaction
+
+Keep the original control's semantic role, label, and keyboard behavior. Native feedback controls are hidden from assistive technology and add no tab stop. The original ref and focus target remain intact.
+
+`enabled={false}` and `disabled={true}` suppress feedback without disabling the target's action. Native `disabled`, `aria-disabled="true"`, and inert hosts suppress feedback. Scrolling, canceled gestures, and drags do not become actions.
+
+## Certification status
+
+Physical-device and VoiceOver certification is still open in [issue #9](https://github.com/bloxwap/haptic/issues/9). Automated Chromium, Firefox, and WebKit tests establish browser interaction behavior; they cannot establish tactile output.
+
+The release checklist requires a recorded iPhone/Safari and Android/Chrome matrix with device model, OS/browser versions, settings, feedback observations, and target behavior. No unperformed hardware result is represented as a pass.
