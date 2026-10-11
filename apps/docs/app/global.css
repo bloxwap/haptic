@@ -47,8 +47,9 @@ body { min-height: 100vh; font-family: var(--font-sans); }
 .settings input { accent-color: #83fba1; }
 .preset-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .preset { display: flex; align-items: start; flex-direction: column; justify-content: center; min-height: 108px; width: 100%; padding: 20px; border: 1px solid #344539; border-radius: 10px; background: #121c15; text-align: left; cursor: pointer; transition: background 120ms, border-color 120ms; }
-.preset:hover { background: #1a2b20; border-color: #83fba1; }
-.preset:active { background: #254b30; }
+.preset:hover:not(:disabled) { background: #1a2b20; border-color: #83fba1; }
+.preset:active:not(:disabled) { background: #254b30; }
+.preset:disabled { opacity: .45; cursor: default; }
 .preset strong { font-weight: 650; font-size: 17px; text-transform: capitalize; }
 .preset small { color: #a3b3a7; margin-top: 5px; }
 .status { margin-top: 20px; font-family: var(--font-mono); font-size: 12px; color: #adbbb1; }

@@ -1,5 +1,31 @@
 import { expect, test } from '@playwright/test';
 
+for (const example of [
+  { name: 'preset board', path: '', target: /selection/i, setting: 'Feedback enabled', status: '.status' },
+  { name: 'interaction examples', path: 'docs/examples/', target: 'Count action', setting: 'Enable feedback', status: '#interaction-result' },
+]) test(`${example.name} controls wait for their handlers while scripts load`, async ({ page, baseURL }) => {
+  let releaseScripts!: () => void;
+  const scripts = new Promise<void>(resolve => { releaseScripts = resolve; });
+  await page.route('**/*.js', async route => { await scripts; await route.continue(); });
+  try {
+    await page.goto(new URL(example.path, baseURL!).href, { waitUntil: 'commit' });
+    const target = page.getByRole('button', { name: example.target });
+    await expect(target).toBeVisible();
+    await expect(target).toBeDisabled();
+    await expect(page.getByLabel(example.setting, { exact: true })).toBeDisabled();
+    if (example.path) await expect(page.getByRole('button', { name: 'Submit form' })).toBeDisabled();
+    releaseScripts();
+    await target.click();
+    await expect(page.locator(example.status)).toContainText('Actions: 1');
+    if (example.path) {
+      await page.getByRole('button', { name: 'Submit form' }).click();
+      await expect(page.locator(example.status)).toContainText('Form submissions: 1');
+    }
+  } finally {
+    releaseScripts();
+  }
+});
+
 test('home demo, docs, static search, deep links, and responsive layout', async ({ page, baseURL }) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto(baseURL!);
