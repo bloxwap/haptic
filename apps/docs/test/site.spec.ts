@@ -27,6 +27,9 @@ test('home demo, docs, static search, deep links, and responsive layout', async 
   await expect(page.locator('#interaction-result')).toContainText('Actions: 1');
   await page.getByRole('button', { name: 'Submit form' }).click();
   await expect(page.locator('#interaction-result')).toContainText('Form submissions: 1');
+  await page.getByLabel('Form value').fill('changed');
+  await page.getByRole('button', { name: 'Reset form' }).click();
+  await expect(page.getByLabel('Form value')).toHaveValue('original');
   await page.getByRole('button', { name: 'Open drawer example' }).click();
   const drawer = page.getByRole('dialog', { name: 'Haptic inside a Vaul drawer' });
   await expect(drawer).toBeVisible();

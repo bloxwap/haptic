@@ -17,7 +17,9 @@ function App() {
     <button type="button" onClick={() => host.current?.focus()}>Focus target</button>
     <form onSubmit={event => { event.preventDefault(); setSubmit(value => value + 1); }}>
       <input type="hidden" name="token" value="original" />
+      <label>Form value<input defaultValue="original" /></label>
       <Haptic><button type="submit">Submit action</button></Haptic>
+      <Haptic><button type="reset">Reset action</button></Haptic>
       <Haptic><button type="submit" onClick={event => event.preventDefault()}>Prevent submit</button></Haptic>
       <Haptic><button disabled type="button">Disabled action</button></Haptic>
     </form>

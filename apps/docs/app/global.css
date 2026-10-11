@@ -7,6 +7,7 @@
 .drawer-content h2 { font-size: 1.5rem; font-weight: 700; }
 .drawer-content p { margin-block: 1rem; }
 .drawer-content .demo-button { margin-right: .75rem; }
+.demo-input { display: block; width: 100%; max-width: 18rem; margin-block: .5rem; padding: .5rem; border: 1px solid #2d4032; border-radius: .5rem; }
 
 @theme inline {
   --font-sans: var(--font-bloxwap-sans), system-ui, sans-serif;
