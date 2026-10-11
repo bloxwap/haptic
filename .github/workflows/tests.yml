@@ -20,6 +20,7 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - run: node --test .github/scripts/wait-for-registry.test.mjs
       - run: npm run typecheck
       - run: npm run coverage
       - run: npm run test:matrix

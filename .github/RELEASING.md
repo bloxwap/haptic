@@ -53,7 +53,7 @@ Commit the desired stable version (initially `0.1.0`), synchronize the docs depe
 
 `publish_npm.yml` checks out the release tag and fails on a mismatched version, source outside main, dirty source, missing device evidence without the scoped initial release decision, already-published version, or unexpected registry response. Validation runs the full package and docs checks, then packs and uploads one archive with SHA-256. The hosted publishing job downloads and verifies that archive, repeats the release gate, and publishes it with OIDC/provenance. No ongoing npm token secret is configured. [npm's provenance documentation](https://docs.npmjs.com/generating-provenance-statements/) explains the public build attestation.
 
-The final registry check validates metadata, dist-tag, attestation workflow/tag/commit, byte identity with the reviewed tarball, signature verification, isolated ESM/CJS/types/SSR/bundler consumers, and real browser actions from installed registry bytes in both React versions.
+The final registry check waits up to five minutes for npm's processing to expose the exact version and intended dist-tag. Unexpected auth/server responses fail immediately; a persistent missing version or incorrect tag fails when the wait expires. It then validates metadata, dist-tag, attestation workflow/tag/commit, byte identity with the reviewed tarball, signature verification, isolated ESM/CJS/types/SSR/bundler consumers, and real browser actions from installed registry bytes in both React versions.
 
 ## Recovery and final evidence
 

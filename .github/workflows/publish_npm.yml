@@ -30,6 +30,7 @@ jobs:
       - run: npm run release:check
         id: release
       - run: npm ci
+      - run: node --test .github/scripts/wait-for-registry.test.mjs
       - run: npm run typecheck
       - run: npm run test:matrix
       - run: npm run size
