@@ -134,7 +134,7 @@ export function HapticTarget({
           tabIndex={-1}
           onClick={event => event.stopPropagation()}
           onFocus={focusHost}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', margin: 0, opacity: 0, pointerEvents: 'none' }}
+          style={{ appearance: 'auto', position: 'absolute', inset: 0, width: '100%', height: '100%', margin: 0, opacity: 0, pointerEvents: 'none' }}
         />
         <label
           htmlFor={switchId}

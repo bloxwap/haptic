@@ -43,6 +43,7 @@ test('native routing preserves one action, focus, forms, links, drawers, and acc
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
   await expect(page.locator('input[switch]')).toHaveCount(6);
+  await expect(page.locator('input[switch]').first()).toHaveCSS('appearance', 'auto');
   const target = page.getByRole('button', { name: 'Tap action' });
   await tap(page, target);
   await expect(page.locator('#actions')).toHaveText('1'); await expect(page.locator('#parent')).toHaveText('1'); await expect(target).toBeFocused();
