@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0-rc.0 — Unreleased
+## 0.1.0-rc.0 — 2026-10-10
 
 - Independently implemented Haptic/HapticTarget wrapper, platform helper, and hydration-safe hook.
 - Existing props, aliases, public types, eleven presets, and custom inputs retained through web-haptics 0.0.6.
@@ -9,4 +9,4 @@
 - ESM, CommonJS, and declarations, with React as an external peer.
 - Separate Bloxwap docs/demo workspace and independently authored verification.
 
-Initial implementation prerelease prepared for the first-package bootstrap. Physical-device certification and public npm publication are pending.
+Bootstrap prerelease for npm package setup. Physical-device and VoiceOver certification remains pending in issue #9; automated checks do not establish tactile output.
