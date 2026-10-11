@@ -1,11 +1,13 @@
 "use client";
 
 import {
-  isValidElement, useEffect, useId, useRef, useState,
+  isValidElement, useEffect, useId, useLayoutEffect, useRef, useState,
   type CSSProperties, type MouseEvent, type ReactElement,
 } from 'react';
 import { WebHaptics, type HapticInput, type TriggerOptions, type WebHapticsOptions } from 'web-haptics';
 import { useIOSNativeHaptics } from './platform';
+
+const useCommittedEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
 
 type HostProps = {
   disabled?: boolean;
@@ -55,7 +57,10 @@ export function HapticTarget({
   const nativeSwitch = useRef<HTMLInputElement>(null);
   const engine = useRef<WebHaptics | null>(null);
   const current = useRef({ enabled, disabled, feedback, triggerOptions, webHapticsOptions, native });
-  current.current = { enabled, disabled, feedback, triggerOptions, webHapticsOptions, native };
+  useCommittedEffect(() => {
+    // A suspended render must not change the visible target's event behavior.
+    current.current = { enabled, disabled, feedback, triggerOptions, webHapticsOptions, native };
+  });
   const [blockedHost, setBlockedHost] = useState(false);
   const gesture = useRef<{ x: number; y: number; canceled: boolean } | null>(null);
   const switchId = useId();
@@ -107,7 +112,15 @@ export function HapticTarget({
   const focusHost = () => {
     readHost()?.focus({ preventScroll: true });
   };
-  const activateHost = (event: MouseEvent<HTMLLabelElement>) => {
+  const guardLabel = (event: MouseEvent<HTMLLabelElement>) => {
+    event.stopPropagation();
+    const host = readHost();
+    if (!host || gesture.current?.canceled || hostDisabled(host)) {
+      gesture.current = null;
+      event.preventDefault();
+    }
+  };
+  const activateHost = (event: MouseEvent<HTMLInputElement>) => {
     event.stopPropagation();
     const host = readHost();
     const canceled = gesture.current?.canceled;
@@ -118,7 +131,7 @@ export function HapticTarget({
     }
     focusHost();
     host.click();
-    // Keep the trusted label's default activation: it toggles the native switch.
+    // The switch is already activated before an action can disable or unmount it.
   };
 
   return (
@@ -132,14 +145,14 @@ export function HapticTarget({
           type="checkbox"
           aria-hidden="true"
           tabIndex={-1}
-          onClick={event => event.stopPropagation()}
+          onClick={activateHost}
           onFocus={focusHost}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', margin: 0, opacity: 0, pointerEvents: 'none' }}
+          style={{ appearance: 'auto', position: 'absolute', inset: 0, width: '100%', height: '100%', margin: 0, opacity: 0, pointerEvents: 'none' }}
         />
         <label
           htmlFor={switchId}
           aria-hidden="true"
-          onClick={activateHost}
+          onClick={guardLabel}
           onPointerDown={event => {
             gesture.current = { x: event.clientX, y: event.clientY, canceled: false };
             if (event.currentTarget.closest('[data-vaul-drawer]')) event.stopPropagation();

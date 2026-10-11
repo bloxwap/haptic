@@ -20,7 +20,9 @@ export function InteractionDemo() {
       <button className="demo-button" onClick={() => setDrawer(true)}>Open drawer example</button>
     </div>
     <form onSubmit={event => { event.preventDefault(); setSubmitted(value => value + 1); }}>
+      <label>Form value<input className="demo-input" defaultValue="original" /></label>
       <Haptic feedback="success" enabled={enabled}><button type="submit" className="demo-button">Submit form</button></Haptic>
+      <Haptic enabled={enabled}><button type="reset" className="demo-button">Reset form</button></Haptic>
     </form>
     <Drawer.Root open={drawer} onOpenChange={setDrawer}>
       <Drawer.Portal>

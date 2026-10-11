@@ -8,6 +8,12 @@
   <a href="LICENSE">MIT license</a>
 </p>
 
+<p align="center">
+  <a href="https://github.com/bloxwap/haptic/actions/workflows/tests.yml"><img src="https://github.com/bloxwap/haptic/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
+  <a href="https://github.com/bloxwap/haptic/actions/workflows/docs.yml"><img src="https://github.com/bloxwap/haptic/actions/workflows/docs.yml/badge.svg" alt="Documentation"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License"></a>
+</p>
+
 ## Features
 
 - `Haptic` and `HapticTarget`: aliases for one component wrapping the original React target.

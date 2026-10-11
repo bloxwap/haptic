@@ -1,0 +1,55 @@
+{
+  "reference": "@joeblau/haptic@0.1.0",
+  "referenceCommit": "87cb02a702b862f5c79a976b4de17453d93ef866",
+  "procedure": "Independently written consumer executes each distributed package in Chromium and WebKit with supplied iOS navigator properties. The action records native checkbox state and disables its own feedback. This measures DOM event ordering, not tactile hardware output.",
+  "records": [
+    {
+      "browser": "chromium",
+      "variant": "reference",
+      "observations": [
+        {
+          "phase": "action",
+          "checked": true
+        }
+      ],
+      "auxiliaryAfterAction": 0,
+      "errors": []
+    },
+    {
+      "browser": "webkit",
+      "variant": "reference",
+      "observations": [
+        {
+          "phase": "action",
+          "checked": true
+        }
+      ],
+      "auxiliaryAfterAction": 0,
+      "errors": []
+    },
+    {
+      "browser": "chromium",
+      "variant": "independent",
+      "observations": [
+        {
+          "phase": "action",
+          "checked": true
+        }
+      ],
+      "auxiliaryAfterAction": 0,
+      "errors": []
+    },
+    {
+      "browser": "webkit",
+      "variant": "independent",
+      "observations": [
+        {
+          "phase": "action",
+          "checked": true
+        }
+      ],
+      "auxiliaryAfterAction": 0,
+      "errors": []
+    }
+  ]
+}
