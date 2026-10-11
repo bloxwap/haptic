@@ -30,6 +30,8 @@ Feedback accepts `selection`, `light`, `medium`, `heavy`, `soft`, `rigid`, `succ
 
 iOS physical taps use a native system tick; presets and intensity do not change it. Synthetic events, timers, and async callbacks cannot promise iOS feedback. Desktop audio preview is opt-in with `webHapticsOptions={{ debug: true }}`. Actual feedback depends on hardware, browser, and settings.
 
+Physical-device and VoiceOver certification remains pending in [issue #9](https://github.com/bloxwap/haptic/issues/9). Automated tests verify browser interactions and API calls, not tactile output.
+
 Exports also include `isIOSWebKitWithoutVibration`, `useIOSNativeHaptics`, `HapticTargetProps`, `HapticInput`, `HapticPattern`, `HapticPreset`, `TriggerOptions`, `Vibration`, and `WebHapticsOptions`. The wrapper/platform code is independent; feedback types and the vibration engine use the declared `web-haptics` dependency.
 
 ## Documentation

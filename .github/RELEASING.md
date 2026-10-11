@@ -1,6 +1,6 @@
 # Releasing @bloxwap/haptic
 
-The first release remains pending in [#14](https://github.com/bloxwap/haptic/issues/14). This runbook is preparation, not proof of npm access, trusted-publisher activation, hardware feedback, or publication.
+The first release is tracked in [#14](https://github.com/bloxwap/haptic/issues/14). The maintainer requested publishing `0.1.0` after the brand cleanup. Physical-device and VoiceOver certification is still pending in #9. [The recorded initial release decision](planning/initial-release.json) permits only `0.1.0-rc.0` and `0.1.0` from the unchanged automated-tested implementation. It requires that limitation in the package and docs, rejects failed observations, and does not apply to later versions. Do not represent this decision as hardware certification.
 
 ## Validate the implementation
 
@@ -22,13 +22,13 @@ npm audit --audit-level=high
 
 The packed-consumer check verifies eight allowlisted files, ESM/CJS imports and declarations, all public types, JSX, SSR without browser globals, React 18/19, and browser bundling outside the workspace. The gzip budget includes `web-haptics` and excludes React. The matrix runs the entire component/hook/hydration/lifecycle suite in isolated React installations.
 
-Use [DEVICE_TESTING.md](DEVICE_TESTING.md) and record real observations in `planning/device-results.json`. Commit the evidence after testing. Record the tested implementation commit; the release gate requires its runtime source and runtime/peer dependency declarations to match the tagged source. Documentation, test reports, and version-only changes can follow that commit. Keep failed/unsupported observations explicit and investigate failures.
+Use [DEVICE_TESTING.md](DEVICE_TESTING.md) and record real observations in `planning/device-results.json`. Commit the evidence after testing. Record the tested implementation commit; the release gate requires its runtime source and runtime/peer dependency declarations to match the tagged source. Documentation, test reports, and version-only changes can follow that commit. Keep failed/unsupported observations explicit and investigate failures. Until those checks occur, the initial release uses the scoped decision above and keeps device results pending.
 
 ## Establish npm access and bootstrap
 
 Run `npm login --registry=https://registry.npmjs.org` locally, then `npm whoami` and verify that account's organization role/team can publish `@bloxwap/haptic`. Check the name with `npm view @bloxwap/haptic`; HTTP 404 means unavailable publicly, not permission granted. Never put credentials in the repository or ask collaborators to send them in a conversation.
 
-A new package needs an initial real publication before its package settings exist. Use an implementation prerelease such as `0.1.0-rc.0`, rather than consuming the intended stable version for the bootstrap. Update `packages/haptic/package.json`, the docs' workspace dependency, the authoritative lockfile, and changelog; commit and tag the source `v0.1.0-rc.0`. Complete all checks above and hardware certification on that source before bootstrapping.
+A new package needs an initial real publication before its package settings exist. Use an implementation prerelease such as `0.1.0-rc.0`, rather than consuming the intended stable version for the bootstrap. Update `packages/haptic/package.json`, the docs' workspace dependency, the authoritative lockfile, and changelog; commit and tag the source `v0.1.0-rc.0`. Complete all automated checks above and satisfy the recorded certification or initial release decision before bootstrapping.
 
 Build and retain the exact reviewed artifact, recording its SHA-256:
 
@@ -51,7 +51,7 @@ Record the actual account/team access and configured publisher in #13. A committ
 
 Commit the desired stable version (initially `0.1.0`), synchronize the docs dependency and lockfile, date the changelog, and update release notes. Recheck device evidence after any runtime/dependency change. Merge to main, wait for Tests and Documentation to pass, tag that exact main commit `v0.1.0`, then publish its GitHub release. Prerelease versions containing a hyphen use `next`; stable versions use `latest`.
 
-`publish_npm.yml` checks out the release tag and fails on a mismatched version, source outside main, dirty source, missing device evidence, already-published version, or unexpected registry response. Validation runs the full package and docs checks, then packs and uploads one archive with SHA-256. The hosted publishing job downloads and verifies that archive, repeats the release gate, and publishes it with OIDC/provenance. No ongoing npm token secret is configured. [npm's provenance documentation](https://docs.npmjs.com/generating-provenance-statements/) explains the public build attestation.
+`publish_npm.yml` checks out the release tag and fails on a mismatched version, source outside main, dirty source, missing device evidence without the scoped initial release decision, already-published version, or unexpected registry response. Validation runs the full package and docs checks, then packs and uploads one archive with SHA-256. The hosted publishing job downloads and verifies that archive, repeats the release gate, and publishes it with OIDC/provenance. No ongoing npm token secret is configured. [npm's provenance documentation](https://docs.npmjs.com/generating-provenance-statements/) explains the public build attestation.
 
 The final registry check validates metadata, dist-tag, attestation workflow/tag/commit, byte identity with the reviewed tarball, signature verification, isolated ESM/CJS/types/SSR/bundler consumers, and real browser actions from installed registry bytes in both React versions.
 

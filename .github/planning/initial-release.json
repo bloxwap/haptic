@@ -1,0 +1,7 @@
+{
+  "versions": ["0.1.0-rc.0", "0.1.0"],
+  "implementationCommit": "f1b6d0e878477f4c6bfa01995d0adf7d3e003d71",
+  "decidedAt": "2026-10-11T01:59:15Z",
+  "deviceCertification": "pending",
+  "reason": "The maintainer instructed: okay lets release haptic 0.1.0, after completing the brand cleanup. Proceed with the automated-tested implementation, disclosing physical-device and VoiceOver certification as pending in issue #9. The rc.0 publication only bootstraps npm package settings for the stable trusted-publisher release. This decision does not certify hardware or apply to later versions."
+}
