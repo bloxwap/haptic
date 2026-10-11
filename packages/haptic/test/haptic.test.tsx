@@ -1,6 +1,6 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createRef, forwardRef, StrictMode, useState, type ComponentProps } from 'react';
+import { createRef, forwardRef, startTransition, StrictMode, Suspense, useState, type ComponentProps } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { Haptic, HapticTarget, type HapticInput } from '../src';
 
@@ -28,6 +28,25 @@ beforeEach(() => {
 });
 
 describe('vibration target', () => {
+  it('uses committed options while a transition remains suspended', () => {
+    const pending = new Promise<void>(() => {});
+    function Wait({ enabled }: { enabled: boolean }) { if (!enabled) throw pending; return null; }
+    function Example() {
+      const [enabled, setEnabled] = useState(true);
+      return <>
+        <button onClick={() => startTransition(() => setEnabled(false))}>Start transition</button>
+        <Suspense fallback={<p>Loading</p>}>
+          <Haptic enabled={enabled}><button>Committed target</button></Haptic>
+          <Wait enabled={enabled} />
+        </Suspense>
+      </>;
+    }
+    const view = render(<Example />);
+    fireEvent.click(view.getByRole('button', { name: 'Start transition' }));
+    fireEvent.click(view.getByRole('button', { name: 'Committed target' }));
+    expect(engine.trigger).toHaveBeenCalledExactlyOnceWith('selection', undefined);
+  });
+
   it.each([null, 'text', []])('rejects invalid children with the characterized error: %j', children => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => render(<Haptic>{children as unknown as ComponentProps<typeof Haptic>['children']}</Haptic>)).toThrow('HapticTarget expects exactly one React element child.');
@@ -182,9 +201,33 @@ describe('native iOS target', () => {
     await act(async () => {
       view.getByRole('button').remove();
       fireEvent.focus(input); fireEvent.click(label);
+      fireEvent.click(input);
     });
     expect(action).not.toHaveBeenCalled();
     expect(view.container.querySelector('input')).toBeNull();
+  });
+
+  it('activates the native control before an action disables its feedback', () => {
+    ios(); const states: boolean[] = [];
+    function SelfDisabling() {
+      const [enabled, setEnabled] = useState(true);
+      return <Haptic enabled={enabled}><button onClick={() => {
+        states.push(document.querySelector<HTMLInputElement>('input[switch]')!.checked);
+        setEnabled(false);
+      }}>Once</button></Haptic>;
+    }
+    const view = render(<SelfDisabling />);
+    fireEvent.click(auxiliary(view.container));
+    expect(states).toEqual([true]);
+    expect(view.container.querySelector('input')).toBeNull();
+  });
+
+  it('guards direct native-control activation during a canceled gesture', () => {
+    ios(); const action = vi.fn();
+    const view = render(<Haptic><button onClick={action}>Canceled</button></Haptic>);
+    fireEvent.pointerDown(auxiliary(view.container)); fireEvent.pointerCancel(auxiliary(view.container));
+    fireEvent.click(view.container.querySelector('input')!);
+    expect(action).not.toHaveBeenCalled();
   });
 
   it('adds a native control after mounting and routes one action with original focus/ref', async () => {
@@ -238,6 +281,7 @@ describe('native iOS target', () => {
     const view = render(<Haptic><button onClick={action}>Mutable</button></Haptic>);
     const label = auxiliary(view.container);
     view.getByRole('button').setAttribute('disabled', '');
+    fireEvent.click(view.container.querySelector('input')!);
     fireEvent.click(label); expect(action).not.toHaveBeenCalled();
   });
 

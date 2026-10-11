@@ -3,6 +3,17 @@ import { useRef, useState } from 'react';
 import { Haptic } from '@bloxwap/haptic';
 import { Drawer } from 'vaul';
 
+function SelfDisablingTarget() {
+  const [enabled, setEnabled] = useState(true), [activated, setActivated] = useState(false);
+  return <div id="self-disabling">
+    <Haptic enabled={enabled}><button onClick={() => {
+      setActivated(document.querySelector<HTMLInputElement>('#self-disabling input[switch]')?.checked ?? false);
+      setEnabled(false);
+    }}>Disable own feedback</button></Haptic>
+    <output id="native-before-action">{String(activated)}</output>
+  </div>;
+}
+
 function App() {
   const [action, setAction] = useState(0), [parent, setParent] = useState(0), [submit, setSubmit] = useState(0);
   const [enabled, setEnabled] = useState(true), [drawerMoves, setDrawerMoves] = useState(0);
@@ -40,6 +51,7 @@ function App() {
     <label><input type="checkbox" checked={debug} onChange={event => setDebug(event.target.checked)} />Debug audio</label>
     <button onClick={() => setMounted(value => !value)}>Toggle feedback target</button>
     {mounted && <Haptic feedback="buzz" webHapticsOptions={{ debug, showSwitch: true }}><button>Debug feedback</button></Haptic>}
+    <SelfDisablingTarget />
     <output id="actions">{action}</output><output id="parent">{parent}</output><output id="submits">{submit}</output><output id="drawer">{drawerMoves}</output>
     <h2 id="destination">Destination</h2>
   </>;

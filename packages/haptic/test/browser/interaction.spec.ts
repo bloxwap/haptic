@@ -45,7 +45,7 @@ test('native routing preserves one action, focus, forms, links, drawers, and acc
   });
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
-  await expect(page.locator('input[switch]')).toHaveCount(7);
+  await expect(page.locator('input[switch]')).toHaveCount(8);
   await expect(page.locator('input[switch]').first()).toHaveCSS('appearance', 'auto');
   const target = page.getByRole('button', { name: 'Tap action' });
   await tap(page, target);
@@ -67,7 +67,7 @@ test('native routing preserves one action, focus, forms, links, drawers, and acc
   await page.mouse.move(box.x + box.width - 4, box.y + 4); await page.mouse.up();
   await expect(page.locator('#actions')).toHaveText('3'); // Drawer supplied the third action; drag supplies none.
   await page.getByLabel('Enable', { exact: true }).uncheck();
-  await expect(page.locator('input[switch]')).toHaveCount(6);
+  await expect(page.locator('input[switch]')).toHaveCount(7);
   await target.click(); await expect(page.locator('#actions')).toHaveText('4');
   await page.getByRole('button', { name: 'Open real drawer' }).click();
   const dialog = page.getByRole('dialog', { name: 'Real Vaul drawer' });
@@ -77,6 +77,9 @@ test('native routing preserves one action, focus, forms, links, drawers, and acc
   await expect(dialog).toBeVisible();
   await dialog.getByRole('button', { name: 'Close real drawer' }).click();
   await expect(dialog).not.toBeVisible();
+  await tap(page, page.getByRole('button', { name: 'Disable own feedback' }));
+  await expect(page.locator('#native-before-action')).toHaveText('true');
+  await expect(page.locator('#self-disabling input[switch]')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 
