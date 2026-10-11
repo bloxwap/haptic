@@ -23,11 +23,9 @@
 - Server-safe rendering and hydration, ESM and CommonJS, and TypeScript declarations.
 - Independently written wrapper/platform code with `web-haptics` as a declared dependency.
 
-The first npm release and physical-device certification are in preparation. Follow the [release tracker](https://github.com/bloxwap/haptic/issues/1) for current evidence.
+Initial version: **0.1.0**. Physical-device and VoiceOver certification remains pending in [issue #9](https://github.com/bloxwap/haptic/issues/9). Automated checks establish browser interactions and API calls, not tactile output. See the [release evidence](https://github.com/bloxwap/haptic/issues/14).
 
 ## Installation
-
-After the first public release:
 
 ```sh
 npm install @bloxwap/haptic
