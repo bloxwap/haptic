@@ -1,28 +1,30 @@
 'use client';
 
 import { Haptic } from '@bloxwap/haptic';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Drawer } from 'vaul';
 
 export function InteractionDemo() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => { setReady(true); }, []);
   const [enabled, setEnabled] = useState(true);
   const [count, setCount] = useState(0);
   const [submitted, setSubmitted] = useState(0);
   const [drawer, setDrawer] = useState(false);
   const ref = useRef<HTMLButtonElement>(null);
   return <section className="guide-demo" aria-label="Interaction examples">
-    <label><input type="checkbox" checked={enabled} onChange={event => setEnabled(event.target.checked)} /> Enable feedback</label>
+    <label><input disabled={!ready} type="checkbox" checked={enabled} onChange={event => setEnabled(event.target.checked)} /> Enable feedback</label>
     <div className="demo-actions">
-      <Haptic enabled={enabled}><button ref={ref} className="demo-button" onClick={() => setCount(value => value + 1)}>Count action</button></Haptic>
-      <button className="demo-button" onClick={() => ref.current?.focus()}>Focus original button</button>
+      <Haptic enabled={enabled}><button disabled={!ready} ref={ref} className="demo-button" onClick={() => setCount(value => value + 1)}>Count action</button></Haptic>
+      <button disabled={!ready} className="demo-button" onClick={() => ref.current?.focus()}>Focus original button</button>
       <Haptic><button disabled className="demo-button">Disabled target</button></Haptic>
       <Haptic><a className="demo-button" href="#interaction-result">Jump to result</a></Haptic>
-      <button className="demo-button" onClick={() => setDrawer(true)}>Open drawer example</button>
+      <button disabled={!ready} className="demo-button" onClick={() => setDrawer(true)}>Open drawer example</button>
     </div>
     <form onSubmit={event => { event.preventDefault(); setSubmitted(value => value + 1); }}>
-      <label>Form value<input className="demo-input" defaultValue="original" /></label>
-      <Haptic feedback="success" enabled={enabled}><button type="submit" className="demo-button">Submit form</button></Haptic>
-      <Haptic enabled={enabled}><button type="reset" className="demo-button">Reset form</button></Haptic>
+      <label>Form value<input disabled={!ready} className="demo-input" defaultValue="original" /></label>
+      <Haptic feedback="success" enabled={enabled}><button disabled={!ready} type="submit" className="demo-button">Submit form</button></Haptic>
+      <Haptic enabled={enabled}><button disabled={!ready} type="reset" className="demo-button">Reset form</button></Haptic>
     </form>
     <Drawer.Root open={drawer} onOpenChange={setDrawer}>
       <Drawer.Portal>

@@ -1,7 +1,7 @@
 'use client';
 
 import { Haptic, useIOSNativeHaptics, type HapticInput } from '@bloxwap/haptic';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const presets = [
   ['selection', 'A tiny tick'], ['light', 'A gentle tap'], ['medium', 'A firm tap'], ['heavy', 'A strong tap'],
@@ -10,6 +10,8 @@ const presets = [
 ] as const;
 
 export function HapticBoard() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => { setReady(true); }, []);
   const [enabled, setEnabled] = useState(true);
   const [debug, setDebug] = useState(false);
   const [intensity, setIntensity] = useState(0.5);
@@ -19,15 +21,15 @@ export function HapticBoard() {
   const record = (name: string) => { setActions(count => count + 1); setLast(name); };
   const target = (name: string, input: HapticInput, description: string) => (
     <Haptic key={name} enabled={enabled} feedback={input} triggerOptions={{ intensity }} webHapticsOptions={{ debug }} style={{ display: 'grid' }}>
-      <button className="preset" onClick={() => record(name)}><strong>{name}</strong><small>{description}</small></button>
+      <button disabled={!ready} className="preset" onClick={() => record(name)}><strong>{name}</strong><small>{description}</small></button>
     </Haptic>
   );
   return <section className="board" aria-labelledby="board-title">
     <div className="board-heading"><div><h2 id="board-title">Tap to feel it.</h2><p>Choose a preset or try a custom pattern.</p></div><span className="eyebrow">11 presets · 1 component</span></div>
     <div className="settings">
-      <label><input type="checkbox" checked={enabled} onChange={event => setEnabled(event.target.checked)} />Feedback enabled</label>
-      <label><input type="checkbox" checked={debug} onChange={event => setDebug(event.target.checked)} />Desktop audio preview</label>
-      <label>Intensity <input aria-label="Intensity" type="range" min="0" max="1" step="0.1" value={intensity} onChange={event => setIntensity(Number(event.target.value))} /><output>{intensity.toFixed(1)}</output></label>
+      <label><input disabled={!ready} type="checkbox" checked={enabled} onChange={event => setEnabled(event.target.checked)} />Feedback enabled</label>
+      <label><input disabled={!ready} type="checkbox" checked={debug} onChange={event => setDebug(event.target.checked)} />Desktop audio preview</label>
+      <label>Intensity <input disabled={!ready} aria-label="Intensity" type="range" min="0" max="1" step="0.1" value={intensity} onChange={event => setIntensity(Number(event.target.value))} /><output>{intensity.toFixed(1)}</output></label>
     </div>
     <div className="preset-grid">
       {presets.map(([name, description]) => target(name, name, description))}
