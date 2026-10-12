@@ -1,29 +1,20 @@
-<h1 align="center">Haptic</h1>
+Haptic
 
-<p align="center"><strong>Haptic feedback for React on iOS and vibration-capable browsers.<br>One target. Same handlers, ref, focus, and accessibility.</strong></p>
+Haptic feedback for React on iOS and vibration-capable browsers. One target. Same handlers, ref, focus, and accessibility. Try the live demo.
 
-<p align="center">
-  <a href="https://github.com/bloxwap/haptic/issues/1">Release plan</a> ·
-  <a href="https://bloxwap.github.io/haptic/">Documentation and demo</a> ·
-  <a href="LICENSE">MIT license</a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/bloxwap/haptic/actions/workflows/tests.yml"><img src="https://github.com/bloxwap/haptic/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
-  <a href="https://github.com/bloxwap/haptic/actions/workflows/docs.yml"><img src="https://github.com/bloxwap/haptic/actions/workflows/docs.yml/badge.svg" alt="Documentation"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License"></a>
-</p>
+[![npm version](https://img.shields.io/npm/v/@bloxwap/haptic?style=flat-square)](https://www.npmjs.com/package/@bloxwap/haptic)
+[![npm downloads](https://img.shields.io/npm/dm/@bloxwap/haptic?style=flat-square)](https://www.npmjs.com/package/@bloxwap/haptic)
+[![Codecov](https://img.shields.io/codecov/c/github/bloxwap/haptic?style=flat-square)](https://codecov.io/gh/bloxwap/haptic)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@bloxwap/haptic?style=flat-square)](https://bundlephobia.com/package/@bloxwap/haptic)
 
 ## Features
 
-- `Haptic` and `HapticTarget`: aliases for one component wrapping the original React target.
-- Eleven vibration presets and custom durations, alternating patterns, and event objects with delay/intensity.
-- Native iOS physical-tap ticks, plus patterns on browsers with the Vibration API.
-- Handlers, refs, focus, accessibility, keyboard, forms, links, and drawer integration retain target behavior.
-- Server-safe rendering and hydration, ESM and CommonJS, and TypeScript declarations.
-- Independently written wrapper/platform code with `web-haptics` as a declared dependency.
-
-Initial version: **0.1.0**. Physical-device and VoiceOver certification remains pending in [issue #9](https://github.com/bloxwap/haptic/issues/9). Automated checks establish browser interactions and API calls, not tactile output. See the [release evidence](https://github.com/bloxwap/haptic/issues/14).
+- **One component wrapping the original React target.** `Haptic` and `HapticTarget` are aliases for a single wrapper that preserves your element's handlers, ref, focus, and accessibility.
+- **Eleven vibration presets and custom patterns.** Choose from presets like `selection`, `success`, and `error`, or specify custom durations, alternating patterns, and event objects with delay and intensity.
+- **Native iOS physical-tap ticks.** Physical taps on iOS trigger the system haptic, while vibration-capable browsers use the Vibration API with pattern and intensity support.
+- **Full target behavior preservation.** Handlers, refs, focus, accessibility, keyboard, forms, links, and drawer integration all retain the original target's behavior.
+- **Server-safe rendering.** Works with SSR and hydration, providing both ESM and CommonJS builds with TypeScript declarations.
+- **Independently written wrapper.** Platform-specific code with `web-haptics` as a declared dependency.
 
 ## Installation
 
@@ -31,9 +22,15 @@ Initial version: **0.1.0**. Physical-device and VoiceOver certification remains 
 npm install @bloxwap/haptic
 ```
 
-Use matching React and React DOM peer versions, React 18 or newer.
+Works with React 18 or newer. Requires matching React and React DOM peer versions.
+
+## Release status
+
+`0.1.0` is public; physical iPhone/Android/iPadOS/VoiceOver certification is still pending (see issues [#7](https://github.com/bloxwap/haptic/issues/7) and [#9](https://github.com/bloxwap/haptic/issues/9)). Automated checks establish browser interactions and API calls, not tactile output.
 
 ## Usage
+
+Wrap any React element to add haptic feedback.
 
 ```tsx
 import { Haptic } from '@bloxwap/haptic';
@@ -64,9 +61,22 @@ The original element keeps its handlers, ref, focus, and accessibility. The wrap
 
 ## API
 
-Exports: `Haptic`, `HapticTarget`, `HapticTargetProps`, `isIOSWebKitWithoutVibration`, `useIOSNativeHaptics`, and the public types `HapticInput`, `HapticPattern`, `HapticPreset`, `TriggerOptions`, `Vibration`, `WebHapticsOptions`.
+```ts
+import {
+  Haptic, HapticTarget,
+  isIOSWebKitWithoutVibration, useIOSNativeHaptics,
+  type HapticTargetProps, type HapticInput, type HapticPattern,
+  type HapticPreset, type TriggerOptions, type Vibration, type WebHapticsOptions,
+} from '@bloxwap/haptic';
+```
 
-Presets: `selection`, `light`, `medium`, `heavy`, `soft`, `rigid`, `success`, `warning`, `error`, `nudge`, `buzz`.
+| Export | Description |
+| --- | --- |
+| `Haptic` / `HapticTarget` | The component that wraps a single React element and adds haptic feedback. Props: `feedback` (preset, duration, pattern, or object), `enabled`, `disabled`, `triggerOptions`, `webHapticsOptions`, `className`, `style`, `children` (single element). |
+| `isIOSWebKitWithoutVibration()` | Returns `true` when running on iOS WebKit without Vibration API support, indicating native system haptics will be used. |
+| `useIOSNativeHaptics()` | React hook that returns whether iOS native haptics are active. |
+
+**Presets:** `selection`, `light`, `medium`, `heavy`, `soft`, `rigid`, `success`, `warning`, `error`, `nudge`, `buzz`.
 
 `feedback` accepts a preset string, duration in milliseconds, alternating on/off `number[]`, vibration event objects, or `{ pattern: [...] }`. The default is `selection`.
 
@@ -80,26 +90,30 @@ For Next.js, place interactive usage in a client component. The build preserves 
 
 ## Documentation
 
-[Guides, API, and interactive demos](https://bloxwap.github.io/haptic/). The [evaluation](.github/planning/EVALUATION.md), [compatibility contract](.github/planning/COMPATIBILITY.md), and [task index](.github/planning/TASKS.md) record the independent build and release requirements.
+Guides, API reference, and interactive demos: **https://bloxwap.github.io/haptic/**
+
+The [evaluation](.github/planning/EVALUATION.md), [compatibility contract](.github/planning/COMPATIBILITY.md), and [task index](.github/planning/TASKS.md) record the independent build and release requirements.
 
 ## Development
 
-The private npm workspace separates the publishable library in `packages/haptic` from the documentation/demo app in `apps/docs`.
+This repository is an npm workspace: the library lives in [`packages/haptic`](packages/haptic) and the documentation site in [`apps/docs`](apps/docs).
 
 ```sh
 npm ci
-npm run build
-npm run typecheck
-npm run test
-npm run coverage
-npm run test:matrix
-npm run size
-npm run pack:check
-npm run test:browser
-npm run dev           # docs at http://localhost:3904
+npm test            # run the test suite
+npm run coverage    # tests with 100% line/branch/function coverage enforcement
+npm run build       # build the library
+npm run typecheck   # TypeScript validation
+npm run test:matrix # test across React versions
+npm run size        # bundle size check
+npm run pack:check  # verify package contents
+npm run test:browser # Playwright tests
+npm run dev         # docs dev server at http://localhost:3905
 ```
 
-Use Node 24 or newer for development. `bun run dev` invokes the same script; npm owns the lockfile.
+Requires Node.js 24 or newer. `bun run dev` invokes the same development script; npm owns the lockfile.
+
+Documentation build and preview:
 
 ```sh
 NEXT_PUBLIC_BASE_PATH=/haptic npm run docs:build
@@ -107,6 +121,18 @@ npm run docs:check
 npm run docs:preview
 ```
 
+### Documentation dev-server ports
+
+| Repository | Port |
+| --- | --- |
+| hyperliquid | 3901 |
+| chart | 3902 |
+| sfx | 3903 |
+| font | 3904 |
+| haptic | 3905 |
+
 ## License
 
-MIT. `web-haptics` is independently distributed under MIT; website fonts retain their [OFL license notice](apps/docs/public/licenses/bloxwap-font-OFL.txt), which is included in the static site.
+[MIT](LICENSE)
+
+`web-haptics` is independently distributed under MIT; website fonts retain their [OFL license notice](apps/docs/public/licenses/bloxwap-font-OFL.txt), which is included in the static site.

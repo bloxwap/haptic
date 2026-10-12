@@ -15,4 +15,4 @@ createServer((request, response) => {
   if (!existsSync(path) || !statSync(path).isFile()) { response.writeHead(404).end('Not found'); return; }
   response.setHeader('Content-Type', types[extname(path)] ?? 'application/octet-stream');
   response.end(readFileSync(path));
-}).listen(Number(process.env.PORT ?? 3904), '0.0.0.0', () => console.log(`Static docs: http://localhost:${process.env.PORT ?? 3904}${basePath}/`));
+}).listen(Number(process.env.PORT ?? 3905), '0.0.0.0', () => console.log(`Static docs: http://localhost:${process.env.PORT ?? 3905}${basePath}/`));
