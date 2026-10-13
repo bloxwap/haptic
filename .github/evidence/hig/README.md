@@ -2,8 +2,7 @@
 
 Owner: haptic maintainers. HIG version: 0.1.0 candidate at
 1a776b9326c6ba03702894943b3edbfd178c4b40. Baseline haptic:
-e95a29e67365c0101b23bc83e9a7a547c2c0bb0e. PR URL is linked in the owning PR and
-final RESULT-haptic.md. Rollback: revert the owning PR; restore prior shell CSS,
+e95a29e67365c0101b23bc83e9a7a547c2c0bb0e. Owning PR: https://github.com/bloxwap/haptic/pull/25. Rollback: revert the owning PR; restore prior shell CSS,
 font and imports. No SDK demo/business logic or preference storage is replaced.
 
 ## Docs row (#34, #36)
@@ -23,7 +22,7 @@ verify responsive/mobile navigation, search, deep links, actions and drawer/form
 the current SDK workspace binary. Unique exported CSS decreases 2,886 bytes,
 font assets decrease 116,056 bytes; exported JS bytes are unchanged. Source token
 CSS decreases from 6,064 bytes to 2,521 bytes (HIG distribution plus bridge).
-No runtime dependency is added; the published browser entry is 3,823 gzip bytes
+No runtime dependency is added; the published browser entry is 3,840 gzip bytes
 against the existing 8,192-byte budget. This is not a per-page transfer estimate.
 
 ## Feedback row (#21–#25, #33, #35)

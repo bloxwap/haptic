@@ -112,6 +112,13 @@ export function HapticTarget({
     engine.current = null;
   }, [native, webHapticsOptions?.debug, webHapticsOptions?.showSwitch]);
 
+  useEffect(() => {
+    if (!enabled || disabled) {
+      dispose(engine.current);
+      engine.current = null;
+    }
+  }, [enabled, disabled]);
+
   const nativeTarget = native && enabled && !disabled && !blockedHost &&
     !child.props.disabled && child.props['aria-disabled'] !== true && child.props['aria-disabled'] !== 'true';
 

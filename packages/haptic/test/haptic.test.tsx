@@ -346,4 +346,6 @@ it('uses host preferences and application policy without changing the action', (
   view.rerender(<Haptic preferences={{ haptics: true }}><button onClick={action}>Save</button></Haptic>);
   fireEvent.click(view.getByRole('button'));
   expect(engine.trigger).toHaveBeenCalledOnce();
+  view.rerender(<Haptic preferences={{ haptics: false }}><button onClick={action}>Save</button></Haptic>);
+  expect(engine.cancel).toHaveBeenCalledOnce(); expect(engine.destroy).toHaveBeenCalledOnce();
 });
