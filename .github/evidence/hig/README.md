@@ -20,7 +20,7 @@ home/install/board/footer and API/nav/code presentation; production smoke tests
 verify responsive/mobile navigation, search, deep links, actions and drawer/forms.
 `bytes.json` records the actual measurement boundary, including baseline reuse of
 the current SDK workspace binary. Unique exported CSS decreases 2,886 bytes,
-font assets decrease 116,056 bytes; exported JS bytes are unchanged. Source token
+font assets decrease 116,056 bytes; exported JS increases 136 bytes with live-mute cleanup. Source token
 CSS decreases from 6,064 bytes to 2,521 bytes (HIG distribution plus bridge).
 No runtime dependency is added; the published browser entry is 3,840 gzip bytes
 against the existing 8,192-byte budget. This is not a per-page transfer estimate.
@@ -44,8 +44,10 @@ Nine docs snippets typecheck; docs export and 16 browser smoke tests pass across
 Chromium, Firefox, WebKit and mobile Chromium. Reduced-motion tests preserve the
 enabled haptic action. Package browser interaction tests pass for actions/routing
 in all three engines. Local Firefox debug audio initially stayed suspended without
-an audio output; CI uses its existing PulseAudio null sink. See PR CI for final
-full browser results. A null sink is audio pipeline testing, not audible or tactile
+an audio output; after extracting PulseAudio locally and using a null sink, its
+real WebAudio startup/teardown test passed. Shared VM load required a 120s test
+budget on the isolated retry. CI uses its existing PulseAudio null sink; see PR CI
+for final full browser results under the standard test budget. A null sink is audio pipeline testing, not audible or tactile
 hardware evidence.
 
 ## Precise remaining ownership and limitations

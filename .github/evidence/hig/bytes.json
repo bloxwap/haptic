@@ -1,6 +1,6 @@
 {
   "baseline": "e95a29e67365c0101b23bc83e9a7a547c2c0bb0e",
-  "methodology": "Sum uncompressed unique static-export files by suffix. Baseline built in this directory from git archive, same dependencies and base path; baseline uses current haptic workspace build, so runtime delta measures docs not old SDK binary.",
+  "methodology": "Sum uncompressed unique static-export files by suffix. Baseline built locally from main git archive, same dependencies and base path. Baseline reuses SDK workspace binary at 8a86f6c; after uses 718081c (adds live-mute cleanup), so this is a docs/export comparison, not the old published SDK binary.",
   "before": {
     "css": 152764,
     "js": 1124104,
@@ -8,7 +8,7 @@
   },
   "after": {
     "css": 149878,
-    "js": 1124104,
+    "js": 1124240,
     "fonts": 12965628
   }
 }
