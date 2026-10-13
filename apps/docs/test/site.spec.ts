@@ -66,3 +66,17 @@ test('home demo, docs, static search, deep links, and responsive layout', async 
   const index = await page.request.get(new URL('search.json', baseURL!).href);
   expect(index.ok()).toBe(true); expect(await index.text()).toContain('intensity');
 });
+
+test('HIG palette and reduced motion retain the haptic action', async ({ page, baseURL }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(baseURL!);
+  const target = page.getByRole('button', { name: /selection/i });
+  expect(await target.evaluate(el => getComputedStyle(el).transitionDuration)).toBe('0s');
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--hig-text').trim())).toBe('#fafafa');
+  await expect(page.getByLabel('Feedback enabled', { exact: true })).toBeChecked();
+  await target.click();
+  await expect(page.locator('.status')).toContainText('Actions: 1');
+  await page.goto(new URL('docs/hig/', baseURL!).href);
+  await expect(page.getByRole('heading', { level: 1, name: 'HIG integration' })).toBeVisible();
+  await expect(page.getByRole('main')).toContainText('Physical iPhone/Android');
+});

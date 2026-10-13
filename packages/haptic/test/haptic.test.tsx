@@ -335,3 +335,15 @@ describe('native iOS target', () => {
     fireEvent.click(view.getByRole('button')); expect(engine.trigger).toHaveBeenCalledTimes(1);
   });
 });
+
+it('uses host preferences and application policy without changing the action', () => {
+  const action = vi.fn();
+  const view = render(<Haptic preferences={{ haptics: false }}><button onClick={action}>Save</button></Haptic>);
+  fireEvent.click(view.getByRole('button'));
+  view.rerender(<Haptic preferences={{ haptics: true }} policyEnabled={false}><button onClick={action}>Save</button></Haptic>);
+  fireEvent.click(view.getByRole('button'));
+  expect(action).toHaveBeenCalledTimes(2); expect(engine.construct).not.toHaveBeenCalled();
+  view.rerender(<Haptic preferences={{ haptics: true }}><button onClick={action}>Save</button></Haptic>);
+  fireEvent.click(view.getByRole('button'));
+  expect(engine.trigger).toHaveBeenCalledOnce();
+});
