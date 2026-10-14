@@ -6,6 +6,7 @@ import {
 } from 'react';
 import { WebHaptics, type HapticInput, type TriggerOptions, type WebHapticsOptions } from 'web-haptics';
 import { useIOSNativeHaptics } from './platform';
+import type { FeedbackPreferences } from './feedback';
 
 const useCommittedEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
 
@@ -20,6 +21,10 @@ export interface HapticTargetProps {
   children: ReactElement<HostProps>;
   /** Enable feedback. Defaults to true. */
   enabled?: boolean;
+  /** Host-owned HIG preferences; motion is independent from haptics. */
+  preferences?: Pick<FeedbackPreferences, 'haptics'>;
+  /** Application policy veto. */
+  policyEnabled?: boolean;
   /** Disable feedback without disabling the original action. Defaults to false. */
   disabled?: boolean;
   /** Vibration preset or pattern; defaults to selection. iOS uses its system tick. */
@@ -47,10 +52,11 @@ function dispose(engine: WebHaptics | null): void {
 
 /** Add physical-tap feedback while keeping the original React target intact. */
 export function HapticTarget({
-  children, enabled = true, disabled = false, feedback = 'selection',
+  children, enabled: intentEnabled = true, preferences, policyEnabled = true, disabled = false, feedback = 'selection',
   triggerOptions, webHapticsOptions, className, style,
 }: HapticTargetProps): ReactElement {
   if (!isValidElement(children)) throw new Error('HapticTarget expects exactly one React element child.');
+  const enabled = intentEnabled && policyEnabled && (preferences?.haptics ?? true);
   const child = children;
   const native = useIOSNativeHaptics();
   const wrapper = useRef<HTMLSpanElement>(null);
@@ -105,6 +111,13 @@ export function HapticTarget({
     dispose(engine.current);
     engine.current = null;
   }, [native, webHapticsOptions?.debug, webHapticsOptions?.showSwitch]);
+
+  useEffect(() => {
+    if (!enabled || disabled) {
+      dispose(engine.current);
+      engine.current = null;
+    }
+  }, [enabled, disabled]);
 
   const nativeTarget = native && enabled && !disabled && !blockedHost &&
     !child.props.disabled && child.props['aria-disabled'] !== true && child.props['aria-disabled'] !== 'true';

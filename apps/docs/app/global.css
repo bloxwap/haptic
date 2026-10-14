@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
+@import '../styles/hig/tokens.css';
 @import '../styles/tokens.css';
 
 @theme inline {
@@ -62,7 +63,7 @@ html > body[data-scroll-locked] {
 }
 
 #nd-page h1 {
-  font-family: var(--font-docs-display), var(--font-sans);
+  font-family: var(--font-sans);
   font-size: clamp(1.875rem, 3vw, 2.5rem);
   font-weight: 700;
   letter-spacing: -0.035em;
@@ -79,7 +80,7 @@ html > body[data-scroll-locked] {
 }
 
 .prose h2 {
-  font-family: var(--font-docs-display), var(--font-sans);
+  font-family: var(--font-sans);
   font-size: 1.375rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -330,7 +331,7 @@ pre, code, kbd { font-family: var(--font-mono); }
 .brand { display: inline-flex; align-items: center; gap: var(--space-md); }
 .brand img { flex: none; width: 28px; height: 28px; }
 .brand-product { border-left: 1px solid var(--border); padding-left: var(--space-md); color: var(--muted-foreground); font-size: var(--text-sm); }
-.hero h1, .preview-intro h2, .principles h2, .not-found h1 { font-family: var(--font-docs-display), var(--font-sans); }
+.hero h1, .preview-intro h2, .principles h2, .not-found h1 { font-family: var(--font-sans); }
 .home { width: 100%; max-width: var(--fd-layout-width, 1400px); margin: 0 auto; padding: var(--space-5xl) var(--space-lg) 0; }
 .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: var(--space-6xl); padding-bottom: var(--space-5xl); }
 .hero-copy { min-width: 0; }
@@ -385,7 +386,7 @@ pre, code, kbd { font-family: var(--font-mono); }
 .guide-demo #interaction-result { color: var(--muted-foreground); font: var(--text-xs) / 1.7 var(--font-mono); }
 .drawer-overlay { position: fixed; inset: 0; z-index: 80; background: #0009; }
 .drawer-content { position: fixed; bottom: 0; left: 0; right: 0; z-index: 81; padding: var(--space-3xl); border-radius: var(--radius-2xl) var(--radius-2xl) 0 0; background: var(--card); color: var(--foreground); }
-.drawer-content h2 { font-family: var(--font-docs-display), var(--font-sans); font-size: var(--text-2xl); font-weight: 700; }
+.drawer-content h2 { font-family: var(--font-sans); font-size: var(--text-2xl); font-weight: 700; }
 .drawer-content p { margin: var(--space-lg) 0; color: var(--muted-foreground); }
 .drawer-content .btn--secondary { background: var(--muted); }
 .search-header { transition: box-shadow var(--duration-fast) var(--ease-spring); }
@@ -413,4 +414,10 @@ pre, code, kbd { font-family: var(--font-mono); }
   .preset { padding: var(--space-md) var(--space-lg); }
   .principles { grid-template-columns: minmax(0, 1fr); }
   .guide-demo .btn { height: auto; min-height: var(--control-h-sm); padding-block: var(--space-sm); white-space: normal; text-align: center; }
+}
+
+/* Motion preference changes presentation only, never tactile or sound settings. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0s !important; scroll-behavior: auto !important; }
+  .btn:active, .preset:active { transform: none; }
 }

@@ -14,3 +14,9 @@ Initial stable release. Physical-device and VoiceOver certification remains pend
 ## 0.1.0-rc.0 — 2026-10-10
 
 - Bootstrap prerelease of the same implementation to establish npm package settings before the stable trusted-publisher release.
+
+## Unreleased
+
+- Add the platform-free HIG semantic feedback entry and optional host-injected native bridge.
+- Add host-owned haptic preferences and application policy to physical targets.
+- Migrate docs to pinned HIG tokens with reduced-motion alternatives and drift checks.

@@ -1,0 +1,56 @@
+---
+title: HIG integration
+description: Semantic feedback, host preferences, and platform boundaries.
+---
+
+Haptic implements the haptic channel of the [HIG feedback contract](https://github.com/bloxwap/hig/blob/main/docs/feedback/contract.md). Import `@bloxwap/haptic/feedback` for platform-free types and `createHapticAdapter`. HIG 0.1.0 is an unpublished candidate; do not install an assumed registry release.
+
+## Semantic events
+
+The version 1 mapping matches HIG 0.1.0: activate, selection and toggle request selection; success, warning and error request their named outcome. Press, release, disclosure and notification are intentionally silent. Cancel cancels the backend. An explicit light/medium/heavy impact overrides an enabled cue. Async outcomes use the operation id after completion, separately from accepted activation.
+
+```ts
+import { createHapticAdapter } from '@bloxwap/haptic/feedback';
+
+const hostHaptics = { trigger: (_cue: string) => {}, cancel: () => {}, dispose: () => {} };
+// Inject the host's backend; this module imports no DOM, React or Expo APIs.
+const adapter = createHapticAdapter({
+  capability: { available: true, mechanism: 'native-haptics', observed: false },
+  trigger: cue => hostHaptics.trigger(cue),
+  cancel: () => hostHaptics.cancel(),
+  dispose: () => hostHaptics.dispose(),
+});
+// Supply adapter as the haptics channel of your HIG FeedbackController.
+```
+
+`createNativeHapticAdapter(Haptics, capability)` accepts the host-imported Expo module and maps selection to Expo selectionAsync, light/medium/heavy to impactAsync, and success/warning/error to notificationAsync. Import Expo only in that host. A vibration browser host may inject WebHaptics trigger/cancel/destroy with `{ debug: false, showSwitch: false }`. Check `navigator.vibrate` before advertising browser-vibration availability; a successful call is not observed tactile output. Never represent iOS physical ticks as an imperative native backend.
+
+`adapter.play(event, preferences)` checks haptics, capability, cancellation, disabled/busy/suppressed state and background. Exceptions/rejections are absorbed. `setBackground(true)` cancels pending feedback; forward host AppState changes. Dispose once on unmount. Backend owners must implement actual resource cleanup. Expo exposes no cancellation handle for an already submitted native tick; its bridge cancellation only gates subsequent requests via background/disposal. Use HIG's controller for bounded deduplication and cooldowns, rather than invoking both an adapter and a vibration wrapper for the same click.
+
+## Physical target and preferences
+
+```tsx
+const physicalTap = useIOSNativeHaptics();
+const eligible = true, busy = false, applicationAllowsHaptics = true;
+const preferences = { haptics: true };
+<HapticTarget
+  enabled={physicalTap && eligible}
+  preferences={preferences}
+  policyEnabled={applicationAllowsHaptics}
+  webHapticsOptions={{ debug: false, showSwitch: false }}
+>
+  <button disabled={busy} onClick={save}>Save</button>
+</HapticTarget>
+```
+
+Pre-approve a single physical target before the gesture; do not put nested controls under an iOS overlay. The iOS tick precedes delegated handlers and cannot be retracted by later preventDefault. Keyboard actions retain the original target; do not synthesize an iOS tactile promise. Presets and intensity all become the same OS tick on this path.
+
+Preference precedence is application veto, stored host haptics, then component enabled/disabled intent and capability. Motion and sound do not implicitly disable haptics. HIG owns persistent preferences and migrations; pass the same preferences to its controller and the physical wrapper. Do not create a competing SDK global store or overwrite existing saved choices. Missing/corrupt storage should use host defaults. No feedback uses no adapters; sound only supplies the sound adapter; haptics only supplies this adapter; both supply both independently. A host-provided adapter can replace either channel without changing control handlers, refs or timing.
+
+Button/toggle/selection changes emit once after acceptance; sliders emit only changed values through HIG cadence; menus use disclosure's silent default; async success/error emit after completion. Preserve visible state/messages: feedback never carries essential or financial information alone. A local preview is a request, not hardware certification.
+
+## Docs migration and validation boundaries
+
+The Fumadocs shell retains navigation, static search, copy/install controls, deep links and `/haptic` export paths. Its palette uses the approved HIG plain CSS distribution pinned at `1a776b9326c6ba03702894943b3edbfd178c4b40`; no HIG npm release is required. Bloxwap Sans/Mono remain package imports. Reduced motion removes decorative scaling/transitions independently of feedback preferences. Run `npm run lint` to reject palette drift.
+
+Linux Playwright tests verify actions and API requests in Chromium, Firefox and WebKit. Desktop vibration availability or iPhone user-agent emulation proves neither hardware nor tactile output. Physical iPhone/Android, system haptics settings, VoiceOver/TalkBack, native AppState and actual latency remain unverified. Track upstream [haptic #9](https://github.com/bloxwap/haptic/issues/9) and [#7](https://github.com/bloxwap/haptic/issues/7). Product and native adoption happen in their owning repositories.
