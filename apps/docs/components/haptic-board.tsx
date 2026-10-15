@@ -1,6 +1,7 @@
 'use client';
 
 import { Haptic, useIOSNativeHaptics, type HapticInput } from '@bloxwap/haptic';
+import { Slider, Switch } from '@bloxwap/hig-react/selection';
 import { useEffect, useState } from 'react';
 
 const presets = [
@@ -9,6 +10,7 @@ const presets = [
   ['error', 'Three sharp taps'], ['nudge', 'Strong, then soft'], ['buzz', 'A longer vibration'],
 ] as const;
 
+/** The SDK's distinctive preset board. HIG supplies the settings controls; presets and Haptic targets stay SDK-owned. */
 export function HapticBoard() {
   const [ready, setReady] = useState(false);
   useEffect(() => { setReady(true); }, []);
@@ -21,23 +23,23 @@ export function HapticBoard() {
   const record = (name: string) => { setActions(count => count + 1); setLast(name); };
   const target = (name: string, input: HapticInput, description: string) => (
     <Haptic key={name} enabled={enabled} feedback={input} triggerOptions={{ intensity }} webHapticsOptions={{ debug }} style={{ display: 'grid' }}>
-      <button disabled={!ready} className="preset" data-active={last === name} onClick={() => record(name)}><strong>{name}</strong><small>{description}</small></button>
+      <button type="button" disabled={!ready} className="preset" data-active={last === name} onClick={() => record(name)}><strong>{name}</strong><small>{description}</small></button>
     </Haptic>
   );
   return <section id="board" className="hero-preview" aria-labelledby="board-title">
     <div className="preview-intro"><p className="eyebrow">11 presets · 1 component</p><h2 id="board-title">Tap to feel it.</h2><p>Choose a preset or try a custom pattern.</p></div>
-    <div className="board">
-    <div className="settings">
-      <label className="switch"><input disabled={!ready} type="checkbox" checked={enabled} onChange={event => setEnabled(event.target.checked)} /><span className="switch-ui" aria-hidden="true" />Feedback enabled</label>
-      <label className="switch"><input disabled={!ready} type="checkbox" checked={debug} onChange={event => setDebug(event.target.checked)} /><span className="switch-ui" aria-hidden="true" />Desktop audio preview</label>
-      <label className="board-slider">Intensity <input disabled={!ready} aria-label="Intensity" type="range" min="0" max="1" step="0.1" value={intensity} onChange={event => setIntensity(Number(event.target.value))} /><output>{intensity.toFixed(1)}</output></label>
-    </div>
-    <div className="preset-grid">
-      {presets.map(([name, description]) => target(name, name, description))}
-      {target('custom', [{ duration: 30 }, { delay: 60, duration: 30 }], 'Your own two-tap pattern')}
-    </div>
-    <div className="status" role="status">Actions: {actions} · Last: {last}</div>
-    <p className="support-note">{native ? 'On iOS, every preset uses the same native system tick. Tap on a supported physical iPhone with system haptics enabled.' : 'Patterns need a vibration-capable device. Desktop audio preview lets you try the feedback without vibration hardware.'} Actions still work when feedback is off.</p>
+    <div className="board hig-surface">
+      <div className="settings">
+        <Switch label="Feedback enabled" disabled={!ready} checked={enabled} onCheckedChange={setEnabled} />
+        <Switch label="Desktop audio preview" disabled={!ready} checked={debug} onCheckedChange={setDebug} />
+        <div className="board-slider"><Slider label="Intensity" disabled={!ready} min={0} max={1} step={0.1} value={intensity} onValueChange={value => setIntensity(Math.round(value * 10) / 10)} /></div>
+      </div>
+      <div className="preset-grid">
+        {presets.map(([name, description]) => target(name, name, description))}
+        {target('custom', [{ duration: 30 }, { delay: 60, duration: 30 }], 'Your own two-tap pattern')}
+      </div>
+      <div className="status" role="status">Actions: {actions} · Last: {last}</div>
+      <p className="support-note">{native ? 'On iOS, every preset uses the same native system tick. Tap on a supported physical iPhone with system haptics enabled.' : 'Patterns need a vibration-capable device. Desktop audio preview lets you try the feedback without vibration hardware.'} Actions still work when feedback is off.</p>
     </div>
   </section>;
 }

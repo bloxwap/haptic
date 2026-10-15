@@ -1,0 +1,74 @@
+{
+  "baseline": "e64c32c (main, after #25)",
+  "hig": "bloxwap/hig@7c67a07 0.1.0-candidate.sha7c67a07c (dry-run tarballs)",
+  "methodology": "NEXT_PUBLIC_BASE_PATH=/haptic static export (apps/docs/out) measured with measure.mjs: uncompressed sum by suffix plus per-file zlib gzip (default level) sum; sourceCss counts apps/docs/{app,styles}/**/*.css; lockfilePackages counts package-lock entries under node_modules. Same Node 24.10.0/npm 11.6.1 on macOS; both builds include the same @bloxwap/haptic workspace build.",
+  "before": {
+    "label": "before",
+    "exportBytes": 15679991,
+    "exportFiles": 118,
+    "cssBytes": 149878,
+    "cssGzipBytes": 23528,
+    "cssFiles": 2,
+    "jsBytes": 1124240,
+    "jsGzipBytes": 363600,
+    "fontBytes": 12965628,
+    "fontFiles": 22,
+    "sourceCssFiles": [
+      "apps/docs/app/global.css",
+      "apps/docs/styles/tokens.css",
+      "apps/docs/styles/hig/tokens.css"
+    ],
+    "sourceCssBytes": 25732,
+    "sourceCssLines": 486,
+    "docsDirectDependencies": 10,
+    "docsDirectDevDependencies": 8,
+    "lockfilePackages": 556
+  },
+  "after": {
+    "label": "after",
+    "exportBytes": 15681140,
+    "exportFiles": 118,
+    "cssBytes": 148539,
+    "cssGzipBytes": 23642,
+    "cssFiles": 2,
+    "jsBytes": 1125248,
+    "jsGzipBytes": 363743,
+    "fontBytes": 12965628,
+    "fontFiles": 22,
+    "sourceCssFiles": [
+      "apps/docs/app/global.css",
+      "apps/docs/styles/tokens.css"
+    ],
+    "sourceCssBytes": 17371,
+    "sourceCssLines": 225,
+    "docsDirectDependencies": 12,
+    "docsDirectDevDependencies": 8,
+    "lockfilePackages": 606
+  },
+  "delta": {
+    "exportBytes": 1149,
+    "cssBytes": -1339,
+    "cssGzipBytes": 114,
+    "jsBytes": 1008,
+    "jsGzipBytes": 143,
+    "fontBytes": 0,
+    "sourceCssBytes": -8361,
+    "sourceCssLines": -261,
+    "docsDirectDependencies": 2,
+    "lockfilePackages": 50
+  },
+  "removedFiles": [
+    "apps/docs/styles/hig/tokens.css (copied HIG distribution)",
+    "apps/docs/styles/hig/LICENSE",
+    "apps/docs/styles/hig/README.md"
+  ],
+  "removedDependencies": [
+    "lucide-react 1.48.0 (duplicate of fumadocs-ui nested lucide-react)"
+  ],
+  "addedDependencies": [
+    "@bloxwap/hig-tokens",
+    "@bloxwap/hig-contracts",
+    "@bloxwap/hig-react (vendored candidate tarballs)"
+  ],
+  "knownException": "npm installs 48 nested @radix-ui packages for hig-react optional peers (@radix-ui/react-dialog/popover pinned to 1.1.15) because fumadocs-ui already resolves 1.2.0; the docs never import hig-react overlay/recipes, so none of them reach the export bundle."
+}

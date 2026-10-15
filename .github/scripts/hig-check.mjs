@@ -1,7 +1,20 @@
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import assert from 'node:assert/strict';
-const css = readFileSync('apps/docs/styles/hig/tokens.css');
-assert.equal(createHash('sha256').update(css).digest('hex'), '1c60086af561070fdc1ee6056d6bc43bd8eed78614c318d466ee3850dc317609', 'HIG distribution drift: replace only from a reviewed upstream commit');
-assert(!readFileSync('apps/docs/styles/tokens.css', 'utf8').includes('#'), 'Local palette copies are forbidden');
-console.log('Pinned HIG distribution and palette ownership verified');
+
+// Vendored HIG candidate tarballs must match the reviewed dry-run output.
+const vendor = 'vendor/bloxwap-hig';
+const sums = readFileSync(`${vendor}/SHA256SUMS`, 'utf8').trim().split('\n').map(line => line.split(/\s+/));
+assert.deepEqual(sums.map(([, file]) => file).sort(), readdirSync(vendor).filter(file => file.endsWith('.tgz')).sort(), 'Every vendored HIG tarball needs a reviewed checksum');
+for (const [sum, file] of sums) assert.equal(createHash('sha256').update(readFileSync(`${vendor}/${file}`)).digest('hex'), sum, `HIG tarball drift: ${file}`);
+
+// Docs consume HIG through package imports; no copied distribution or local palette.
+const css = readFileSync('apps/docs/app/global.css', 'utf8');
+for (const entry of ['@bloxwap/hig-tokens/css', '@bloxwap/hig-react/css']) assert(css.includes(`@import '${entry}'`), `global.css must import ${entry}`);
+assert(!existsSync('apps/docs/styles/hig'), 'Copied HIG distributions are replaced by the package import');
+for (const file of ['apps/docs/app/global.css', ...readdirSync('apps/docs/styles').map(file => `apps/docs/styles/${file}`)]) {
+  const source = readFileSync(file, 'utf8');
+  assert(!/#[0-9a-f]{3,8}(?![\w-])|\b(?:rgb|hsl|oklch)a?\(/i.test(source), `Local palette literals are forbidden: ${file}`);
+  assert(!/--hig-[\w-]+\s*:/.test(source), `HIG tokens are package-owned; do not redefine them: ${file}`);
+}
+console.log(`Verified ${sums.length} vendored HIG tarballs, package CSS imports and palette ownership`);
