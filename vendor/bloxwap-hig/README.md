@@ -5,16 +5,18 @@ registry packages. HIG has no published npm release yet, so `apps/docs` installs
 them through `file:` dependencies and the root `overrides` pin HIG's internal
 `@bloxwap/hig-tokens`/`@bloxwap/hig-contracts` dependency to the same files.
 
-- Source: [bloxwap/hig@7c67a07](https://github.com/bloxwap/hig/tree/7c67a07c) (0.1.0 candidate)
-- Produced with: `npm ci && npm run build && npm run release:dry-run -- --channel candidate`
-  (native TTFs regenerated first with `npm run generate:fonts`, as the dry run requires)
-- Only the packages the docs import: `hig-tokens` (CSS variables), `hig-contracts`
-  (dependency of `hig-react`), `hig-react` (control CSS and components)
+- Source: [bloxwap/hig@872906a](https://github.com/bloxwap/hig/tree/872906a9071469af8714b3b6fb5cc7bd64d2d6f3) (0.1.0 candidate)
+- Produced with: `npm ci && npm run build && npm run generate:fonts && npm run release:dry-run -- --channel candidate`
+  (`generate:fonts` feeds the separate `@bloxwap/hig-native-fonts` package, which the docs do not vendor)
+- Only the packages the docs import: `hig-tokens` (CSS variables and roles), `hig-contracts`
+  (dependency of `hig-react`), `hig-react` (control CSS, components and the overlay-free
+  `recipes/code-window` entry)
 - `SHA256SUMS` is verified by `npm run lint` (`.github/scripts/hig-check.mjs`)
 
-The tokens tarball carries HIG's native TTF faces for React Native consumers. The
-docs never import or serve them; web fonts come from `@bloxwap/font`, and
-`scripts/check-export.mjs` fails if a `.ttf` reaches the static export.
+Since hig#64 the tokens tarball ships no font binaries (8 KB, down from 4.4 MB); `npm run lint`
+asserts the installed package has none. Web fonts come from `@bloxwap/font`. Since hig#63 the
+optional Radix peers are caret ranges, so npm keeps one Radix tree with Fumadocs and Vaul
+(34 lockfile entries, none nested).
 
 Upgrade: rebuild the dry run from a reviewed HIG commit, replace these files and
 `SHA256SUMS`, update the versions in `apps/docs/package.json` and root `overrides`,

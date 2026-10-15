@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Surface, Text } from '@bloxwap/hig-react/surface';
+import { CodeWindow } from '@bloxwap/hig-react/recipes/code-window';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { HapticBoard } from '@/components/haptic-board';
 import { InstallCommand } from '@/components/install-command';
@@ -17,9 +17,9 @@ export default function Home() {
         <InstallCommand />
         <p className="support-note">The first npm release is in preparation. <a className="text-link" href={`${repository}/issues/1`}>Follow the release plan</a>.</p>
       </div>
-      {/* HIG CodeWindow composition (Surface + Text + focusable pre); the recipes entry also pulls overlay peers. */}
+      {/* HIG CodeWindow recipe (language label + focusable code); its entry imports no overlay or Radix peer. */}
       <figure className="code-window" aria-label="React usage example">
-        <Surface><Text>TSX · your-button.tsx</Text><pre tabIndex={0}><code><span className="syntax-keyword">import</span>{' { Haptic } '}<span className="syntax-keyword">from</span>{' '}<span className="syntax-string">{'\'@bloxwap/haptic\''}</span>{';\n\n'}<span className="syntax-muted">{'// Add feedback. Keep your original button.'}</span>{'\n'}<span className="syntax-keyword">export function</span>{' SaveButton() {\n  '}<span className="syntax-keyword">return</span>{' (\n    <'}<span className="syntax-type">Haptic</span>{' feedback='}<span className="syntax-string">{'"success"'}</span>{'>\n      <'}<span className="syntax-type">button</span>{' onClick={save}>\n        Save changes\n      </'}<span className="syntax-type">button</span>{'>\n    </'}<span className="syntax-type">Haptic</span>{'>\n  );\n}'}</code></pre></Surface>
+        <CodeWindow language="TSX · your-button.tsx"><span className="syntax-keyword">import</span>{' { Haptic } '}<span className="syntax-keyword">from</span>{' '}<span className="syntax-string">{'\'@bloxwap/haptic\''}</span>{';\n\n'}<span className="syntax-muted">{'// Add feedback. Keep your original button.'}</span>{'\n'}<span className="syntax-keyword">export function</span>{' SaveButton() {\n  '}<span className="syntax-keyword">return</span>{' (\n    <'}<span className="syntax-type">Haptic</span>{' feedback='}<span className="syntax-string">{'"success"'}</span>{'>\n      <'}<span className="syntax-type">button</span>{' onClick={save}>\n        Save changes\n      </'}<span className="syntax-type">button</span>{'>\n    </'}<span className="syntax-type">Haptic</span>{'>\n  );\n}'}</CodeWindow>
         <figcaption className="code-status"><span aria-hidden="true" />One component. Your original interaction.</figcaption>
       </figure>
     </section>

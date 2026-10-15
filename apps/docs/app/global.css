@@ -12,9 +12,11 @@ html > body[data-scroll-locked] { margin-right: 0 !important; --removed-body-scr
 pre, code, kbd { font-family: var(--font-mono); }
 ::selection { background: color-mix(in srgb, var(--hig-action) 25%, transparent); color: var(--hig-text); }
 
-/* HIG controls render with the Next-loaded Bloxwap faces; anchors share the button recipe. */
-.hig-button { display: inline-flex; align-items: center; justify-content: center; gap: var(--hig-space-sm); font-family: var(--font-sans); text-decoration: none; touch-action: manipulation; transition: filter var(--docs-transition), transform var(--docs-transition); }
+/* HIG controls read --hig-font-sans, which resolves to the Next-loaded Bloxwap face; anchors share the button recipe. */
+.hig-button { display: inline-flex; align-items: center; justify-content: center; gap: var(--hig-space-sm); text-decoration: none; touch-action: manipulation; transition: filter var(--docs-transition), transform var(--docs-transition); }
 .hig-button svg { flex: none; }
+/* HIG buttons are 44px by default (hig#80); coarse pointers keep the comfortable 48px target role. */
+@media (pointer: coarse) { .hig-button { min-height: var(--hig-density-comfortable-target); } }
 .hig-input { font-family: var(--font-mono); }
 
 #nd-page { max-width: 52rem; }
