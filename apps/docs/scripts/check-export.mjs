@@ -9,9 +9,6 @@ for (const path of ['index.html', 'docs/index.html', 'docs/api/index.html', 'doc
   if (!existsSync(join('out', path))) throw new Error(`Static export is missing ${path}`);
 }
 const exported = readdirSync('out', { recursive: true });
-// HIG's tokens package carries native TTFs; web fonts must come from @bloxwap/font only.
-const nativeFaces = exported.filter(path => path.endsWith('.ttf'));
-if (nativeFaces.length) throw new Error(`Static export must not serve native HIG font faces: ${nativeFaces.join(', ')}`);
 for (const file of exported.filter(path => path.endsWith('.html'))) {
   const html = readFileSync(join('out', file), 'utf8');
   for (const match of html.matchAll(/(?:href|src)="(\/[^"<>]+)"/g)) {

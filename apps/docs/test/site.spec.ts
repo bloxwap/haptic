@@ -137,7 +137,7 @@ test('keyboard search and navigation reach a deep-linked docs page', async ({ pa
   await expect(page.getByRole('button', { name: 'Count action' })).toBeFocused();
 });
 
-test('docs callouts and code controls use HIG presentation', async ({ page, baseURL }) => {
+test('docs callouts and code controls use HIG presentation', async ({ page, baseURL, isMobile }) => {
   await page.goto(new URL('docs/platforms/', baseURL!).href);
   const callout = page.locator('.docs-callout [data-severity="warning"]');
   await expect(callout).toContainText('Not hardware-certified');
@@ -145,6 +145,15 @@ test('docs callouts and code controls use HIG presentation', async ({ page, base
   expect(await callout.evaluate(el => getComputedStyle(el).borderInlineStartWidth)).toBe('3px');
   await page.goto(baseURL!);
   const action = page.getByRole('link', { name: /try the haptic board/i });
-  expect(await action.evaluate(el => el.classList.contains('hig-button') && parseFloat(getComputedStyle(el).minHeight) >= 48)).toBe(true);
+  // HIG buttons are 44px by default (hig#80); touch keeps the comfortable 48px target role.
+  expect(await action.evaluate((el, min) => el.classList.contains('hig-button') && parseFloat(getComputedStyle(el).minHeight) >= min, isMobile ? 48 : 44)).toBe(true);
+  // HIG control CSS reads --hig-font-sans (hig#65): with no host font bridge the button renders in a loaded Bloxwap face.
+  const face = await action.evaluate(async el => {
+    await document.fonts.ready;
+    const family = getComputedStyle(el).fontFamily.split(',')[0].trim().replace(/["']/g, '');
+    return { family, loaded: [...document.fonts].some(font => font.family.replace(/["']/g, '') === family && font.status === 'loaded') };
+  });
+  expect(face.family).toMatch(/bloxwap/i);
+  expect(face.loaded).toBe(true);
   await expect(page.locator('.code-window pre')).toHaveAttribute('tabindex', '0');
 });

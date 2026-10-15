@@ -8,6 +8,10 @@ const sums = readFileSync(`${vendor}/SHA256SUMS`, 'utf8').trim().split('\n').map
 assert.deepEqual(sums.map(([, file]) => file).sort(), readdirSync(vendor).filter(file => file.endsWith('.tgz')).sort(), 'Every vendored HIG tarball needs a reviewed checksum');
 for (const [sum, file] of sums) assert.equal(createHash('sha256').update(readFileSync(`${vendor}/${file}`)).digest('hex'), sum, `HIG tarball drift: ${file}`);
 
+// Web tokens ship no font binaries since hig#64; docs fonts come from @bloxwap/font only.
+const tokenFonts = readdirSync('node_modules/@bloxwap/hig-tokens', { recursive: true }).filter(file => /\.(ttf|otf|woff2?)$/.test(file));
+assert.deepEqual(tokenFonts, [], 'Installed @bloxwap/hig-tokens must not carry font binaries');
+
 // Docs consume HIG through package imports; no copied distribution or local palette.
 const css = readFileSync('apps/docs/app/global.css', 'utf8');
 for (const entry of ['@bloxwap/hig-tokens/css', '@bloxwap/hig-react/css']) assert(css.includes(`@import '${entry}'`), `global.css must import ${entry}`);
