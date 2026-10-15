@@ -72,11 +72,79 @@ test('HIG palette and reduced motion retain the haptic action', async ({ page, b
   await page.goto(baseURL!);
   const target = page.getByRole('button', { name: /selection/i });
   expect(await target.evaluate(el => getComputedStyle(el).transitionDuration)).toBe('0s');
-  expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--hig-text').trim())).toBe('#fafafa');
+  // HIG text role from @bloxwap/hig-tokens/css: sRGB fallback, or its oklch value where supported.
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--hig-text').trim())).toMatch(/^(#fafafa|oklch\((0\.985|98\.5%) 0 0\))$/);
   await expect(page.getByLabel('Feedback enabled', { exact: true })).toBeChecked();
   await target.click();
   await expect(page.locator('.status')).toContainText('Actions: 1');
   await page.goto(new URL('docs/hig/', baseURL!).href);
   await expect(page.getByRole('heading', { level: 1, name: 'HIG integration' })).toBeVisible();
   await expect(page.getByRole('main')).toContainText('Physical iPhone/Android');
+});
+
+test('HIG install tabs: keyboard navigation, copy action and status', async ({ page, baseURL, browserName, context }) => {
+  await page.goto(baseURL!);
+  const tabs = page.getByRole('tablist', { name: 'Package manager' });
+  const npm = tabs.getByRole('tab', { name: 'npm', exact: true });
+  await expect(npm).toBeEnabled();
+  await expect(npm).toHaveAttribute('aria-selected', 'true');
+  await npm.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(tabs.getByRole('tab', { name: 'pnpm' })).toBeFocused();
+  await expect(page.getByRole('tabpanel')).toContainText('pnpm add @bloxwap/haptic');
+  await page.keyboard.press('End');
+  await expect(tabs.getByRole('tab', { name: 'yarn' })).toHaveAttribute('aria-selected', 'true');
+  await page.keyboard.press('Home');
+  await expect(tabs.getByRole('tab', { name: 'bun' })).toBeFocused();
+  await page.keyboard.press('ArrowLeft');
+  await expect(tabs.getByRole('tab', { name: 'yarn' })).toBeFocused();
+  const panel = page.getByRole('tabpanel');
+  await expect(panel).toContainText('yarn add @bloxwap/haptic');
+  if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await panel.getByRole('button', { name: 'Copy install command' }).click();
+  const status = page.locator('.package-install [role="status"]');
+  if (browserName === 'chromium') {
+    await expect(status).toHaveText('Command copied to clipboard.');
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('yarn add @bloxwap/haptic');
+  } else {
+    // Clipboard permission differs per engine; either outcome must be announced and leave the command selectable.
+    await expect(status).toHaveText(/Command copied to clipboard\.|Could not copy\. Select the command to copy it manually\./);
+  }
+});
+
+test('keyboard search and navigation reach a deep-linked docs page', async ({ page, baseURL, isMobile }) => {
+  await page.goto(new URL('docs/', baseURL!).href);
+  if (isMobile) await page.getByRole('button', { name: /search/i }).first().click();
+  else await page.keyboard.press(process.platform === 'darwin' ? 'Meta+k' : 'Control+k');
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await page.getByRole('combobox').fill('Vaul drawer');
+  await expect(dialog).toContainText('Interaction examples');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/haptic\/docs\/examples\/(#.*)?$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Interaction examples' })).toBeVisible();
+  const count = page.getByRole('button', { name: 'Count action' });
+  await expect(count).toBeEnabled();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  // The closing search dialog restores focus to its trigger; focus the target once that settles.
+  await expect(async () => { await count.focus(); await expect(count).toBeFocused({ timeout: 250 }); }).toPass();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#interaction-result')).toContainText('Actions: 1');
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'Focus original button' })).toBeFocused();
+  await page.keyboard.press('Space');
+  await expect(page.getByRole('button', { name: 'Count action' })).toBeFocused();
+});
+
+test('docs callouts and code controls use HIG presentation', async ({ page, baseURL }) => {
+  await page.goto(new URL('docs/platforms/', baseURL!).href);
+  const callout = page.locator('.docs-callout [data-severity="warning"]');
+  await expect(callout).toContainText('Not hardware-certified');
+  await expect(callout).toContainText('cannot establish tactile output');
+  expect(await callout.evaluate(el => getComputedStyle(el).borderInlineStartWidth)).toBe('3px');
+  await page.goto(baseURL!);
+  const action = page.getByRole('link', { name: /try the haptic board/i });
+  expect(await action.evaluate(el => el.classList.contains('hig-button') && parseFloat(getComputedStyle(el).minHeight) >= 48)).toBe(true);
+  await expect(page.locator('.code-window pre')).toHaveAttribute('tabindex', '0');
 });

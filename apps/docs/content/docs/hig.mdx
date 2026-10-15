@@ -51,6 +51,10 @@ Button/toggle/selection changes emit once after acceptance; sliders emit only ch
 
 ## Docs migration and validation boundaries
 
-The Fumadocs shell retains navigation, static search, copy/install controls, deep links and `/haptic` export paths. Its palette uses the approved HIG plain CSS distribution pinned at `1a776b9326c6ba03702894943b3edbfd178c4b40`; no HIG npm release is required. Bloxwap Sans/Mono remain package imports. Reduced motion removes decorative scaling/transitions independently of feedback preferences. Run `npm run lint` to reject palette drift.
+The Fumadocs shell retains navigation, static search, deep links and `/haptic` export paths. Shared presentation comes from HIG packages: `@bloxwap/hig-tokens/css` supplies the palette and spacing, `@bloxwap/hig-react/css` supplies control geometry, and HIG `Tabs`, `IconButton`, `Button`, `Switch`, `Slider`, `Field`, `CodeWindow` and `Callout` render the install/copy controls, demo settings, forms, code window and callouts. The 0.1.0 candidate tarballs are packed from [bloxwap/hig@7c67a07](https://github.com/bloxwap/hig/tree/7c67a07) by its dry-run release and vendored under `vendor/bloxwap-hig/` until a registry release exists. Bloxwap Sans/Mono remain `@bloxwap/font` package imports. The preset board, interaction targets and Vaul drawer stay SDK-owned. Reduced motion removes decorative scaling/transitions independently of feedback preferences. Run `npm run lint` to reject palette drift and unreviewed tarball changes.
+
+<Callout type="warning" title="Validation boundary">
 
 Linux Playwright tests verify actions and API requests in Chromium, Firefox and WebKit. Desktop vibration availability or iPhone user-agent emulation proves neither hardware nor tactile output. Physical iPhone/Android, system haptics settings, VoiceOver/TalkBack, native AppState and actual latency remain unverified. Track upstream [haptic #9](https://github.com/bloxwap/haptic/issues/9) and [#7](https://github.com/bloxwap/haptic/issues/7). Product and native adoption happen in their owning repositories.
+
+</Callout>

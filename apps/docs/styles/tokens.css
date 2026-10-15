@@ -1,25 +1,44 @@
-/* Fumadocs compatibility aliases; palette owned by the pinned HIG distribution. */
-:root {
-  --bloxwap-black: var(--hig-background); --bloxwap-green: var(--hig-action);
-  --bloxwap-blue: var(--hig-info); --bloxwap-pink: var(--hig-negative);
-  --foreground: var(--hig-text); --background: var(--hig-background);
-  --card: var(--hig-surface); --muted: var(--hig-nested);
-  --muted-foreground: var(--hig-muted); --border: var(--hig-border);
-  --popover: var(--hig-surface); --popover-foreground: var(--hig-text);
-  --space-xs: var(--hig-space-xs); --space-sm: var(--hig-space-sm);
-  --space-md: var(--hig-space-md); --space-lg: var(--hig-space-lg);
-  --space-xl: var(--hig-space-xl); --space-2xl: var(--hig-space-xxl);
-  --space-3xl: var(--hig-space-xxxl); --space-4xl: var(--hig-space-section);
-  --space-5xl: 4rem; --space-6xl: 5rem;
-  --control-h-sm: 3rem; --control-h-md: 3rem; --icon-md: 1.25rem;
-  --radius-full: 9999px; --radius-lg: 10px; --radius-xl: 14px; --radius-2xl: 20px;
-  --text-2xs: .6875rem; --text-xs: .75rem; --text-sm: .875rem; --text-base: 1rem;
-  --text-lg: 1.125rem; --text-2xl: 1.5rem; --text-3xl: 1.875rem;
-  --text-4xl: 2.25rem; --text-5xl: 3rem; --text-6xl: 3.75rem;
-  --duration-fast: 120ms; --ease-spring: ease-out;
+/*
+ * Fumadocs bridge. The palette, spacing and control geometry come from the
+ * @bloxwap/hig-tokens and @bloxwap/hig-react packages; this file only maps
+ * them onto Fumadocs/Tailwind names and adds docs-only type steps.
+ * Never add color literals here (npm run lint rejects them).
+ */
+:root,
+.dark,
+.dark #nd-sidebar {
+  --color-fd-background: var(--hig-background);
+  --color-fd-foreground: var(--hig-text);
+  --color-fd-card: var(--hig-background);
+  --color-fd-card-foreground: var(--hig-text);
+  --color-fd-popover: var(--hig-surface);
+  --color-fd-popover-foreground: var(--hig-text);
+  --color-fd-muted: var(--hig-nested);
+  --color-fd-muted-foreground: var(--hig-muted);
+  --color-fd-secondary: var(--hig-surface);
+  --color-fd-secondary-foreground: var(--hig-text);
+  --color-fd-border: var(--hig-border);
+  --color-fd-primary: var(--hig-action);
+  --color-fd-primary-foreground: var(--hig-onAction);
+  --color-fd-accent: var(--hig-surface);
+  --color-fd-accent-foreground: var(--hig-text);
+  --color-fd-ring: var(--hig-focus);
 }
+
+:root {
+  --docs-radius-surface: 14px;
+  --docs-radius-nested: 10px;
+  --docs-text-2xs: .6875rem;
+  --docs-transition: 120ms ease-out;
+}
+
 @theme inline {
-  --color-background: var(--hig-background); --color-foreground: var(--hig-text);
-  --color-card: var(--hig-surface); --color-muted: var(--hig-nested);
-  --color-muted-foreground: var(--hig-muted); --color-border: var(--hig-border);
+  --font-sans: var(--font-bloxwap-sans), ui-rounded, system-ui, sans-serif;
+  --font-mono: var(--font-bloxwap-mono), ui-monospace, monospace;
+  --color-background: var(--hig-background);
+  --color-foreground: var(--hig-text);
+  --color-card: var(--hig-surface);
+  --color-muted: var(--hig-nested);
+  --color-muted-foreground: var(--hig-muted);
+  --color-border: var(--hig-border);
 }
