@@ -17,6 +17,7 @@ Initial stable release. Physical-device and VoiceOver certification remains pend
 
 ## Unreleased
 
+- Add `canTriggerHaptic` and `triggerHaptic` for browser vibration with explicit request results, SSR safety, and no auxiliary DOM. Imperative iOS ticks remain unavailable because transient activation does not establish a trusted switch event.
 - Add the platform-free HIG semantic feedback entry and optional host-injected native bridge.
 - Add host-owned haptic preferences and application policy to physical targets.
 - Migrate docs to pinned HIG tokens with reduced-motion alternatives and drift checks.

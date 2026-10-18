@@ -3,6 +3,7 @@ import type { MDXComponents } from 'mdx/types';
 import type { ReactNode } from 'react';
 import { Callout as HIGCallout } from '@bloxwap/hig-react/status';
 import { InteractionDemo } from '@/components/interaction-demo';
+import { ImperativeDemo } from '@/components/imperative-demo';
 
 const severity = { info: 'info', note: 'note', idea: 'tip', success: 'success', warn: 'warning', warning: 'warning', error: 'error' } as const;
 
@@ -12,5 +13,5 @@ function Callout({ title, type = 'info', children }: { title: ReactNode; type?: 
 }
 
 export function getMDXComponents(components: MDXComponents = {}): MDXComponents {
-  return { ...defaults, Callout, InteractionDemo, ...components };
+  return { ...defaults, Callout, InteractionDemo, ImperativeDemo, ...components };
 }

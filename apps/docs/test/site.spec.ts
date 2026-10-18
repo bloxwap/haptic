@@ -1,5 +1,50 @@
 import { expect, test } from '@playwright/test';
 
+declare global {
+  interface Window { imperativeRequests: unknown[] }
+}
+
+test('imperative requests report browser acceptance for sync, awaited and timer calls', async ({ page, baseURL }) => {
+  await page.addInitScript(() => {
+    const requests: unknown[] = [];
+    Object.defineProperty(window, 'imperativeRequests', { value: requests });
+    Object.defineProperty(navigator, 'vibrate', { configurable: true, value: (pattern: unknown) => { requests.push(pattern); return true; } });
+  });
+  await page.goto(new URL('docs/examples/', baseURL!).href);
+  const demo = page.getByRole('region', { name: 'Imperative feedback examples' });
+  let requests = 0;
+  for (const name of ['Request now', 'Request after await', 'Request from timer']) {
+    await demo.getByRole('button', { name, exact: true }).click();
+    requests++;
+    await expect.poll(() => page.evaluate(() => window.imperativeRequests.length)).toBe(requests);
+    await expect(demo.getByRole('status')).toHaveText('Available: true · Request accepted: true · Route: browser-vibration');
+  }
+  await page.evaluate(() => { Object.defineProperty(navigator, 'vibrate', { value: () => false }); });
+  await demo.getByRole('button', { name: 'Request now', exact: true }).click();
+  await expect(demo.getByRole('status')).toContainText('Request accepted: false · Route: none · vibration-rejected');
+});
+
+test('imperative iOS requests remain unavailable and add no native controls', async ({ page, baseURL }) => {
+  await page.addInitScript(() => {
+    Object.defineProperties(navigator, {
+      vibrate: { configurable: true, value: undefined },
+      platform: { configurable: true, value: 'iPhone' },
+      userAgent: { configurable: true, value: 'AppleWebKit' },
+    });
+  });
+  await page.goto(new URL('docs/examples/', baseURL!).href);
+  const demo = page.getByRole('region', { name: 'Imperative feedback examples' });
+  await expect(demo.getByRole('button', { name: 'Request now', exact: true })).toBeEnabled();
+  const nativeControls = await page.locator('input[switch]').count();
+  for (const name of ['Request now', 'Request after await', 'Request from timer']) {
+    await demo.getByRole('button', { name, exact: true }).click();
+    if (name === 'Request from timer') await expect(demo.getByRole('status')).toHaveText('Waiting for timer.');
+    await expect(demo.getByRole('status')).toContainText('Request accepted: false · Route: none');
+  }
+  await expect(demo.locator('input, label, [aria-hidden]')).toHaveCount(0);
+  await expect(page.locator('input[switch]')).toHaveCount(nativeControls);
+});
+
 for (const example of [
   { name: 'preset board', path: '', target: /selection/i, setting: 'Feedback enabled', status: '.status' },
   { name: 'interaction examples', path: 'docs/examples/', target: 'Count action', setting: 'Enable feedback', status: '#interaction-result' },
