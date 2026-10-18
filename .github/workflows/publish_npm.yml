@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-          cache: npm
+          package-manager-cache: false
       - run: npm run release:check
         id: release
       - run: npm ci
@@ -75,7 +75,7 @@ jobs:
         with:
           node-version: '24'
           registry-url: https://registry.npmjs.org
-          cache: npm
+          package-manager-cache: false
       - run: npm install --global npm@11.6.1
       - run: npm ci
       - uses: actions/download-artifact@v8
