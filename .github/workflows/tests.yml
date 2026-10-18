@@ -20,7 +20,7 @@ jobs:
           node-version: '24'
           package-manager-cache: false
       - run: npm ci
-      - run: node --test .github/scripts/wait-for-registry.test.mjs
+      - run: node --test .github/scripts/wait-for-registry.test.mjs .github/scripts/check-publish-auth.test.mjs
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run coverage

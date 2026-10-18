@@ -39,30 +39,30 @@ shasum -a 256 bloxwap-haptic-0.1.0-rc.0.tgz
 npm publish ./bloxwap-haptic-0.1.0-rc.0.tgz --access public --tag next
 ```
 
-This local publication uses the signed-in account and its required 2FA flow. It does not establish GitHub OIDC or build provenance. Keep the bootstrap credential local. Verify the published prerelease's identity/tarball and record that limitation in #14. The provenance-required registry workflow is intended for the subsequent OIDC publication.
+This local publication uses the signed-in account and its required 2FA flow. Keep the bootstrap credential local. Verify the published prerelease's identity/tarball and record that limitation in #14. Subsequent CI publications authenticate with the org-level `NPM_TOKEN` secret.
 
-## Configure the exact trusted publisher
+## Configure npm token authentication
 
-In npm package settings select GitHub Actions with organization **bloxwap**, repository **haptic**, workflow filename **publish_npm.yml**, and no environment name (the workflow has none). Enable direct **npm publish** explicitly; staged publishing is a separate allowed action. Every job, including publish, runs on the self-hosted Mac mini fleet (`runs-on: [self-hosted, macOS, ARM64]`). Keep Node >=22.14, npm >=11.5.1, and an `id-token: write` publishing job so OIDC and `--provenance` stay enabled. Newly created trust must complete its first successful publication within two days. Check [npm's trusted publishing documentation](https://docs.npmjs.com/trusted-publishers/) and [docs/ci-runners.md](../docs/ci-runners.md) when executing this step.
+[npm trusted publishing does not support self-hosted runners](https://docs.npmjs.com/trusted-publishers/). Every job, including publish, runs on the self-hosted Mac mini fleet (`runs-on: [self-hosted, macOS, ARM64]`). The publish job authenticates with the org-level `NPM_TOKEN` secret (`NODE_AUTH_TOKEN`) that has publish rights for `@bloxwap` packages. That drops OIDC trusted publishing and automatic provenance. Keep Node 24 and npm 11.6.1. Check [docs/ci-runners.md](../docs/ci-runners.md) when executing this step.
 
-Record the actual account/team access and configured publisher in #13. A committed workflow alone does not complete that task.
+Record the actual account/team access and token availability in #13. A committed workflow alone does not complete that task.
 
-## Publish a tagged OIDC release
+## Publish a tagged release
 
 Commit the desired stable version (initially `0.1.0`), synchronize the docs dependency and lockfile, date the changelog, and update release notes. Recheck device evidence after any runtime/dependency change. Merge to main, wait for Tests and Documentation to pass, tag that exact main commit `v0.1.0`, then publish its GitHub release. Prerelease versions containing a hyphen use `next`; stable versions use `latest`.
 
-`publish_npm.yml` checks out the release tag and fails on a mismatched version, source outside main, dirty source, missing device evidence without the scoped initial release decision, already-published version, or unexpected registry response. Validation runs the full package and docs checks, then packs and uploads one archive with SHA-256. The publishing job downloads and verifies that archive, repeats the release gate, and publishes it with OIDC/provenance from the same Mac mini runners. No ongoing npm token secret is configured. [npm's provenance documentation](https://docs.npmjs.com/generating-provenance-statements/) explains the public build attestation.
+`publish_npm.yml` checks out the release tag and fails on a mismatched version, source outside main, dirty source, missing device evidence without the scoped initial release decision, already-published version, or unexpected registry response. Validation runs the full package and docs checks, then packs and uploads one archive with SHA-256. The publishing job downloads and verifies that archive, repeats the release gate, checks `NPM_TOKEN` authentication, and publishes it from the same Mac mini runners. Token publish does not attach provenance.
 
-The final registry check waits up to five minutes for npm's processing to expose the exact version and intended dist-tag. Unexpected auth/server responses fail immediately; a persistent missing version or incorrect tag fails when the wait expires. It then validates metadata, dist-tag, attestation workflow/tag/commit, byte identity with the reviewed tarball, signature verification, isolated ESM/CJS/types/SSR/bundler consumers, and real browser actions from installed registry bytes in both React versions.
+The final registry check waits up to five minutes for npm's processing to expose the exact version and intended dist-tag. Unexpected auth/server responses fail immediately; a persistent missing version or incorrect tag fails when the wait expires. It then validates metadata, dist-tag, byte identity with the reviewed tarball, isolated ESM/CJS/types/SSR/bundler consumers, and real browser actions from installed registry bytes in both React versions.
 
 ## Recovery and final evidence
 
 Do not retry publication blindly after a network failure. Query the exact version first. An existing immutable version cannot be overwritten. If publication succeeded but verification failed, inspect that version and rerun the **Registry smoke** workflow with the exact version; do not hide the failure by installing workspace source. Fix defects with a new version. If publication never reached npm, resolve the auth/network error and rerun the failed release workflow. Dist-tags are checked explicitly; repair a wrong tag through an authorized account or a publisher whose allowed actions include dist-tag management.
 
 ```sh
-npm view @bloxwap/haptic@0.1.0 version dist-tags repository dependencies peerDependencies dist.attestations --json
+npm view @bloxwap/haptic@0.1.0 version dist-tags repository dependencies peerDependencies dist.tarball --json
 HAPTIC_REGISTRY_VERSION=0.1.0 npm run registry:check
 DOCS_URL=https://bloxwap.github.io/haptic/ npm run docs:smoke
 ```
 
-Attach the release/tag, exact npm version, tarball digest, validation/publish/registry/docs run URLs, trusted-publisher evidence, and device results to #14. Update docs and README release status/badges to the real published version, then close completed issues and #1 only when every prerequisite is substantiated.
+Attach the release/tag, exact npm version, tarball digest, validation/publish/registry/docs run URLs, and device results to #14. Update docs and README release status/badges to the real published version, then close completed issues and #1 only when every prerequisite is substantiated.

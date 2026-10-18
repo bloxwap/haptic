@@ -5,7 +5,7 @@ description: Prepare and verify a public npm artifact from the release source.
 
 The initial release is tracked in [issue #14](https://github.com/bloxwap/haptic/issues/14). The maintainer requested `0.1.0` after the brand cleanup. Physical-device and VoiceOver certification remains pending in [issue #9](https://github.com/bloxwap/haptic/issues/9) and is disclosed in this release. The [initial release decision](https://github.com/bloxwap/haptic/blob/main/.github/planning/initial-release.json) covers that version and its npm bootstrap only.
 
-Follow the [release runbook](https://github.com/bloxwap/haptic/blob/main/.github/RELEASING.md) and [physical-device procedure](https://github.com/bloxwap/haptic/blob/main/.github/DEVICE_TESTING.md). The release workflow validates a versioned source tag, unchanged verified implementation, and recorded certification or the limited initial release decision before publishing. Its final registry check installs actual registry bytes into fresh React 18/19 consumers and verifies provenance and browser actions.
+Follow the [release runbook](https://github.com/bloxwap/haptic/blob/main/.github/RELEASING.md) and [physical-device procedure](https://github.com/bloxwap/haptic/blob/main/.github/DEVICE_TESTING.md). The release workflow validates a versioned source tag, unchanged verified implementation, and recorded certification or the limited initial release decision before publishing. Its final registry check installs actual registry bytes into fresh React 18/19 consumers and verifies metadata, tarball identity, and browser actions.
 
 ## Before publishing
 
@@ -15,12 +15,12 @@ Only `packages/haptic` is publishable. The root and documentation app are privat
 
 ## npm setup
 
-Verify permission to publish under the `@bloxwap` organization. A publicly unavailable package name is not a permission check. Establish a first-publish bootstrap using the reviewed real artifact, then configure the npm-side GitHub trusted publisher for `bloxwap/haptic` and `publish_npm.yml`.
+Verify permission to publish under the `@bloxwap` organization. A publicly unavailable package name is not a permission check. Establish a first-publish bootstrap using the reviewed real artifact, then publish later versions from CI with the org-level `NPM_TOKEN` secret.
 
-Check the publisher's allowed action: direct `npm publish` and staged publication are separate choices. Publish from the self-hosted Mac mini runners with matching workflow identity, `id-token: write`, `--provenance`, and currently supported npm/Node versions. See [npm's current documentation](https://docs.npmjs.com/trusted-publishers/) and the [CI runner prerequisites](https://github.com/bloxwap/haptic/blob/main/docs/ci-runners.md).
+[npm trusted publishing does not support self-hosted runners](https://docs.npmjs.com/trusted-publishers/). Publish from the Mac mini runners with `NODE_AUTH_TOKEN` from `NPM_TOKEN`. That drops OIDC trusted publishing and automatic provenance. See the [CI runner prerequisites](https://github.com/bloxwap/haptic/blob/main/docs/ci-runners.md).
 
 ## Verify the release
 
-The GitHub tag must match the library version. Publish the exact validated package with the intended dist-tag and provenance. Install that exact version from the public registry into fresh consumer projects, then repeat format/type/React/browser smoke checks and verify package metadata and attestation source.
+The GitHub tag must match the library version. Publish the exact validated package with the intended dist-tag. Install that exact version from the public registry into fresh consumer projects, then repeat format/type/React/browser smoke checks and verify package metadata and tarball identity.
 
-Confirm the deployed docs under `/haptic/`, snippets, links, and badges refer to the actual release. Do not close the release tracker on a workflow configuration, packed tarball, or manual publish alone; retain the final registry, OIDC, docs, and device evidence.
+Confirm the deployed docs under `/haptic/`, snippets, links, and badges refer to the actual release. Do not close the release tracker on a workflow configuration, packed tarball, or manual publish alone; retain the final registry, docs, and device evidence.
