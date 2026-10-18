@@ -19,3 +19,5 @@ runs:
       run: sh "$GITHUB_WORKSPACE/.github/scripts/firefox-tmp.sh" allocate
     - shell: bash
       run: npx playwright install ${{ inputs.browsers }}
+    - shell: sh
+      run: xattr -cr "$HOME/Library/Caches/ms-playwright" || true

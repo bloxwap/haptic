@@ -34,7 +34,7 @@ The repository, GitHub Pages environment, and runner group must allow these self
 
 CI writes `AppleKeyboardUIMode=2` so WebKit Tab moves between buttons. Keep System Settings → Keyboard → Keyboard navigation enabled on the login session if a WebKit focus test still fails after that write.
 
-Firefox profiles must not share `/tmp` or `/var/folders` across runners on the same mini. CI allocates `HAPTIC_FIREFOX_TMPDIR` with `mktemp -d` under `/tmp`, Playwright sets `process.env.TMPDIR` to that directory (so `os.tmpdir()` is unique), and an `always()` step deletes it. Do not point job-wide `TMPDIR` at `$RUNNER_TEMP`.
+Firefox profiles must not share a tmp directory across runners on the same mini. CI allocates `HAPTIC_FIREFOX_TMPDIR` with `mktemp -d` under `/private/tmp` (the real path; `/tmp` is a symlink Nightly fails to resolve), Playwright sets `process.env.TMPDIR` to that directory, and an `always()` step deletes it. After `playwright install`, CI clears `com.apple.quarantine` on `~/Library/Caches/ms-playwright`. Do not point job-wide `TMPDIR` at `$RUNNER_TEMP`.
 
 ## npm provenance and OIDC
 

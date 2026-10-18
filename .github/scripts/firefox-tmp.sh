@@ -1,8 +1,9 @@
 #!/bin/sh
 set -eu
 
-# Unique per-job Firefox profile root under /tmp. Nightly cannot use $RUNNER_TEMP
-# on macOS, and a shared /tmp dir collides when several runners share a mini.
+# Unique per-job Firefox profile root. Nightly cannot use $RUNNER_TEMP on macOS,
+# a shared tmp dir collides when several runners share a mini, and /tmp is a
+# symlink to /private/tmp that Nightly fails to resolve as a profile path.
 # Usage: firefox-tmp.sh allocate | cleanup
 
 cmd=${1:?usage: firefox-tmp.sh allocate|cleanup}
@@ -10,7 +11,12 @@ cmd=${1:?usage: firefox-tmp.sh allocate|cleanup}
 case $cmd in
   allocate)
     id=$(printf '%s' "${GITHUB_RUN_ID:-0}-${GITHUB_JOB:-job}-${RUNNER_NAME:-local}" | tr -c 'A-Za-z0-9._-' '-')
-    dir=$(mktemp -d "/tmp/haptic-ff-$id.XXXXXX")
+    root=/tmp
+    if [ -d /private/tmp ]; then
+      root=/private/tmp
+    fi
+    dir=$(mktemp -d "$root/haptic-ff-$id.XXXXXX")
+    dir=$(cd "$dir" && pwd -P)
     if [ -n "${GITHUB_ENV-}" ]; then
       echo "HAPTIC_FIREFOX_TMPDIR=$dir" >> "$GITHUB_ENV"
     fi
@@ -20,7 +26,7 @@ case $cmd in
     dir=${HAPTIC_FIREFOX_TMPDIR-}
     [ -n "$dir" ] || exit 0
     case $dir in
-      /tmp/haptic-ff-*) ;;
+      /tmp/haptic-ff-*|/private/tmp/haptic-ff-*) ;;
       *)
         echo "firefox-tmp.sh cleanup: refusing $dir" >&2
         exit 1
