@@ -24,6 +24,8 @@ Register each machine with those labels. GitHub's default self-hosted macOS ARM6
 
 Node 24 and npm 11.6.1 are provisioned by the workflows (`actions/setup-node`, plus a global npm pin on the publish job). They do not need to be preinstalled, but the runner user must be able to write the Actions tool cache.
 
+`actions/setup-node` uses `package-manager-cache: false` in every job. npm's local download cache already persists on the minis. Uploading that shared cache to GitHub caused the required Tests checks to remain in post-job cleanup for several minutes after all validation passed. Keep the local cache and `npm ci`; avoid archiving the machine-wide npm cache as part of each job. [setup-node documents the explicit opt-out](https://github.com/actions/setup-node#caching-global-packages-data).
+
 Keep the runner online under a regular user. Do not run jobs as root. macOS 14 or newer is expected for current Playwright browsers.
 
 The repository, GitHub Pages environment, and runner group must allow these self-hosted machines. OIDC must stay enabled so `id-token: write` jobs can mint ID tokens.
