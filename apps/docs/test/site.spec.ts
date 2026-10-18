@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test';
 
+declare global {
+  interface Window { imperativeRequests: unknown[] }
+}
+
 test('imperative requests report browser acceptance for sync, awaited and timer calls', async ({ page, baseURL }) => {
   await page.addInitScript(() => {
     const requests: unknown[] = [];
@@ -12,7 +16,7 @@ test('imperative requests report browser acceptance for sync, awaited and timer 
   for (const name of ['Request now', 'Request after await', 'Request from timer']) {
     await demo.getByRole('button', { name, exact: true }).click();
     requests++;
-    await expect.poll(() => page.evaluate(() => (window as Window & { imperativeRequests: unknown[] }).imperativeRequests.length)).toBe(requests);
+    await expect.poll(() => page.evaluate(() => window.imperativeRequests.length)).toBe(requests);
     await expect(demo.getByRole('status')).toHaveText('Available: true · Request accepted: true · Route: browser-vibration');
   }
   await page.evaluate(() => { Object.defineProperty(navigator, 'vibrate', { value: () => false }); });
