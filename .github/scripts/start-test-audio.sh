@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-# Firefox's real WebAudio context needs a reachable output device.
+# Browser WebAudio tests need a reachable output device.
 # Mac mini runners already have Core Audio; do not install packages.
 if [ -n "${GITHUB_ACTIONS-}" ]; then
   tmpdir=${RUNNER_TEMP:?RUNNER_TEMP is required in GitHub Actions}

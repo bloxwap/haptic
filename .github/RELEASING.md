@@ -12,7 +12,7 @@ npm run typecheck
 npm run test:matrix
 npm run size
 npm run pack:check
-npx playwright install chromium firefox webkit
+npx playwright install chromium webkit
 npm run test:browser
 npm run docs:check
 NEXT_PUBLIC_BASE_PATH=/haptic npm run docs:build

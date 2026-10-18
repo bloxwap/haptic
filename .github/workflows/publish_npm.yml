@@ -40,7 +40,7 @@ jobs:
       - run: npm run docs:build
       - uses: ./.github/actions/playwright-browsers
         with:
-          browsers: chromium firefox webkit
+          browsers: chromium webkit
       - run: sh .github/scripts/start-test-audio.sh
       - run: npm run test:browser
       - run: npm run docs:smoke
@@ -53,8 +53,6 @@ jobs:
             bloxwap-haptic-*.tgz
             SHA256SUMS
           if-no-files-found: error
-      - if: always() && env.HAPTIC_FIREFOX_TMPDIR != ''
-        run: sh .github/scripts/firefox-tmp.sh cleanup
   publish:
     needs: validate
     runs-on: [self-hosted, macOS, ARM64]
@@ -92,5 +90,3 @@ jobs:
         with:
           browsers: chromium
       - run: npm run registry:check
-      - if: always() && env.HAPTIC_FIREFOX_TMPDIR != ''
-        run: sh .github/scripts/firefox-tmp.sh cleanup
