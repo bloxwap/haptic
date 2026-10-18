@@ -13,3 +13,9 @@ playwright-report/
 .DS_Store
 .env*
 !.env.example
+
+.hig-reference/
+.tmp/
+
+# Reviewed HIG candidate tarballs (see vendor/bloxwap-hig/README.md).
+!vendor/bloxwap-hig/*.tgz

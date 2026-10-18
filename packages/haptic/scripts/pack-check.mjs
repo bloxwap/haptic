@@ -10,17 +10,17 @@ function run(command, args, cwd) {
   if (result.status !== 0) throw new Error(`${command} ${args.join(' ')} failed\n${result.stdout}\n${result.stderr}`);
   return result.stdout;
 }
-const temporary = mkdtempSync(join(tmpdir(), 'haptic-pack-'));
+const temporary = mkdtempSync(join(process.env.RUNNER_TEMP || tmpdir(), 'haptic-pack-'));
 try {
   const registryVersion = process.env.HAPTIC_REGISTRY_VERSION;
   const specifier = registryVersion ? `@bloxwap/haptic@${registryVersion}` : '.';
   const [packed] = JSON.parse(run('npm', ['pack', specifier, '--ignore-scripts', '--json', '--pack-destination', temporary], process.cwd()));
   const paths = packed.files.map(file => file.path);
-  for (const required of ['dist/index.js', 'dist/index.cjs', 'dist/index.d.ts', 'dist/index.d.cts', 'package.json', 'README.md', 'LICENSE', 'CHANGELOG.md']) {
+  for (const required of ['dist/index.js', 'dist/index.cjs', 'dist/index.d.ts', 'dist/index.d.cts', 'dist/feedback.js', 'dist/feedback.cjs', 'dist/feedback.d.ts', 'dist/feedback.d.cts', 'package.json', 'README.md', 'LICENSE', 'CHANGELOG.md']) {
     if (!paths.includes(required)) throw new Error(`Missing published file: ${required}`);
   }
   for (const path of paths) {
-    if (!/^(dist\/index\.(js|cjs|d\.ts|d\.cts)|package\.json|README\.md|LICENSE|CHANGELOG\.md)$/.test(path)) throw new Error(`Unexpected published file: ${path}`);
+    if (!/^(dist\/(index|feedback)\.(js|cjs|d\.ts|d\.cts)|package\.json|README\.md|LICENSE|CHANGELOG\.md)$/.test(path)) throw new Error(`Unexpected published file: ${path}`);
   }
   const manifest = JSON.parse(run('tar', ['-xOf', join(temporary, packed.filename), 'package/package.json'], process.cwd()));
   if (manifest.name !== '@bloxwap/haptic' || manifest.publishConfig.access !== 'public') throw new Error('Incorrect publication identity.');
@@ -32,6 +32,14 @@ try {
     run('mkdir', ['-p', consumer], process.cwd());
     writeFileSync(join(consumer, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
     run('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', registryVersion ? '--package-lock' : '--no-package-lock', join(temporary, packed.filename), `react@${version}`, `react-dom@${version}`, version.startsWith('18') ? '@types/react@18' : '@types/react@19', version.startsWith('18') ? '@types/react-dom@18' : '@types/react-dom@19', 'typescript@5.9.3'], consumer);
+    writeFileSync(join(consumer, 'feedback.ts'), `
+      import { createHapticAdapter, createNativeHapticAdapter, type FeedbackEvent, type FeedbackPreferences } from '@bloxwap/haptic/feedback';
+      const event: FeedbackEvent = { id: '1', source: 'consumer', intent: 'success', origin: 'programmatic' };
+      const preferences: FeedbackPreferences = { version: 1, haptics: true, sound: false, volume: 0, motion: false };
+      void createHapticAdapter; void createNativeHapticAdapter; void event; void preferences;
+    `);
+    writeFileSync(join(consumer, 'feedback.tsconfig.json'), JSON.stringify({ compilerOptions: { strict: true, noEmit: true, types: [], lib: ['ES2020'], target: 'ES2020', module: 'NodeNext', moduleResolution: 'NodeNext' }, files: ['feedback.ts'] }));
+    run('node', ['node_modules/typescript/bin/tsc', '-p', 'feedback.tsconfig.json'], consumer);
     const checks = `
       import { strict as assert } from 'node:assert';
       import { createRequire } from 'node:module';
@@ -40,6 +48,8 @@ try {
       Reflect.deleteProperty(globalThis, 'navigator');
       const esm = await import('@bloxwap/haptic');
       const cjs = createRequire(import.meta.url)('@bloxwap/haptic');
+      assert.equal(typeof (await import('@bloxwap/haptic/feedback')).createHapticAdapter, 'function');
+      assert.equal(typeof createRequire(import.meta.url)('@bloxwap/haptic/feedback').createNativeHapticAdapter, 'function');
       for (const api of [esm, cjs]) {
         assert.deepEqual(Object.keys(api).sort(), ['Haptic', 'HapticTarget', 'isIOSWebKitWithoutVibration', 'useIOSNativeHaptics'].sort());
         assert.equal(api.Haptic, api.HapticTarget);

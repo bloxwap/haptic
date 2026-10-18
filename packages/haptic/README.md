@@ -41,3 +41,22 @@ Exports also include `isIOSWebKitWithoutVibration`, `useIOSNativeHaptics`, `Hapt
 ## License
 
 MIT
+
+### HIG semantic feedback
+
+`@bloxwap/haptic/feedback` exports platform-free `FeedbackEvent`,
+`FeedbackPreferences`, `semanticHaptics`, `createHapticAdapter(backend)` and
+`createNativeHapticAdapter(hostExpoModule, capability)`. The adapters implement
+HIG's haptic channel without importing React, DOM, Web Audio, Expo or RN. HIG owns
+preference storage, event deduplication and cadence; the host supplies backend
+availability and AppState. API success is never hardware observation.
+
+`HapticTarget` also accepts host `preferences={{ haptics }}` and
+`policyEnabled`. Application veto and stored preferences gate component intent;
+sound and motion remain independent. For HIG's physical iOS target, pre-approve
+eligibility, enable only the physical path and disable debug audio. An iOS tick
+cannot be canceled after the OS activates its switch. Native Expo operations
+cannot retract an already submitted tick either.
+
+See the [integration guide](https://bloxwap.github.io/haptic/docs/hig/) for mappings,
+backend injection, no-op defaults, independent channels and validation limits.

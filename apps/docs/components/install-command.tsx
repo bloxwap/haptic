@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useId, useState } from 'react';
-import { Check, Copy } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { CheckIcon } from '@bloxwap/hig-react/brand';
+import { IconButton } from '@bloxwap/hig-react/button';
+import { Tabs } from '@bloxwap/hig-react/navigation';
 
 const managers = [
   { name: 'bun', command: 'bun add @bloxwap/haptic' },
@@ -10,13 +12,17 @@ const managers = [
   { name: 'yarn', command: 'yarn add @bloxwap/haptic' },
 ];
 
+function CopyIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg>;
+}
+
+/** Package-manager tabs and copy action use HIG Tabs/IconButton; the commands stay SDK-owned. */
 export function InstallCommand() {
-  const id = useId();
   const [ready, setReady] = useState(false);
   useEffect(() => { setReady(true); }, []);
-  const [selected, setSelected] = useState(1);
+  const [selected, setSelected] = useState('npm');
   const [copyResult, setCopyResult] = useState<{ command: string; success: boolean } | null>(null);
-  const { command } = managers[selected];
+  const command = managers.find(manager => manager.name === selected)!.command;
   const result = copyResult?.command === command ? copyResult : null;
 
   useEffect(() => {
@@ -25,53 +31,34 @@ export function InstallCommand() {
     return () => window.clearTimeout(timer);
   }, [copyResult]);
 
-  function select(index: number) {
-    setSelected(index);
-    setCopyResult(null);
-  }
-
-  async function copy() {
+  async function copy(text: string) {
     try {
-      await navigator.clipboard.writeText(command);
-      setCopyResult({ command, success: true });
+      await navigator.clipboard.writeText(text);
+      setCopyResult({ command: text, success: true });
     } catch {
-      setCopyResult({ command, success: false });
+      setCopyResult({ command: text, success: false });
     }
   }
 
   return <div className="package-install">
-    <div className="install-tabs" role="tablist" aria-label="Package manager">
-      {managers.map(({ name }, index) => <button
-        key={name}
-        type="button"
-        disabled={!ready}
-        role="tab"
-        id={`${id}-tab-${index}`}
-        aria-controls={`${id}-command`}
-        aria-selected={selected === index}
-        tabIndex={selected === index ? 0 : -1}
-        onClick={() => select(index)}
-        onKeyDown={(event) => {
-          let next: number;
-          if (event.key === 'ArrowRight') next = (index + 1) % managers.length;
-          else if (event.key === 'ArrowLeft') next = (index + managers.length - 1) % managers.length;
-          else if (event.key === 'Home') next = 0;
-          else if (event.key === 'End') next = managers.length - 1;
-          else return;
-          event.preventDefault();
-          select(next);
-          document.getElementById(`${id}-tab-${next}`)?.focus();
-        }}
-      >{name}</button>)}
-    </div>
-    <div className="install-command" role="tabpanel" id={`${id}-command`} aria-labelledby={`${id}-tab-${selected}`} tabIndex={0}>
-      <span className="install-prompt" aria-hidden="true">$</span>
-      <code>{command}</code>
-      <button type="button" className="btn btn--ghost btn--icon" disabled={!ready} aria-label="Copy install command" title={result?.success ? 'Copied!' : 'Copy command'} onClick={copy}>
-        {result?.success ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-      </button>
-    </div>
-    <span role="status" className={result && !result.success ? 'install-feedback' : 'sr-only'}>
+    <Tabs
+      label="Package manager"
+      value={selected}
+      onValueChange={value => { setSelected(value); setCopyResult(null); }}
+      items={managers.map(manager => ({
+        value: manager.name,
+        label: manager.name,
+        disabled: !ready,
+        content: <div className="install-command">
+          <span className="install-prompt" aria-hidden="true">$</span>
+          <code>{manager.command}</code>
+          <IconButton intent="ghost" label="Copy install command" disabled={!ready} title={result?.success ? 'Copied!' : 'Copy command'} onClick={() => copy(manager.command)}>
+            {result?.success && manager.command === command ? <CheckIcon /> : <CopyIcon />}
+          </IconButton>
+        </div>,
+      }))}
+    />
+    <span role="status" className={result && !result.success ? 'install-feedback' : 'hig-sr-only'}>
       {result ? result.success ? 'Command copied to clipboard.' : 'Could not copy. Select the command to copy it manually.' : ''}
     </span>
     <p className="install-platforms">React 18+ · SSR-safe · ESM + CommonJS</p>

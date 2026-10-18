@@ -4,7 +4,7 @@ import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const source = process.cwd();
-const temporary = mkdtempSync(join(tmpdir(), 'haptic-react-matrix-'));
+const temporary = mkdtempSync(join(process.env.RUNNER_TEMP || tmpdir(), 'haptic-react-matrix-'));
 function run(args, cwd) {
   const result = spawnSync('npm', args, { cwd, stdio: 'inherit', env: process.env });
   if (result.status !== 0) throw new Error(`npm ${args.join(' ')} failed (${result.status})`);
