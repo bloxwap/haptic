@@ -19,7 +19,7 @@ Register each machine with those labels. GitHub's default self-hosted macOS ARM6
 | Homebrew `zstd` | `actions/cache` compression |
 | `shasum` | Release artifact digests (`/usr/bin/shasum`) |
 | Core Audio with a reachable output | Firefox WebAudio in browser tests |
-| Writable `$RUNNER_TEMP` | Temporary files; workflows also set `TMPDIR` to `${{ runner.temp }}` |
+| Writable `$RUNNER_TEMP` | Temporary files; workflows export `TMPDIR=$RUNNER_TEMP` for later steps |
 | Network to GitHub, npm, and the Playwright CDN | Checkout, package install, browser download, OIDC, Pages, publish |
 
 Node 24 and npm 11.6.1 are provisioned by the workflows (`actions/setup-node`, plus a global npm pin on the publish job). They do not need to be preinstalled, but the runner user must be able to write the Actions tool cache.

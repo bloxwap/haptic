@@ -13,10 +13,9 @@ jobs:
   verify:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 20
-    env:
-      TMPDIR: ${{ runner.temp }}
     steps:
       - uses: actions/checkout@v7
+      - run: echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
