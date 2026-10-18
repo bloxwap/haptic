@@ -32,7 +32,9 @@ The repository, GitHub Pages environment, and runner group must allow these self
 
 `playwright install --with-deps` is Linux-only and is not used here. Jobs restore `~/Library/Caches/ms-playwright` and run `npx playwright install` for the browsers that job needs.
 
-CI writes `AppleKeyboardUIMode=2` so WebKit Tab moves between buttons. Keep System Settings → Keyboard → Keyboard navigation enabled on the login session if a WebKit focus test still fails after that write. Firefox profiles use a unique `mktemp` directory under `/tmp` (`HAPTIC_FIREFOX_TMPDIR`), not `$RUNNER_TEMP` and not a shared `/tmp` folder, because several runners share each mini. Jobs delete that directory in an `always()` step.
+CI writes `AppleKeyboardUIMode=2` so WebKit Tab moves between buttons. Keep System Settings → Keyboard → Keyboard navigation enabled on the login session if a WebKit focus test still fails after that write.
+
+Firefox profiles must not share `/tmp` or `/var/folders` across runners on the same mini. CI allocates `HAPTIC_FIREFOX_TMPDIR` with `mktemp -d` under `/tmp`, Playwright sets `process.env.TMPDIR` to that directory (so `os.tmpdir()` is unique), and an `always()` step deletes it. Do not point job-wide `TMPDIR` at `$RUNNER_TEMP`.
 
 ## npm provenance and OIDC
 
