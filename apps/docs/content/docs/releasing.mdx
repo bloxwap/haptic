@@ -17,7 +17,7 @@ Only `packages/haptic` is publishable. The root and documentation app are privat
 
 Verify permission to publish under the `@bloxwap` organization. A publicly unavailable package name is not a permission check. Establish a first-publish bootstrap using the reviewed real artifact, then configure the npm-side GitHub trusted publisher for `bloxwap/haptic` and `publish_npm.yml`.
 
-Check the publisher's allowed action: direct `npm publish` and staged publication are separate choices. Use hosted GitHub runners, matching workflow identity, OIDC permission, and currently supported npm/Node versions. See [npm's current documentation](https://docs.npmjs.com/trusted-publishers/).
+Check the publisher's allowed action: direct `npm publish` and staged publication are separate choices. Publish from the self-hosted Mac mini runners with matching workflow identity, `id-token: write`, `--provenance`, and currently supported npm/Node versions. See [npm's current documentation](https://docs.npmjs.com/trusted-publishers/) and the [CI runner prerequisites](https://github.com/bloxwap/haptic/blob/main/docs/ci-runners.md).
 
 ## Verify the release
 

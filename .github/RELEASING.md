@@ -12,7 +12,7 @@ npm run typecheck
 npm run test:matrix
 npm run size
 npm run pack:check
-npx playwright install --with-deps chromium firefox webkit
+npx playwright install chromium firefox webkit
 npm run test:browser
 npm run docs:check
 NEXT_PUBLIC_BASE_PATH=/haptic npm run docs:build
@@ -43,7 +43,7 @@ This local publication uses the signed-in account and its required 2FA flow. It 
 
 ## Configure the exact trusted publisher
 
-In npm package settings select GitHub Actions with organization **bloxwap**, repository **haptic**, workflow filename **publish_npm.yml**, and no environment name (the workflow has none). Enable direct **npm publish** explicitly; staged publishing is a separate allowed action. Use GitHub-hosted runners, Node >=22.14 and npm >=11.5.1, and an `id-token: write` publishing job. Newly created trust must complete its first successful publication within two days. Check [npm's trusted publishing documentation](https://docs.npmjs.com/trusted-publishers/) when executing this step.
+In npm package settings select GitHub Actions with organization **bloxwap**, repository **haptic**, workflow filename **publish_npm.yml**, and no environment name (the workflow has none). Enable direct **npm publish** explicitly; staged publishing is a separate allowed action. Every job, including publish, runs on the self-hosted Mac mini fleet (`runs-on: [self-hosted, macOS, ARM64]`). Keep Node >=22.14, npm >=11.5.1, and an `id-token: write` publishing job so OIDC and `--provenance` stay enabled. Newly created trust must complete its first successful publication within two days. Check [npm's trusted publishing documentation](https://docs.npmjs.com/trusted-publishers/) and [docs/ci-runners.md](../docs/ci-runners.md) when executing this step.
 
 Record the actual account/team access and configured publisher in #13. A committed workflow alone does not complete that task.
 
@@ -51,7 +51,7 @@ Record the actual account/team access and configured publisher in #13. A committ
 
 Commit the desired stable version (initially `0.1.0`), synchronize the docs dependency and lockfile, date the changelog, and update release notes. Recheck device evidence after any runtime/dependency change. Merge to main, wait for Tests and Documentation to pass, tag that exact main commit `v0.1.0`, then publish its GitHub release. Prerelease versions containing a hyphen use `next`; stable versions use `latest`.
 
-`publish_npm.yml` checks out the release tag and fails on a mismatched version, source outside main, dirty source, missing device evidence without the scoped initial release decision, already-published version, or unexpected registry response. Validation runs the full package and docs checks, then packs and uploads one archive with SHA-256. The hosted publishing job downloads and verifies that archive, repeats the release gate, and publishes it with OIDC/provenance. No ongoing npm token secret is configured. [npm's provenance documentation](https://docs.npmjs.com/generating-provenance-statements/) explains the public build attestation.
+`publish_npm.yml` checks out the release tag and fails on a mismatched version, source outside main, dirty source, missing device evidence without the scoped initial release decision, already-published version, or unexpected registry response. Validation runs the full package and docs checks, then packs and uploads one archive with SHA-256. The publishing job downloads and verifies that archive, repeats the release gate, and publishes it with OIDC/provenance from the same Mac mini runners. No ongoing npm token secret is configured. [npm's provenance documentation](https://docs.npmjs.com/generating-provenance-statements/) explains the public build attestation.
 
 The final registry check waits up to five minutes for npm's processing to expose the exact version and intended dist-tag. Unexpected auth/server responses fail immediately; a persistent missing version or incorrect tag fails when the wait expires. It then validates metadata, dist-tag, attestation workflow/tag/commit, byte identity with the reviewed tarball, signature verification, isolated ESM/CJS/types/SSR/bundler consumers, and real browser actions from installed registry bytes in both React versions.
 
