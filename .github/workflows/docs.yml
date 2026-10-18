@@ -18,7 +18,6 @@ jobs:
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
       - uses: actions/checkout@v7
-      - run: echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
@@ -61,7 +60,6 @@ jobs:
       DOCS_URL: https://bloxwap.github.io/haptic/
     steps:
       - uses: actions/checkout@v7
-      - run: echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v7
         with:
           node-version: '24'

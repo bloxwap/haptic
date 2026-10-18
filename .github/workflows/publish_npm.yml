@@ -23,7 +23,6 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name }}
           fetch-depth: 0
-      - run: echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
@@ -72,7 +71,6 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name }}
           fetch-depth: 0
-      - run: echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v7
         with:
           node-version: '24'

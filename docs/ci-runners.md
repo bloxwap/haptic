@@ -19,7 +19,7 @@ Register each machine with those labels. GitHub's default self-hosted macOS ARM6
 | Homebrew `zstd` | `actions/cache` compression |
 | `shasum` | Release artifact digests (`/usr/bin/shasum`) |
 | Core Audio with a reachable output | Firefox WebAudio in browser tests |
-| Writable `$RUNNER_TEMP` | Temporary files; workflows export `TMPDIR=$RUNNER_TEMP` for later steps |
+| Writable `$RUNNER_TEMP` | Script scratch files (`start-test-audio.sh`, Node `mkdtemp`). Do not set job-wide `TMPDIR` to it — Firefox cannot create profiles there |
 | Network to GitHub, npm, and the Playwright CDN | Checkout, package install, browser download, OIDC, Pages, publish |
 
 Node 24 and npm 11.6.1 are provisioned by the workflows (`actions/setup-node`, plus a global npm pin on the publish job). They do not need to be preinstalled, but the runner user must be able to write the Actions tool cache.
@@ -31,6 +31,8 @@ The repository, GitHub Pages environment, and runner group must allow these self
 ## Playwright
 
 `playwright install --with-deps` is Linux-only and is not used here. Jobs restore `~/Library/Caches/ms-playwright` and run `npx playwright install` for the browsers that job needs.
+
+CI writes `AppleKeyboardUIMode=2` so WebKit Tab moves between buttons. Keep System Settings → Keyboard → Keyboard navigation enabled on the login session if a WebKit focus test still fails after that write. Firefox profiles are created under `/tmp`, not `$RUNNER_TEMP`.
 
 ## npm provenance and OIDC
 

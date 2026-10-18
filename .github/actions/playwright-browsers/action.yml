@@ -13,5 +13,7 @@ runs:
         key: playwright-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package-lock.json') }}
         restore-keys: |
           playwright-${{ runner.os }}-${{ runner.arch }}-
+    - shell: sh
+      run: defaults write NSGlobalDomain AppleKeyboardUIMode -int 2
     - shell: bash
       run: npx playwright install ${{ inputs.browsers }}
