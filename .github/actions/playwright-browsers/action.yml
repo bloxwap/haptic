@@ -15,5 +15,7 @@ runs:
           playwright-${{ runner.os }}-${{ runner.arch }}-
     - shell: sh
       run: defaults write NSGlobalDomain AppleKeyboardUIMode -int 2
+    - shell: sh
+      run: sh "$GITHUB_WORKSPACE/.github/scripts/firefox-tmp.sh" allocate
     - shell: bash
       run: npx playwright install ${{ inputs.browsers }}

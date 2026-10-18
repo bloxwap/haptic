@@ -4,8 +4,10 @@ const remote = process.env.DOCS_URL;
 const port = Number(process.env.DOCS_PORT ?? 4177);
 const firefoxLaunch = {
   ...(process.env.HAPTIC_FIREFOX_EXECUTABLE ? { executablePath: process.env.HAPTIC_FIREFOX_EXECUTABLE } : {}),
-  // Nightly cannot create profiles under GitHub's $RUNNER_TEMP on macOS.
-  ...(process.platform === 'darwin' ? { env: { ...process.env, TMPDIR: '/tmp' } } : {}),
+  // Nightly cannot create profiles under $RUNNER_TEMP; CI allocates a unique /tmp dir.
+  ...(process.platform === 'darwin' && process.env.HAPTIC_FIREFOX_TMPDIR
+    ? { env: { ...process.env, TMPDIR: process.env.HAPTIC_FIREFOX_TMPDIR } }
+    : {}),
 };
 export default defineConfig({
   testDir: 'test',

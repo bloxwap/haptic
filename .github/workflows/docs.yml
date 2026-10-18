@@ -38,6 +38,8 @@ jobs:
         with:
           name: docs-failures
           path: apps/docs/test-results/
+      - if: always() && env.HAPTIC_FIREFOX_TMPDIR != ''
+        run: sh .github/scripts/firefox-tmp.sh cleanup
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: build
@@ -74,3 +76,5 @@ jobs:
         with:
           name: live-docs-failures
           path: apps/docs/test-results/
+      - if: always() && env.HAPTIC_FIREFOX_TMPDIR != ''
+        run: sh .github/scripts/firefox-tmp.sh cleanup

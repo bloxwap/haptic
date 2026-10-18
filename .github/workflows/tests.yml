@@ -38,3 +38,5 @@ jobs:
         with:
           name: test-failures
           path: packages/haptic/test-results/
+      - if: always() && env.HAPTIC_FIREFOX_TMPDIR != ''
+        run: sh .github/scripts/firefox-tmp.sh cleanup
