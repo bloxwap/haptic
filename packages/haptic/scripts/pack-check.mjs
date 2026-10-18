@@ -10,7 +10,7 @@ function run(command, args, cwd) {
   if (result.status !== 0) throw new Error(`${command} ${args.join(' ')} failed\n${result.stdout}\n${result.stderr}`);
   return result.stdout;
 }
-const temporary = mkdtempSync(join(tmpdir(), 'haptic-pack-'));
+const temporary = mkdtempSync(join(process.env.RUNNER_TEMP || tmpdir(), 'haptic-pack-'));
 try {
   const registryVersion = process.env.HAPTIC_REGISTRY_VERSION;
   const specifier = registryVersion ? `@bloxwap/haptic@${registryVersion}` : '.';

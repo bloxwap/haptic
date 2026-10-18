@@ -7,7 +7,6 @@ export default defineConfig({
   use: { baseURL: remote ?? `http://127.0.0.1:${port}/haptic/`, trace: 'retain-on-failure' },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'], launchOptions: { executablePath: process.env.HAPTIC_FIREFOX_EXECUTABLE } } },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
     { name: 'mobile-chromium', use: { ...devices['Pixel 7'] } },
   ],

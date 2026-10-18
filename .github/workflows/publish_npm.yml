@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 25
     outputs:
       version: ${{ steps.release.outputs.version }}
@@ -38,12 +38,14 @@ jobs:
       - run: npm audit --audit-level=high
       - run: npm run docs:check
       - run: npm run docs:build
-      - run: npx playwright install --with-deps chromium firefox webkit
-      - run: bash .github/scripts/start-test-audio.sh
+      - uses: ./.github/actions/playwright-browsers
+        with:
+          browsers: chromium webkit
+      - run: sh .github/scripts/start-test-audio.sh
       - run: npm run test:browser
       - run: npm run docs:smoke
       - run: npm run pack:haptic
-      - run: sha256sum bloxwap-haptic-*.tgz > SHA256SUMS
+      - run: sh .github/scripts/sha256.sh digest SHA256SUMS bloxwap-haptic-*.tgz
       - uses: actions/upload-artifact@v7
         with:
           name: npm-package
@@ -53,7 +55,7 @@ jobs:
           if-no-files-found: error
   publish:
     needs: validate
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 10
     permissions:
       contents: read
@@ -80,9 +82,11 @@ jobs:
         with:
           name: npm-package
           path: .release-artifacts
-      - run: sha256sum --check SHA256SUMS
+      - run: sh "$GITHUB_WORKSPACE/.github/scripts/sha256.sh" verify SHA256SUMS
         working-directory: .release-artifacts
       - run: npm run release:check
       - run: npm publish "$HAPTIC_EXPECTED_TARBALL" --access public --provenance --tag "$DIST_TAG"
-      - run: npx playwright install --with-deps chromium
+      - uses: ./.github/actions/playwright-browsers
+        with:
+          browsers: chromium
       - run: npm run registry:check
