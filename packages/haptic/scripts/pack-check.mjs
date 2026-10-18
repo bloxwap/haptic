@@ -51,9 +51,11 @@ try {
       assert.equal(typeof (await import('@bloxwap/haptic/feedback')).createHapticAdapter, 'function');
       assert.equal(typeof createRequire(import.meta.url)('@bloxwap/haptic/feedback').createNativeHapticAdapter, 'function');
       for (const api of [esm, cjs]) {
-        assert.deepEqual(Object.keys(api).sort(), ['Haptic', 'HapticTarget', 'isIOSWebKitWithoutVibration', 'useIOSNativeHaptics'].sort());
+        assert.deepEqual(Object.keys(api).sort(), ['Haptic', 'HapticTarget', 'isIOSWebKitWithoutVibration', 'useIOSNativeHaptics', 'canTriggerHaptic', 'triggerHaptic'].sort());
         assert.equal(api.Haptic, api.HapticTarget);
         assert.equal(api.isIOSWebKitWithoutVibration(), false);
+        assert.deepEqual(api.canTriggerHaptic(), { available: false, mechanism: 'none', observed: false, reason: 'browser-unavailable' });
+        assert.deepEqual(await api.triggerHaptic(), { delivered: false, mechanism: 'none', reason: 'browser-unavailable' });
         const html = renderToString(React.createElement(api.Haptic, null, React.createElement('button', { type: 'button' }, 'Consumer')));
         assert.match(html, /Consumer/); assert.doesNotMatch(html, /type="checkbox"/);
       }
@@ -61,7 +63,9 @@ try {
     `;
     writeFileSync(join(consumer, 'smoke.mjs'), checks);
     console.log(run('node', ['smoke.mjs'], consumer).trim());
-    const types = `import { Haptic, HapticTarget, isIOSWebKitWithoutVibration, useIOSNativeHaptics, type HapticTargetProps, type HapticInput, type HapticPattern, type HapticPreset, type TriggerOptions, type Vibration, type WebHapticsOptions } from '@bloxwap/haptic';
+    const types = `import { Haptic, HapticTarget, isIOSWebKitWithoutVibration, useIOSNativeHaptics, canTriggerHaptic, triggerHaptic, type HapticCapability, type HapticTriggerResult, type HapticTargetProps, type HapticInput, type HapticPattern, type HapticPreset, type TriggerOptions, type Vibration, type WebHapticsOptions } from '@bloxwap/haptic';
+const capability: HapticCapability = canTriggerHaptic();
+const result: Promise<HapticTriggerResult> = triggerHaptic('success', { intensity: 0.7 });
 const events: Vibration[] = [{ duration: 8, delay: 5, intensity: 0.5 }];
 const pattern: HapticPattern = events;
 const preset: HapticPreset = { pattern: events };
@@ -74,7 +78,7 @@ isIOSWebKitWithoutVibration();
 function Hook() { return <Haptic enabled={useIOSNativeHaptics()}><button>Hook</button></Haptic>; }
 `;
     writeFileSync(join(consumer, 'types.tsx'), types);
-    writeFileSync(join(consumer, 'common.cts'), "import haptic = require('@bloxwap/haptic');\nimport React = require('react');\nReact.createElement(haptic.Haptic, { children: React.createElement('button') });\nhaptic.isIOSWebKitWithoutVibration();\n");
+    writeFileSync(join(consumer, 'common.cts'), "import haptic = require('@bloxwap/haptic');\nimport React = require('react');\nReact.createElement(haptic.Haptic, { children: React.createElement('button') });\nhaptic.isIOSWebKitWithoutVibration();\nconst capability: haptic.HapticCapability = haptic.canTriggerHaptic();\nconst result: Promise<haptic.HapticTriggerResult> = haptic.triggerHaptic();\n");
     writeFileSync(join(consumer, 'tsconfig.json'), JSON.stringify({ compilerOptions: { strict: true, skipLibCheck: true, noEmit: true, target: 'ES2020', module: 'NodeNext', moduleResolution: 'NodeNext', jsx: 'react-jsx' }, include: ['types.tsx', 'common.cts'] }));
     run('node', ['node_modules/typescript/bin/tsc'], consumer);
     await build({ stdin: { contents: "import { Haptic } from '@bloxwap/haptic'; console.log(Haptic);", resolveDir: consumer }, bundle: true, write: false, platform: 'browser', format: 'esm' });

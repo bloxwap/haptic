@@ -9,7 +9,7 @@ try {
     const mdx = readFileSync(join('content/docs', file), 'utf8');
     for (const [, snippet] of mdx.matchAll(/```(?:tsx|ts)\n([\s\S]*?)```/g)) {
       const source = snippet.replace(/import[\s\S]*?from\s+['"][^'"]+['"];?/g, '');
-      const prelude = `import { createHapticAdapter } from '@bloxwap/haptic/feedback';\nimport { useRef } from 'react';\nimport { Haptic, HapticTarget, useIOSNativeHaptics, isIOSWebKitWithoutVibration, type HapticTargetProps, type HapticInput, type HapticPattern, type HapticPreset, type TriggerOptions, type Vibration, type WebHapticsOptions } from '@bloxwap/haptic';\nconst save = () => {};\n`;
+      const prelude = `import { createHapticAdapter } from '@bloxwap/haptic/feedback';\nimport { useRef } from 'react';\nimport { Haptic, HapticTarget, useIOSNativeHaptics, isIOSWebKitWithoutVibration, canTriggerHaptic, triggerHaptic, type HapticCapability, type HapticTriggerResult, type HapticTargetProps, type HapticInput, type HapticPattern, type HapticPreset, type TriggerOptions, type Vibration, type WebHapticsOptions } from '@bloxwap/haptic';\nconst save = () => {};\n`;
       writeFileSync(join(temporary, `snippet-${count++}.tsx`), prelude + source);
     }
   }
