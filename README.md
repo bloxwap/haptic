@@ -1,11 +1,24 @@
-Haptic
+<h1 align="center">Haptic</h1>
 
-Haptic feedback for React on iOS and vibration-capable browsers. One target. Same handlers, ref, focus, and accessibility. Try the live demo.
+<!--
+─────────────────────────────────────────────────────────────────────────────
+-->
 
-[![npm version](https://img.shields.io/npm/v/@bloxwap/haptic?style=flat-square)](https://www.npmjs.com/package/@bloxwap/haptic)
-[![npm downloads](https://img.shields.io/npm/dm/@bloxwap/haptic?style=flat-square)](https://www.npmjs.com/package/@bloxwap/haptic)
-[![Codecov](https://img.shields.io/codecov/c/github/bloxwap/haptic?style=flat-square)](https://codecov.io/gh/bloxwap/haptic)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@bloxwap/haptic?style=flat-square)](https://bundlephobia.com/package/@bloxwap/haptic)
+<p align="center">
+Haptic feedback for React on iOS and vibration-capable browsers.<br>
+SSR-safe, with graceful fallbacks. <a href="https://bloxwap.github.io/haptic/">Try the live demo</a>.
+</p>
+
+<!--
+─────────────────────────────────────────────────────────────────────────────
+-->
+
+<p align="center">
+<a href="https://www.npmjs.com/package/@bloxwap/haptic"><img src="https://img.shields.io/npm/v/@bloxwap/haptic" alt="npm version"></a>
+<a href="https://www.npmjs.com/package/@bloxwap/haptic"><img src="https://img.shields.io/npm/dm/@bloxwap/haptic" alt="downloads"></a>
+<a href="https://codecov.io/gh/bloxwap/haptic"><img src="https://img.shields.io/codecov/c/github/bloxwap/haptic" alt="coverage"></a>
+<a href="https://bundlephobia.com/package/@bloxwap/haptic"><img src="https://img.shields.io/bundlephobia/minzip/@bloxwap/haptic" alt="minzipped size"></a>
+</p>
 
 ## Features
 
