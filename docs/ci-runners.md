@@ -15,7 +15,7 @@ Register each machine with those labels. GitHub's default self-hosted macOS ARM6
 | GitHub Actions runner 2.327.1 or newer | Node 24 actions (`actions/checkout@v7`, `actions/setup-node@v7`, `actions/cache@v5`, artifact v7/v8) |
 | Labels `self-hosted`, `macOS`, `ARM64` | Job targeting |
 | Xcode Command Line Tools | Git, clang, and Playwright WebKit |
-| Homebrew `gnu-tar` (`gtar` on `PATH`) | `actions/upload-pages-artifact` archives with GNU tar on macOS |
+| Homebrew `gnu-tar` (`gtar` in `/opt/homebrew/bin` or `/usr/local/bin`) | `actions/upload-pages-artifact` archives with GNU tar on macOS. CI prepends those dirs to `PATH` |
 | Homebrew `zstd` | `actions/cache` compression |
 | `shasum` | Release artifact digests (`/usr/bin/shasum`) |
 | Core Audio with a reachable output | Browser WebAudio in debug-audio tests |

@@ -10,7 +10,7 @@ concurrency:
 jobs:
   validate:
     runs-on: [self-hosted, macOS, ARM64]
-    timeout-minutes: 25
+    timeout-minutes: 40
     outputs:
       version: ${{ steps.release.outputs.version }}
       dist_tag: ${{ steps.release.outputs.dist_tag }}

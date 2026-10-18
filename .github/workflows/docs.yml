@@ -30,6 +30,7 @@ jobs:
         with:
           browsers: chromium webkit
       - run: npm run docs:smoke
+      - run: command -v gtar
       - uses: actions/upload-pages-artifact@v5
         with:
           path: apps/docs/out
