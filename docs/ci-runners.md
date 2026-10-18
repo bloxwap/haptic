@@ -20,7 +20,7 @@ Register each machine with those labels. GitHub's default self-hosted macOS ARM6
 | `shasum` | Release artifact digests (`/usr/bin/shasum`) |
 | Core Audio with a reachable output | Browser WebAudio in debug-audio tests |
 | Writable `$RUNNER_TEMP` | Script scratch files (`start-test-audio.sh`, Node `mkdtemp`) |
-| Network to GitHub, npm, and the Playwright CDN | Checkout, package install, browser download, OIDC, Pages, publish |
+| Network to GitHub, npm, and the Playwright CDN | Checkout, package install, browser download, Pages OIDC, publish |
 
 Node 24 and npm 11.6.1 are provisioned by the workflows (`actions/setup-node`, plus a global npm pin on the publish job). They do not need to be preinstalled, but the runner user must be able to write the Actions tool cache.
 
@@ -28,7 +28,7 @@ Node 24 and npm 11.6.1 are provisioned by the workflows (`actions/setup-node`, p
 
 Keep the runner online under a regular user. Do not run jobs as root. macOS 14 or newer is expected for current Playwright browsers.
 
-The repository, GitHub Pages environment, and runner group must allow these self-hosted machines. OIDC must stay enabled so `id-token: write` jobs can mint ID tokens.
+The repository, GitHub Pages environment, and runner group must allow these self-hosted machines. OIDC must stay enabled so the Pages deploy job can mint ID tokens.
 
 ## Playwright
 
@@ -38,12 +38,10 @@ Playwright projects are Chromium and WebKit (plus mobile Chromium on docs). Fire
 
 CI writes `AppleKeyboardUIMode=2` so WebKit Tab moves between buttons. Keep System Settings → Keyboard → Keyboard navigation enabled on the login session if a WebKit focus test still fails after that write. After `playwright install`, CI clears `com.apple.quarantine` on `~/Library/Caches/ms-playwright`.
 
-## npm provenance and OIDC
+## Trusted publishing is unavailable
 
-The publish job keeps `permissions.id-token: write`, `actions/setup-node` `registry-url: https://registry.npmjs.org`, and `npm publish --provenance`. No npm token secret is configured. GitHub mints OIDC ID tokens for self-hosted runners when `id-token: write` is set.
-
-npm's public trusted-publishing docs currently list GitHub-hosted runners as the supported environment. This repository still publishes from the Mac mini fleet with the same OIDC/provenance flags so the attestation workflow identity stays `.github/workflows/publish_npm.yml`. Do not add a long-lived npm token to compensate.
+[npm trusted publishing does not support self-hosted runners](https://docs.npmjs.com/trusted-publishers/). The publish job therefore authenticates with the org-level `NPM_TOKEN` secret (`NODE_AUTH_TOKEN`). That **drops OIDC trusted publishing and automatic provenance**. `actions/setup-node` still sets `registry-url: https://registry.npmjs.org`. Keep `NPM_TOKEN` shared with this repository (publish rights for `@bloxwap` packages).
 
 ## GitHub Pages
 
-Documentation deploy keeps `pages: write` and `id-token: write` on the deploy job and uses `actions/configure-pages` / `actions/deploy-pages`. The build job uploads the static export with `actions/upload-pages-artifact`, which requires `gtar`.
+Documentation deploy keeps `pages: write` and `id-token: write` on the deploy job and uses `actions/configure-pages` / `actions/deploy-pages`. The build job uploads the static export with `actions/upload-pages-artifact`, which requires `gtar`. GitHub Pages uses OIDC on the self-hosted runners. npm trusted publishing does not, so publish uses `NPM_TOKEN` and does not attach provenance.

@@ -14,16 +14,6 @@ assert.deepEqual(metadata.dependencies, { 'web-haptics': '0.0.6' });
 assert.deepEqual(metadata.peerDependencies, { react: '>=18', 'react-dom': '>=18' });
 const expectedTag = version.includes('-') ? 'next' : 'latest';
 assert.equal(distTags[expectedTag], version);
-assert.equal(metadata.dist.attestations?.provenance?.predicateType, 'https://slsa.dev/provenance/v1', 'Missing build provenance.');
-const attestation = await fetch(metadata.dist.attestations.url, { signal: AbortSignal.timeout(30000) });
-assert.ok(attestation.ok); const attestations = await attestation.json();
-const provenance = attestations.attestations.find(item => item.predicateType === 'https://slsa.dev/provenance/v1');
-assert.ok(provenance, 'Missing provenance attestation.');
-const statement = JSON.parse(Buffer.from(provenance.bundle.dsseEnvelope.payload, 'base64').toString());
-assert.equal(statement.predicate.buildDefinition.externalParameters.workflow.repository, 'https://github.com/bloxwap/haptic');
-assert.equal(statement.predicate.buildDefinition.externalParameters.workflow.path, '.github/workflows/publish_npm.yml');
-assert.equal(statement.predicate.buildDefinition.externalParameters.workflow.ref, `refs/tags/v${version}`);
-if (process.env.HAPTIC_EXPECTED_COMMIT) assert.equal(statement.predicate.buildDefinition.resolvedDependencies[0].digest.gitCommit, process.env.HAPTIC_EXPECTED_COMMIT);
 if (process.env.HAPTIC_EXPECTED_TARBALL) {
   const archive = await fetch(metadata.dist.tarball, { signal: AbortSignal.timeout(30000) }); assert.ok(archive.ok);
   const registryHash = createHash('sha512').update(Buffer.from(await archive.arrayBuffer())).digest('hex');
@@ -31,4 +21,4 @@ if (process.env.HAPTIC_EXPECTED_TARBALL) {
   assert.equal(registryHash, localHash, 'Published tarball differs from the validated artifact.');
 }
 execFileSync('node', ['scripts/pack-check.mjs'], { cwd: 'packages/haptic', stdio: 'inherit', env: process.env });
-console.log(`Registry metadata, dist-tag, provenance, and real installed consumers verified for @bloxwap/haptic@${version}.`);
+console.log(`Registry metadata, dist-tag, and real installed consumers verified for @bloxwap/haptic@${version}.`);
