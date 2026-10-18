@@ -16,7 +16,7 @@ Register each machine with those labels. GitHub's default self-hosted macOS ARM6
 | Labels `self-hosted`, `macOS`, `ARM64` | Job targeting |
 | Xcode Command Line Tools | Git, clang, and Playwright WebKit |
 | Homebrew `gnu-tar` (`gtar` in `/opt/homebrew/bin` or `/usr/local/bin`) | `actions/upload-pages-artifact` archives with GNU tar on macOS. CI prepends those dirs to `PATH` |
-| Homebrew `zstd` | `actions/cache` compression |
+| Homebrew `zstd` | `actions/setup-node` npm cache compression |
 | `shasum` | Release artifact digests (`/usr/bin/shasum`) |
 | Core Audio with a reachable output | Browser WebAudio in debug-audio tests |
 | Writable `$RUNNER_TEMP` | Script scratch files (`start-test-audio.sh`, Node `mkdtemp`) |
@@ -30,7 +30,7 @@ The repository, GitHub Pages environment, and runner group must allow these self
 
 ## Playwright
 
-`playwright install --with-deps` is Linux-only and is not used here. Jobs restore `~/Library/Caches/ms-playwright` and run `npx playwright install` for the browsers that job needs.
+`playwright install --with-deps` is Linux-only and is not used here. Jobs run `npx playwright install` and reuse the on-disk `~/Library/Caches/ms-playwright` already shared across runners on each mini. Do not wrap that directory in `actions/cache`; uploading it stalls for many minutes and can timeout the job.
 
 Playwright projects are Chromium and WebKit (plus mobile Chromium on docs). Firefox is not installed or tested: Nightly does not launch from a LaunchDaemon session on these minis.
 

@@ -1,5 +1,5 @@
 name: Playwright browsers
-description: Restore ~/Library/Caches/ms-playwright and install browsers without --with-deps.
+description: Install Chromium/WebKit without --with-deps; reuse the mini on-disk cache.
 inputs:
   browsers:
     description: Space-separated Playwright browser names.
@@ -9,12 +9,6 @@ runs:
   steps:
     - shell: sh
       run: sh "$GITHUB_WORKSPACE/.github/scripts/macos-path.sh"
-    - uses: actions/cache@v5
-      with:
-        path: ~/Library/Caches/ms-playwright
-        key: playwright-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package-lock.json') }}
-        restore-keys: |
-          playwright-${{ runner.os }}-${{ runner.arch }}-
     - shell: sh
       run: defaults write NSGlobalDomain AppleKeyboardUIMode -int 2
     - shell: bash
