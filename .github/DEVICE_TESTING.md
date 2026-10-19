@@ -14,7 +14,7 @@ Browser automation proves action/DOM semantics. A successful `navigator.vibrate`
 6. With a hardware keyboard, tab to the original target and activate it. Actions work and no auxiliary checkbox enters the tab order. Programmatic `.click()`, timers, and async callbacks are not physical-feedback guarantees.
 7. Record system-haptic settings. Disable system haptics and repeat ordinary actions, then restore the initial settings. Record tactile results rather than inferring them from DOM state.
 
-### Imperative API (#27, unreleased)
+### Imperative API (#27)
 
 Use the Imperative feedback section of Interaction examples. Compare **Request now**, **Request after await**, and **Request from timer** against the physical target's system tick. Record tactile observations separately from the on-screen availability/request result for each button. Current code reports iOS imperative requests unavailable, including inside an active click: [WebKit requires a trusted event on the switch](https://github.com/WebKit/WebKit/commit/fc1ef83eae10068fe468587d959e868041ddfe03), and script-created label clicks do not meet that requirement. Do not infer support from `navigator.userActivation.isActive` or a changed checkbox. No imperative iOS route may be advertised as observed without new physical evidence and a supported mechanism.
 

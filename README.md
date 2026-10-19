@@ -39,7 +39,7 @@ Works with React 18 or newer. Requires matching React and React DOM peer version
 
 ## Release status
 
-`0.1.0` is public; physical iPhone/Android/iPadOS/VoiceOver certification is still pending (see issues [#7](https://github.com/bloxwap/haptic/issues/7) and [#9](https://github.com/bloxwap/haptic/issues/9)). Automated checks establish browser interactions and API calls, not tactile output.
+`0.2.0` is public; physical iPhone/Android/iPadOS/VoiceOver certification is still pending (see issues [#7](https://github.com/bloxwap/haptic/issues/7) and [#9](https://github.com/bloxwap/haptic/issues/9)). Automated checks establish browser interactions and API calls, not tactile output.
 
 ## Usage
 
@@ -78,8 +78,10 @@ The original element keeps its handlers, ref, focus, and accessibility. The wrap
 import {
   Haptic, HapticTarget,
   isIOSWebKitWithoutVibration, useIOSNativeHaptics,
+  canTriggerHaptic, triggerHaptic,
   type HapticTargetProps, type HapticInput, type HapticPattern,
   type HapticPreset, type TriggerOptions, type Vibration, type WebHapticsOptions,
+  type HapticCapability, type HapticTriggerResult,
 } from '@bloxwap/haptic';
 ```
 
@@ -88,12 +90,14 @@ import {
 | `Haptic` / `HapticTarget` | The component that wraps a single React element and adds haptic feedback. Props: `feedback` (preset, duration, pattern, or object), `enabled`, `disabled`, `triggerOptions`, `webHapticsOptions`, `className`, `style`, `children` (single element). |
 | `isIOSWebKitWithoutVibration()` | Returns `true` when running on iOS WebKit without Vibration API support, indicating native system haptics will be used. |
 | `useIOSNativeHaptics()` | React hook that returns whether iOS native haptics are active. |
+| `canTriggerHaptic()` | Probes current imperative availability without creating DOM or requesting feedback. |
+| `triggerHaptic(cue?, options?)` | Requests browser vibration with the same patterns as `HapticTarget` and resolves `{ delivered, mechanism, reason? }` without rejecting. |
 
 **Presets:** `selection`, `light`, `medium`, `heavy`, `soft`, `rigid`, `success`, `warning`, `error`, `nudge`, `buzz`.
 
 `feedback` accepts a preset string, duration in milliseconds, alternating on/off `number[]`, vibration event objects, or `{ pattern: [...] }`. The default is `selection`.
 
-The unreleased source build also exports `canTriggerHaptic()` and `triggerHaptic(cue?, options?)`, plus `HapticCapability` and `HapticTriggerResult`. The probe checks current imperative availability. The trigger uses the same vibration patterns and resolves `{ delivered, mechanism, reason? }` without rejecting or creating DOM. `delivered` means the browser accepted the request, not that tactile output was observed. iOS imperative requests report unavailable even inside a click handler because programmatic clicks cannot establish a trusted physical tap. These exports are not in published `0.1.0` yet; see the [API guide](https://bloxwap.github.io/haptic/docs/api/).
+`delivered` means the browser accepted the request, not that tactile output was observed. iOS imperative requests report unavailable even inside a click handler because programmatic clicks cannot establish a trusted physical tap. Use `HapticTarget` for the eligible iOS physical path. See the [API guide](https://bloxwap.github.io/haptic/docs/api/).
 
 ## Platforms
 

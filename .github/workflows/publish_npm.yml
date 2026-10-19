@@ -35,7 +35,7 @@ jobs:
       - run: npm run release:check
         id: release
       - run: npm ci
-      - run: node --test .github/scripts/wait-for-registry.test.mjs .github/scripts/check-publish-auth.test.mjs
+      - run: node --test .github/scripts/wait-for-registry.test.mjs .github/scripts/check-publish-auth.test.mjs .github/scripts/release-check.test.mjs
       - run: npm run typecheck
       - run: npm run test:matrix
       - run: npm run size

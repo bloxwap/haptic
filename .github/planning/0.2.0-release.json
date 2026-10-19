@@ -1,0 +1,7 @@
+{
+  "versions": ["0.2.0"],
+  "implementationCommit": "8b1ab578e2f06fbf2cd941697b1a93440e396bc9",
+  "decidedAt": "2026-10-19T13:30:00Z",
+  "deviceCertification": "pending",
+  "reason": "Ship the already-merged imperative canTriggerHaptic/triggerHaptic API (PR #30) and the platform-free @bloxwap/haptic/feedback entry so bloxwap/hig can drop published-0.1.0 workarounds (hig#70 / hig#127). Runtime source at this implementation commit matches HIG's pinned upstream fixtures. Physical-device and VoiceOver certification remains pending in #9 and is disclosed; this decision does not certify hardware or apply to later versions."
+}

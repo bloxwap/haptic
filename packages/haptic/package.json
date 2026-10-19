@@ -1,6 +1,6 @@
 {
   "name": "@bloxwap/haptic",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Physical-tap haptic feedback for React on iOS and vibration-capable browsers.",
   "type": "module",
   "sideEffects": false,
