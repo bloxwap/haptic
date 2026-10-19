@@ -9,7 +9,7 @@ Eligible iOS WebKit targets use a native switch interaction. A physical tap can 
 
 WebKit introduced its switch control in Safari 17.4. That is a control baseline, not a claim that every device or OS version has been physically tested. System-haptic settings and hardware capability still matter.
 
-The unreleased imperative API reports iOS unavailable, including inside a synchronous click handler. [WebKit requires trusted switch events](https://github.com/WebKit/WebKit/commit/fc1ef83eae10068fe468587d959e868041ddfe03); `navigator.userActivation.isActive` alone cannot certify a programmatic tick. The physical target remains the iOS interaction route.
+The imperative API reports iOS unavailable, including inside a synchronous click handler. [WebKit requires trusted switch events](https://github.com/WebKit/WebKit/commit/fc1ef83eae10068fe468587d959e868041ddfe03); `navigator.userActivation.isActive` alone cannot certify a programmatic tick. The physical target remains the iOS interaction route.
 
 ## Vibration-capable browsers
 

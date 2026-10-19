@@ -31,9 +31,7 @@ description: Every component, prop, helper, and public type.
 </Haptic>
 ```
 
-## Imperative feedback (unreleased)
-
-These functions are available from the source build on main; the published `0.1.0` package does not include them yet.
+## Imperative feedback
 
 `canTriggerHaptic(): HapticCapability` checks current imperative availability without creating DOM or requesting feedback. `available` describes a request route, and `observed` is always false: JavaScript cannot certify tactile output. The probe accounts for page visibility and sticky activation when the browser exposes it.
 

@@ -1,6 +1,26 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import { canTriggerHaptic, triggerHaptic, type HapticInput, type TriggerOptions } from '../src';
 import observations from '../../../.github/planning/reference-observations.json';
+
+describe('HIG injected backend contract', () => {
+  it('exports enumerable canTriggerHaptic and triggerHaptic from the public entry', async () => {
+    const api = await import('../src');
+    expect('canTriggerHaptic' in api).toBe(true);
+    expect('triggerHaptic' in api).toBe(true);
+    expect(api.canTriggerHaptic).toBeTypeOf('function');
+    expect(api.triggerHaptic).toBeTypeOf('function');
+  });
+
+  it('publishes the main and feedback entries that packed consumers import', () => {
+    const manifest = JSON.parse(readFileSync('package.json', 'utf8'));
+    expect(Object.keys(manifest.exports).sort()).toEqual(['.', './feedback', './package.json']);
+    expect(manifest.exports['.']).toEqual({
+      import: { types: './dist/index.d.ts', default: './dist/index.js' },
+      require: { types: './dist/index.d.cts', default: './dist/index.cjs' },
+    });
+  });
+});
 
 function browser(overrides: object = {}) {
   const vibrate = vi.fn(() => true);

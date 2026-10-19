@@ -22,7 +22,7 @@ export function ImperativeDemo() {
   };
   return <section className="guide-demo hig-surface" aria-label="Imperative feedback examples">
     <h2>Imperative feedback</h2>
-    <p>Try a synchronous request, a request after an await, or a timer. On iOS these report unavailable; use a physical target above for its system tick. Browser acceptance does not prove tactile output. This API is unreleased.</p>
+    <p>Try a synchronous request, a request after an await, or a timer. On iOS these report unavailable; use a physical target above for its system tick. Browser acceptance does not prove tactile output.</p>
     <div className="demo-actions">
       <Button disabled={!ready} onClick={request}>Request now</Button>
       <Button intent="secondary" disabled={!ready} onClick={async () => { await Promise.resolve(); request(); }}>Request after await</Button>

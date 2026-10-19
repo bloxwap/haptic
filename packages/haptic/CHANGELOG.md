@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 — 2026-10-19
+
+- Add `canTriggerHaptic` and `triggerHaptic` for browser vibration with explicit request results, SSR safety, and no auxiliary DOM. Imperative iOS ticks remain unavailable because transient activation does not establish a trusted switch event.
+- Add the platform-free `@bloxwap/haptic/feedback` entry and optional host-injected native bridge.
+- Add host-owned haptic preferences and application policy to physical targets.
+- Migrate docs to pinned HIG tokens with reduced-motion alternatives and drift checks.
+
+Physical-device and VoiceOver certification remains pending in issue #9; automated checks do not establish tactile output.
+
 ## 0.1.0 — 2026-10-10
 
 - Independently implemented Haptic/HapticTarget wrapper, platform helper, and hydration-safe hook.
@@ -14,10 +23,3 @@ Initial stable release. Physical-device and VoiceOver certification remains pend
 ## 0.1.0-rc.0 — 2026-10-10
 
 - Bootstrap prerelease of the same implementation to establish npm package settings before the stable trusted-publisher release.
-
-## Unreleased
-
-- Add `canTriggerHaptic` and `triggerHaptic` for browser vibration with explicit request results, SSR safety, and no auxiliary DOM. Imperative iOS ticks remain unavailable because transient activation does not establish a trusted switch event.
-- Add the platform-free HIG semantic feedback entry and optional host-injected native bridge.
-- Add host-owned haptic preferences and application policy to physical targets.
-- Migrate docs to pinned HIG tokens with reduced-motion alternatives and drift checks.

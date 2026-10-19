@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { appendFileSync, readFileSync } from 'node:fs';
+import { appendFileSync, readdirSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
 const manifest = JSON.parse(readFileSync('packages/haptic/package.json', 'utf8'));
@@ -23,17 +23,19 @@ if (devices.status === 'certified') {
     if (kind === 'iphone-safari' || kind === 'android-chrome' || kind === 'voiceover') assert.equal(result.result, 'pass', `${kind} must pass.`);
   }
 } else {
-  const decision = JSON.parse(readFileSync('.github/planning/initial-release.json', 'utf8'));
+  const decisionFile = readdirSync('.github/planning').filter(name => name.endsWith('-release.json')).sort()
+    .find(name => JSON.parse(readFileSync(`.github/planning/${name}`, 'utf8')).versions?.includes(manifest.version));
+  assert.ok(decisionFile, 'Physical-device certification is required for this version.');
+  const decision = JSON.parse(readFileSync(`.github/planning/${decisionFile}`, 'utf8'));
   assert.equal(devices.status, 'pending', 'Failed device certification blocks publication.');
   assert.ok(!devices.observations.some(item => item.result === 'fail'), 'Failed device observation blocks publication.');
-  assert.ok(decision.versions.includes(manifest.version), 'Physical-device certification is required for this version.');
   assert.equal(decision.deviceCertification, 'pending');
-  assert.ok(decision.reason && Number.isFinite(Date.parse(decision.decidedAt)), 'Missing initial release decision.');
+  assert.ok(decision.reason && Number.isFinite(Date.parse(decision.decidedAt)), `Missing pending-certification decision in ${decisionFile}.`);
   verifiedCommit = decision.implementationCommit;
   for (const file of ['packages/haptic/CHANGELOG.md', 'packages/haptic/README.md', 'apps/docs/content/docs/platforms.mdx']) {
     assert.match(readFileSync(file, 'utf8'), /certification.*(?:pending|open)/i, `Disclose pending device certification in ${file}.`);
   }
-  console.warn(`Physical-device certification remains pending in #9; initial release decision applies to ${manifest.version}.`);
+  console.warn(`Physical-device certification remains pending in #9; ${decisionFile} applies to ${manifest.version}.`);
 }
 assert.match(verifiedCommit ?? '', /^[a-f0-9]{40}$/);
 git('merge-base', '--is-ancestor', verifiedCommit, 'HEAD');

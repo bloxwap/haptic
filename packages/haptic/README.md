@@ -32,9 +32,9 @@ iOS physical taps use a native system tick; presets and intensity do not change 
 
 Physical-device and VoiceOver certification remains pending in [issue #9](https://github.com/bloxwap/haptic/issues/9). Automated tests verify browser interactions and API calls, not tactile output.
 
-Exports also include `isIOSWebKitWithoutVibration`, `useIOSNativeHaptics`, `HapticTargetProps`, `HapticInput`, `HapticPattern`, `HapticPreset`, `TriggerOptions`, `Vibration`, and `WebHapticsOptions`. The wrapper/platform code is independent; feedback types and the vibration engine use the declared `web-haptics` dependency.
+Exports also include `isIOSWebKitWithoutVibration`, `useIOSNativeHaptics`, `canTriggerHaptic`, `triggerHaptic`, `HapticTargetProps`, `HapticCapability`, `HapticTriggerResult`, `HapticInput`, `HapticPattern`, `HapticPreset`, `TriggerOptions`, `Vibration`, and `WebHapticsOptions`. The wrapper/platform code is independent; feedback types and the vibration engine use the declared `web-haptics` dependency.
 
-The unreleased source build adds `canTriggerHaptic()` and `triggerHaptic(cue?, options?)`, with `HapticCapability` and `HapticTriggerResult` types. The trigger requests browser vibration with the same patterns and resolves `{ delivered, mechanism, reason? }` without rejecting or creating auxiliary DOM. `delivered` means browser acceptance, not observed tactile output. iOS imperative feedback reports unavailable even during transient activation: programmatic switch clicks do not establish a trusted physical tap. Use `HapticTarget` for the eligible iOS physical path. These exports are not in published `0.1.0` yet.
+`canTriggerHaptic()` probes current imperative availability without creating DOM. `triggerHaptic(cue?, options?)` requests browser vibration with the same patterns and resolves `{ delivered, mechanism, reason? }` without rejecting or creating auxiliary DOM. `delivered` means browser acceptance, not observed tactile output. iOS imperative feedback reports unavailable even during transient activation: programmatic switch clicks do not establish a trusted physical tap. Use `HapticTarget` for the eligible iOS physical path.
 
 ## Documentation
 
