@@ -8,7 +8,7 @@ permissions:
   contents: read
 concurrency:
   group: docs-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   build:
     # Security: never run fork PR code on the self-hosted runner.
@@ -33,7 +33,9 @@ jobs:
           browsers: chromium webkit
       - run: npm run docs:smoke
       - run: command -v gtar
+        if: github.event_name != 'pull_request'
       - uses: actions/upload-pages-artifact@v5
+        if: github.event_name != 'pull_request'
         with:
           path: apps/docs/out
       - uses: actions/upload-artifact@v7

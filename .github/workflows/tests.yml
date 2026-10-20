@@ -8,7 +8,7 @@ permissions:
   contents: read
 concurrency:
   group: tests-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   verify:
     # Security: never run fork PR code on the self-hosted runner.
