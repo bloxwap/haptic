@@ -11,6 +11,8 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
+    # Security: never run fork PR code on the self-hosted runner.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 20
     env:
@@ -40,7 +42,8 @@ jobs:
           name: docs-failures
           path: apps/docs/test-results/
   deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    # Security: never run fork PR code on the self-hosted runner.
+    if: (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     needs: build
     runs-on: [self-hosted, macOS, ARM64]
     permissions:
@@ -54,6 +57,8 @@ jobs:
       - uses: actions/deploy-pages@v5
         id: deployment
   smoke:
+    # Security: never run fork PR code on the self-hosted runner.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     needs: deploy
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 15
