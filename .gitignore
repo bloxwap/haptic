@@ -19,3 +19,6 @@ playwright-report/
 
 # Reviewed HIG candidate tarballs (see vendor/bloxwap-hig/README.md).
 !vendor/bloxwap-hig/*.tgz
+
+# Local benchmark measurements.
+packages/haptic/bench/results/
