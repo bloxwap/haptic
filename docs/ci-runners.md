@@ -44,4 +44,6 @@ CI writes `AppleKeyboardUIMode=2` so WebKit Tab moves between buttons. Keep Syst
 
 ## GitHub Pages
 
-Documentation deploy keeps `pages: write` and `id-token: write` on the deploy job and uses `actions/configure-pages` / `actions/deploy-pages`. The build job uploads the static export with `actions/upload-pages-artifact`, which requires `gtar`. GitHub Pages uses OIDC on the self-hosted runners. npm trusted publishing does not, so publish uses `NPM_TOKEN` and does not attach provenance.
+Documentation deploy keeps `pages: write` and `id-token: write` on the deploy job and uses `actions/configure-pages` / `actions/deploy-pages`. The build job still compiles, checks, and smokes the docs on every same-repo PR. It uploads the static export with `actions/upload-pages-artifact` only when deploy will run (push to `main` or `workflow_dispatch`), because PRs never deploy and the unused upload stalled the minis. That step requires `gtar`. GitHub Pages uses OIDC on the self-hosted runners. npm trusted publishing does not, so publish uses `NPM_TOKEN` and does not attach provenance.
+
+Tests and Documentation keep a per-ref concurrency group. `cancel-in-progress` is true for pull requests only, so superseded PR jobs free the minis and a later push does not abort an in-flight Pages deploy.
