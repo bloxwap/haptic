@@ -47,4 +47,4 @@ Disabling feedback leaves the original action available. A target with `disabled
 
 ## Next.js
 
-Put interactive examples in a client component with `'use client'`. The published build preserves its client boundary and still renders safely through React server rendering. Platform detection resolves after mounting to keep initial markup compatible with hydration.
+Put interactive examples in a client component with `'use client'`. The published build preserves its client boundary and still renders safely through React server rendering. Platform detection resolves on the first client-only render. Hydrated renders keep the server routing value until hydration completes so initial markup agrees.

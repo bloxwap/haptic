@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 /** Select the native-switch path; this is routing, not a hardware capability test. */
 export function isIOSWebKitWithoutVibration(
@@ -12,9 +12,13 @@ export function isIOSWebKitWithoutVibration(
   return appleMobile && /AppleWebKit/.test(navigatorLike.userAgent);
 }
 
-/** Resolve routing after mount so server and initial client markup agree. */
+const noopSubscribe = () => () => {};
+const serverSnapshot = () => false;
+
+/**
+ * Resolve routing on the first client-only render. Server rendering and the first
+ * hydration render return false, then resolve client routing after hydration.
+ */
 export function useIOSNativeHaptics(): boolean {
-  const [native, setNative] = useState(false);
-  useEffect(() => { setNative(isIOSWebKitWithoutVibration()); }, []);
-  return native;
+  return useSyncExternalStore(noopSubscribe, isIOSWebKitWithoutVibration, serverSnapshot);
 }
