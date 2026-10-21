@@ -39,7 +39,7 @@ Works with React 18 or newer. Requires matching React and React DOM peer version
 
 ## Release status
 
-`0.2.0` is public; physical iPhone/Android/iPadOS/VoiceOver certification is still pending (see issues [#7](https://github.com/bloxwap/haptic/issues/7) and [#9](https://github.com/bloxwap/haptic/issues/9)). Automated checks establish browser interactions and API calls, not tactile output.
+`0.3.0` is public; physical iPhone/Android/iPadOS/VoiceOver certification is still pending (see issues [#7](https://github.com/bloxwap/haptic/issues/7) and [#9](https://github.com/bloxwap/haptic/issues/9)). Automated checks establish browser interactions and API calls, not tactile output.
 
 ## Usage
 

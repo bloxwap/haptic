@@ -7,6 +7,7 @@ test('pending-certification decisions have unique versions and a recorded implem
   const files = readdirSync('.github/planning').filter(name => name.endsWith('-release.json')).sort();
   assert.ok(files.includes('initial-release.json'));
   assert.ok(files.includes('0.2.0-release.json'));
+  assert.ok(files.includes('0.3.0-release.json'));
   for (const name of files) {
     const decision = JSON.parse(readFileSync(`.github/planning/${name}`, 'utf8'));
     assert.equal(decision.deviceCertification, 'pending');
@@ -20,4 +21,5 @@ test('pending-certification decisions have unique versions and a recorded implem
   }
   assert.ok(seen.has('0.1.0'));
   assert.ok(seen.has('0.2.0'));
+  assert.ok(seen.has('0.3.0'));
 });
