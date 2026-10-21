@@ -203,10 +203,14 @@ describe('native iOS target', () => {
 
   it.each(['disabled', 'aria-disabled', 'inert'] as const)('never commits an overlay over an initially %s custom host', attribute => {
     ios();
+    // React 18 does not render a boolean inert prop, so inert comes from a DOM ancestor.
     function Host() {
-      return <button {...{ [attribute]: attribute === 'aria-disabled' ? 'true' : true }}>Blocked</button>;
+      return attribute === 'inert'
+        ? <button>Blocked</button>
+        : <button {...{ [attribute]: attribute === 'aria-disabled' ? 'true' : true }}>Blocked</button>;
     }
     const container = document.createElement('div');
+    if (attribute === 'inert') container.setAttribute('inert', '');
     const commits: boolean[] = [];
     const view = render(<Profiler id="host" onRender={() => {
       commits.push(container.querySelector('input, label') !== null);
