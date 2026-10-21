@@ -1,8 +1,9 @@
 "use client";
 
-import { defaultPatterns, type HapticInput, type TriggerOptions, type Vibration } from 'web-haptics';
+import type { HapticInput, TriggerOptions, Vibration } from 'web-haptics';
 import type { HapticCapability } from './feedback';
 import { isIOSWebKitWithoutVibration } from './platform';
+import { defaultPatterns } from './presets';
 
 export interface HapticTriggerResult {
   /** The browser accepted a feedback request; this does not certify tactile output. */
