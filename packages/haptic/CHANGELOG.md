@@ -5,6 +5,7 @@
 - Use a local preset table so importing `triggerHaptic` does not bundle the web-haptics engine.
 - Create host observers only for native iOS targets and block native overlays until the committed host is enabled.
 - **Behavior change:** `useIOSNativeHaptics()` now resolves on the first client-only render (for example `createRoot` mounts and client navigation), so on iOS it returns `true` on the first render instead of after an effect. Server rendering and the first hydration render still return `false`, with iOS routing resolved after hydration.
+- Skip the `web-haptics` engine, its hidden DOM, and its animation-frame loop on desktop browsers without vibration unless debug audio or the visible switch is enabled.
 
 ## 0.2.0 — 2026-10-19
 
