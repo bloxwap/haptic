@@ -24,7 +24,51 @@ function auxiliary(container: HTMLElement) { return container.querySelector<HTML
 beforeEach(() => {
   engine.construct.mockReset(); engine.trigger.mockReset(); engine.cancel.mockReset(); engine.destroy.mockReset();
   engine.trigger.mockResolvedValue(undefined);
-  Reflect.deleteProperty(navigator, 'vibrate');
+  Object.defineProperty(navigator, 'vibrate', { configurable: true, value: vi.fn(() => true) });
+});
+
+describe('unsupported desktop', () => {
+  beforeEach(() => {
+    vi.spyOn(navigator, 'platform', 'get').mockReturnValue('Linux');
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue('Mozilla/5.0 desktop');
+    Object.defineProperty(navigator, 'vibrate', { configurable: true, value: undefined });
+  });
+
+  it.each([undefined, { debug: false, showSwitch: false }])('skips the engine and body nodes with options %j', webHapticsOptions => {
+    const action = vi.fn();
+    const view = render(<Haptic webHapticsOptions={webHapticsOptions}><button onClick={action}>Tap</button></Haptic>);
+    const append = vi.spyOn(document.body, 'appendChild');
+    const nodes = document.body.innerHTML;
+    fireEvent.click(view.getByRole('button'));
+    expect(action).toHaveBeenCalledTimes(1);
+    expect(engine.construct).not.toHaveBeenCalled();
+    expect(engine.trigger).not.toHaveBeenCalled();
+    expect(append).not.toHaveBeenCalled();
+    expect(document.body.innerHTML).toBe(nodes);
+  });
+
+  it.each([{ debug: true }, { showSwitch: true }])('preserves desktop feedback with %j', webHapticsOptions => {
+    const action = vi.fn();
+    const view = render(<Haptic webHapticsOptions={webHapticsOptions}><button onClick={action}>Tap</button></Haptic>);
+    fireEvent.click(view.getByRole('button'));
+    expect(action).toHaveBeenCalledTimes(1);
+    expect(engine.construct).toHaveBeenCalledExactlyOnceWith(webHapticsOptions);
+    expect(engine.trigger).toHaveBeenCalledExactlyOnceWith('selection', undefined);
+  });
+
+  it('checks vibration support on each tap', () => {
+    const action = vi.fn();
+    const view = render(<Haptic><button onClick={action}>Tap</button></Haptic>);
+    const host = view.getByRole('button');
+    fireEvent.click(host);
+    Object.defineProperty(navigator, 'vibrate', { configurable: true, value: () => true });
+    fireEvent.click(host);
+    Object.defineProperty(navigator, 'vibrate', { configurable: true, value: undefined });
+    fireEvent.click(host);
+    expect(action).toHaveBeenCalledTimes(3);
+    expect(engine.construct).toHaveBeenCalledTimes(1);
+    expect(engine.trigger).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('vibration target', () => {

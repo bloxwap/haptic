@@ -106,6 +106,7 @@ export function HapticTarget({
       const options = current.current;
       const host = readHost();
       if (!host || !host.contains(event.target as Node) || options.native || !options.enabled || options.disabled || hostDisabled(host)) return;
+      if (typeof navigator.vibrate !== 'function' && !options.webHapticsOptions?.debug && !options.webHapticsOptions?.showSwitch) return;
       try {
         engine.current ??= new WebHaptics(options.webHapticsOptions);
         void engine.current.trigger(options.feedback, options.triggerOptions).catch(() => {});
