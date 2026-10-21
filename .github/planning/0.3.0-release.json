@@ -1,0 +1,7 @@
+{
+  "versions": ["0.3.0"],
+  "implementationCommit": "26603e778aa6eff4ee0e186d10c5b40bc2dddd0d",
+  "decidedAt": "2026-10-21T01:20:00Z",
+  "deviceCertification": "pending",
+  "reason": "The maintainer instructed: address and merge all of the performance issues identified in the benchmark findings, and once done, release an update to the project. Ships #36 (local preset table; triggerHaptic no longer bundles web-haptics), #37 (no web-haptics engine on desktop browsers without vibration), #38 (host MutationObserver only on the iOS native path), and #39 (useIOSNativeHaptics resolves on the first client-only render; a documented visible behavior change, hence a pre-1.0 minor). Benchmark evidence is simulated-browser only. Physical-device and VoiceOver certification remains pending in #9 and is disclosed; this decision does not certify hardware or apply to later versions."
+}
