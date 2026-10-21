@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Use a local preset table so importing `triggerHaptic` does not bundle the web-haptics engine.
+
 ## 0.2.0 — 2026-10-19
 
 - Add `canTriggerHaptic` and `triggerHaptic` for browser vibration with explicit request results, SSR safety, and no auxiliary DOM. Imperative iOS ticks remain unavailable because transient activation does not establish a trusted switch event.
