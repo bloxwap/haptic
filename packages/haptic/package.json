@@ -78,7 +78,8 @@
     "test:browser": "playwright test",
     "pack:check": "npm run build && node scripts/pack-check.mjs",
     "prepack": "npm run build",
-    "prepublishOnly": "npm run typecheck && npm run coverage && npm run pack:check"
+    "prepublishOnly": "npm run typecheck && npm run coverage && npm run pack:check",
+    "bench": "npm run build && node bench/run.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.11.0",

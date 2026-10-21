@@ -32,6 +32,7 @@
     "docs:check": "npm --workspace @bloxwap/haptic-docs run check",
     "docs:preview": "npm --workspace @bloxwap/haptic-docs run preview",
     "docs:smoke": "npm --workspace @bloxwap/haptic-docs run smoke",
-    "lint": "node .github/scripts/hig-check.mjs && git diff --check"
+    "lint": "node .github/scripts/hig-check.mjs && git diff --check",
+    "bench": "npm --workspace @bloxwap/haptic run bench"
   }
 }
