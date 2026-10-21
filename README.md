@@ -130,6 +130,15 @@ npm run test:browser # Playwright tests
 npm run dev         # docs dev server at http://localhost:3905
 ```
 
+Type checking uses [`tsrs`](https://github.com/oxc-project/tsrs), a Rust port of the TypeScript 7 compiler that reports the same diagnostics as `tsc`. tsrs ships binaries for macOS on Apple Silicon and Linux (x64/arm64) only. On Windows or an Intel Mac, use the `tsc` fallbacks instead:
+
+```sh
+npm run typecheck:tsc   # library type check with the regular TypeScript compiler
+npm run docs:check:tsc  # docs and snippet type check with tsc
+```
+
+The library build (tsup) never used `tsc`, so `npm run build`, tests, and coverage work everywhere. `npm run docs:build` runs tsrs before `next build`; on those platforms run `npm run docs:check:tsc`, then `npm --workspace @bloxwap/haptic-docs exec -- next build`.
+
 Requires Node.js 24 or newer. `bun run dev` invokes the same development script; npm owns the lockfile.
 
 Documentation build and preview:

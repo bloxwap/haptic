@@ -10,6 +10,8 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    "types": [],
+    "noUncheckedSideEffectImports": true,
     "esModuleInterop": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",

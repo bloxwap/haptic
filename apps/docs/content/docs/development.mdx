@@ -18,6 +18,15 @@ npm run test:browser
 npm run dev
 ```
 
+Type checking uses [`tsrs`](https://github.com/oxc-project/tsrs), a Rust port of the TypeScript 7 compiler that reports the same diagnostics as `tsc`. tsrs ships binaries for macOS on Apple Silicon and Linux (x64/arm64) only. On Windows or an Intel Mac, use the `tsc` fallbacks instead:
+
+```sh
+npm run typecheck:tsc   # library type check with the regular TypeScript compiler
+npm run docs:check:tsc  # docs and snippet type check with tsc
+```
+
+The library build (tsup) never used `tsc`, so `npm run build`, tests, and coverage work everywhere. `npm run docs:build` runs tsrs before `next build`; on those platforms run `npm run docs:check:tsc`, then `npm --workspace @bloxwap/haptic-docs exec -- next build`.
+
 The docs run at `http://localhost:3905`. `bun run dev` invokes the same development script; npm remains the lockfile authority.
 
 The library is consolidated in `packages/haptic/src`: public exports in `index.ts`, the React target in `haptic.tsx`, platform routing in `platform.ts`, and the imperative vibration helpers in `trigger.ts`. Tests and package verification belong to that package. Next.js, Fumadocs, branding, and interactive examples belong to private `apps/docs`.
