@@ -10,9 +10,46 @@ concurrency:
   group: tests-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
-  verify:
+  changes:
     # Security: never run fork PR code on the self-hosted runner.
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      code: ${{ github.event_name != 'pull_request' && 'true' || (steps.filter.outputs.code == 'true' || steps.filter.outputs.checked_docs == 'true') && 'true' || 'false' }}
+    steps:
+      # Only filter PRs; main pushes and manual runs keep all existing checks.
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        if: github.event_name == 'pull_request'
+        id: filter
+        with:
+          predicate-quantifier: some-with-excludes
+          filters: |
+            # Skip prose-only PRs, except documentation consumed by checks below.
+            code:
+              - '**'
+              - '!**/*.md'
+              - '!**/*.mdx'
+              - '!LICENSE'
+              - '!.github/ISSUE_TEMPLATE/**'
+              - '!.github/pull_request_template.md'
+              - '!**/CODEOWNERS'
+              - '!CODEOWNERS'
+            # Keep package file checks and built/typechecked docs in verification.
+            checked_docs:
+              - 'packages/haptic/README.md'
+              - 'packages/haptic/CHANGELOG.md'
+              - 'packages/haptic/LICENSE'
+              - 'apps/docs/**/*.md'
+              - 'apps/docs/**/*.mdx'
+  verify:
+    needs: changes
+    # Skip irrelevant PRs while preserving the required check name.
+    # Security: never run fork PR code on the self-hosted runner.
+    if: needs.changes.outputs.code == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 20
     steps:
