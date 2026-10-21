@@ -34,6 +34,8 @@ Physical-device and VoiceOver certification remains pending in [issue #9](https:
 
 Exports also include `isIOSWebKitWithoutVibration`, `useIOSNativeHaptics`, `canTriggerHaptic`, `triggerHaptic`, `HapticTargetProps`, `HapticCapability`, `HapticTriggerResult`, `HapticInput`, `HapticPattern`, `HapticPreset`, `TriggerOptions`, `Vibration`, and `WebHapticsOptions`. The wrapper/platform code is independent; feedback types and the vibration engine use the declared `web-haptics` dependency.
 
+`useIOSNativeHaptics()` returns the detected routing value on the first client-only render. It returns `false` on the server and during the first hydration render, then resolves client routing after hydration.
+
 `canTriggerHaptic()` probes current imperative availability without creating DOM. `triggerHaptic(cue?, options?)` requests browser vibration with the same patterns and resolves `{ delivered, mechanism, reason? }` without rejecting or creating auxiliary DOM. `delivered` means browser acceptance, not observed tactile output. iOS imperative feedback reports unavailable even during transient activation: programmatic switch clicks do not establish a trusted physical tap. Use `HapticTarget` for the eligible iOS physical path.
 
 ## Documentation

@@ -72,7 +72,7 @@ It recognizes iPadOS desktop-mode identities, but routing recognition does not e
 
 ## Hook
 
-`useIOSNativeHaptics(): boolean` returns false on the server and initial render, then resolves platform routing after mount. Use it only inside a React component or hook. It does not detect whether the user can physically feel the feedback.
+`useIOSNativeHaptics(): boolean` returns the detected routing value on the first client-only render. It returns `false` on the server and during the first hydration render, then resolves client routing after hydration. Use it only inside a React component or hook. It does not detect whether the user can physically feel the feedback.
 
 ## Public types
 
