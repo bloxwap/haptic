@@ -67,7 +67,15 @@ export function HapticTarget({
     // A suspended render must not change the visible target's event behavior.
     current.current = { enabled, disabled, feedback, triggerOptions, webHapticsOptions, native };
   });
-  const [blockedHost, setBlockedHost] = useState(false);
+  // Stay blocked until the committed host has been checked on the native path.
+  const [blockedHost, setBlockedHost] = useState(true);
+  const blocked = useRef(true);
+  const updateBlocked = (next: boolean) => {
+    // Skip redundant updates, such as the observer seeing the overlay's own insertion.
+    if (blocked.current === next) return;
+    blocked.current = next;
+    setBlockedHost(next);
+  };
   const gesture = useRef<{ x: number; y: number; canceled: boolean } | null>(null);
   const switchId = useId();
   const readHost = () => {
@@ -75,16 +83,25 @@ export function HapticTarget({
     return element === nativeSwitch.current ? null : element as HTMLElement | null;
   };
 
-  useEffect(() => {
+  useCommittedEffect(() => {
+    if (!native) {
+      updateBlocked(true);
+      return;
+    }
     const root = wrapper.current!;
     const synchronize = () => {
       const host = readHost();
-      setBlockedHost(host ? hostDisabled(host) : true);
+      updateBlocked(host ? hostDisabled(host) : true);
     };
     synchronize();
     const observer = new MutationObserver(synchronize);
     observer.observe(root, { subtree: true, childList: true, attributes: true, attributeFilter: ['disabled', 'aria-disabled', 'inert'] });
 
+    return () => observer.disconnect();
+  }, [native]);
+
+  useEffect(() => {
+    const root = wrapper.current!;
     const requestFeedback = (event: Event) => {
       const options = current.current;
       const host = readHost();
@@ -99,7 +116,6 @@ export function HapticTarget({
     // Native capture runs before React's delegated handlers, including stopped clicks.
     root.addEventListener('click', requestFeedback, true);
     return () => {
-      observer.disconnect();
       root.removeEventListener('click', requestFeedback, true);
       dispose(engine.current);
       engine.current = null;

@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Use a local preset table so importing `triggerHaptic` does not bundle the web-haptics engine.
+- Create host observers only for native iOS targets and block native overlays until the committed host is enabled.
 
 ## 0.2.0 — 2026-10-19
 

@@ -1,6 +1,6 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createRef, forwardRef, startTransition, StrictMode, Suspense, useState, type ComponentProps } from 'react';
+import { createRef, forwardRef, Profiler, startTransition, StrictMode, Suspense, useState, type ComponentProps } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { Haptic, HapticTarget, type HapticInput } from '../src';
 
@@ -28,6 +28,14 @@ beforeEach(() => {
 });
 
 describe('vibration target', () => {
+  it('constructs no host observers on the vibration path', () => {
+    Object.defineProperty(navigator, 'vibrate', { configurable: true, value: () => true });
+    const observer = vi.spyOn(globalThis, 'MutationObserver');
+    const view = render(<Haptic><button>Tap</button></Haptic>);
+    expect(observer).not.toHaveBeenCalled();
+    view.unmount();
+  });
+
   it('uses committed options while a transition remains suspended', () => {
     const pending = new Promise<void>(() => {});
     function Wait({ enabled }: { enabled: boolean }) { if (!enabled) throw pending; return null; }
@@ -183,6 +191,35 @@ describe('vibration target', () => {
 });
 
 describe('native iOS target', () => {
+  it('constructs and cleans up one host observer on iOS', () => {
+    ios();
+    const observer = vi.spyOn(globalThis, 'MutationObserver');
+    const disconnect = vi.spyOn(MutationObserver.prototype, 'disconnect');
+    const view = render(<Haptic><button>Tap</button></Haptic>);
+    expect(observer).toHaveBeenCalledTimes(1);
+    view.unmount();
+    expect(disconnect).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['disabled', 'aria-disabled', 'inert'] as const)('never commits an overlay over an initially %s custom host', attribute => {
+    ios();
+    // React 18 does not render a boolean inert prop, so inert comes from a DOM ancestor.
+    function Host() {
+      return attribute === 'inert'
+        ? <button>Blocked</button>
+        : <button {...{ [attribute]: attribute === 'aria-disabled' ? 'true' : true }}>Blocked</button>;
+    }
+    const container = document.createElement('div');
+    if (attribute === 'inert') container.setAttribute('inert', '');
+    const commits: boolean[] = [];
+    const view = render(<Profiler id="host" onRender={() => {
+      commits.push(container.querySelector('input, label') !== null);
+    }}><Haptic><Host /></Haptic></Profiler>, { container });
+    expect(commits.length).toBeGreaterThan(0);
+    expect(commits.every(overlay => !overlay)).toBe(true);
+    expect(view.container.querySelector('input, label')).toBeNull();
+  });
+
   it('removes auxiliary controls when a custom target stops rendering a host', async () => {
     ios();
     function Custom({ visible }: { visible: boolean }) { return visible ? <button>Conditional</button> : null; }
@@ -270,6 +307,10 @@ describe('native iOS target', () => {
     expect(view.container.querySelector('input')).not.toBeNull();
     await act(async () => host.setAttribute('aria-disabled', 'true'));
     expect(view.container.querySelector('input')).toBeNull();
+    await act(async () => { host.removeAttribute('aria-disabled'); host.setAttribute('inert', ''); });
+    expect(view.container.querySelector('input, label')).toBeNull();
+    await act(async () => host.removeAttribute('inert'));
+    expect(view.container.querySelector('input')).not.toBeNull();
     view.rerender(<Haptic enabled={false}><button>Mutable</button></Haptic>);
     expect(view.container.querySelector('input')).toBeNull();
     view.rerender(<Haptic><button aria-disabled={true}>Mutable</button></Haptic>);
