@@ -13,7 +13,9 @@ try {
       writeFileSync(join(temporary, `snippet-${count++}.tsx`), prelude + source);
     }
   }
-  const result = spawnSync('node', [resolve('../../node_modules/typescript/bin/tsc'), '--noEmit', '--strict', '--skipLibCheck', '--jsx', 'react-jsx', '--target', 'ES2020', '--module', 'ESNext', '--moduleResolution', 'Bundler', ...readdirSync(temporary).map(path => join(temporary, path))], { encoding: 'utf8' });
+  // tsrs by default; `--tsc` uses the regular TypeScript compiler (Windows and Intel Macs have no tsrs binary).
+  const compiler = process.argv.includes('--tsc') ? [resolve('../../node_modules/typescript/bin/tsc')] : [resolve('../../node_modules/tsrs/bin/tsrs'), '--ignoreConfig'];
+  const result = spawnSync('node', [...compiler, '--noEmit', '--strict', '--skipLibCheck', '--jsx', 'react-jsx', '--target', 'ES2020', '--module', 'ESNext', '--moduleResolution', 'Bundler', ...readdirSync(temporary).map(path => join(temporary, path))], { encoding: 'utf8' });
   if (result.status !== 0) throw new Error(`Documentation snippets failed:\n${result.stdout}\n${result.stderr}`);
   console.log(`Type-checked ${count} documentation snippets against the public package.`);
 } finally { rmSync(temporary, { recursive: true, force: true }); }

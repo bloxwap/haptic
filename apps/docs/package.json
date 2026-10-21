@@ -7,10 +7,12 @@
     "predev": "npm --workspace @bloxwap/haptic run build",
     "dev": "next dev --port 3905",
     "prebuild": "npm --workspace @bloxwap/haptic run build",
-    "build": "next build",
+    "build": "fumadocs-mdx && next typegen && tsrs --noEmit -p . && next build",
     "postbuild": "node scripts/check-export.mjs",
     "precheck": "npm --workspace @bloxwap/haptic run build",
-    "check": "fumadocs-mdx && next typegen && tsc --noEmit && node scripts/check-snippets.mjs",
+    "check": "fumadocs-mdx && next typegen && tsrs --noEmit && node scripts/check-snippets.mjs",
+    "precheck:tsc": "npm --workspace @bloxwap/haptic run build",
+    "check:tsc": "fumadocs-mdx && next typegen && tsc --noEmit && node scripts/check-snippets.mjs --tsc",
     "preview": "node scripts/preview.mjs",
     "postinstall": "fumadocs-mdx",
     "smoke": "playwright test"
@@ -37,6 +39,7 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "tailwindcss": "4.2.0",
+    "tsrs": "0.18.0-ts7.1.0-dev.20260929",
     "typescript": "5.9.3"
   }
 }
