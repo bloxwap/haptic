@@ -3,7 +3,7 @@ title: HIG integration
 description: Semantic feedback, host preferences, and platform boundaries.
 ---
 
-Haptic implements the haptic channel of the [HIG feedback contract](https://github.com/bloxwap/hig/blob/main/docs/feedback/contract.md). Import `@bloxwap/haptic/feedback` for platform-free types and `createHapticAdapter`. HIG 0.1.0 is an unpublished candidate; do not install an assumed registry release.
+Haptic implements the haptic channel of the [HIG feedback contract](https://github.com/bloxwap/hig/blob/main/docs/feedback/contract.md). Import `@bloxwap/haptic/feedback` for platform-free types and `createHapticAdapter`. HIG 0.1.0 is published on npm; the docs install its exact coordinated registry versions.
 
 ## Semantic events
 
@@ -51,7 +51,7 @@ Button/toggle/selection changes emit once after acceptance; sliders emit only ch
 
 ## Docs migration and validation boundaries
 
-The Fumadocs shell retains navigation, static search, deep links and `/haptic` export paths. Shared presentation comes from HIG packages: `@bloxwap/hig-tokens/css` supplies the palette, spacing, radius, motion, density and font roles, `@bloxwap/hig-react/css` supplies control geometry, and HIG `Tabs`, `IconButton`, `Button`, `Switch`, `Slider`, `Field`, `CodeWindow` and `Callout` render the install/copy controls, demo settings, forms, code window and callouts. The 0.1.0 candidate tarballs are packed from [bloxwap/hig@872906a](https://github.com/bloxwap/hig/tree/872906a9071469af8714b3b6fb5cc7bd64d2d6f3) by its dry-run release and vendored under `vendor/bloxwap-hig/` until a registry release exists. Bloxwap Sans/Mono remain `@bloxwap/font` package imports. The preset board, interaction targets and Vaul drawer stay SDK-owned. Reduced motion removes decorative scaling/transitions independently of feedback preferences. Run `npm run lint` to reject palette drift and unreviewed tarball changes.
+The Fumadocs shell retains navigation, static search, deep links and `/haptic` export paths. Shared presentation comes from HIG packages: `@bloxwap/hig-tokens/css` supplies the palette, spacing, radius, motion, density and font roles, `@bloxwap/hig-react/css` supplies control geometry, and HIG `Tabs`, `IconButton`, `Button`, `Switch`, `Slider`, `Field`, `CodeWindow` and `Callout` render the install/copy controls, demo settings, forms, code window and callouts. The docs install the coordinated [HIG 0.1.0 release](https://github.com/bloxwap/hig/releases/tag/v0.1.0) from npm, with tarball integrity recorded in `package-lock.json`. The optional `@bloxwap/hig-react/css/base` import preserves the existing page reset alongside component CSS. Bloxwap Sans/Mono remain `@bloxwap/font` package imports. The preset board, interaction targets and Vaul drawer stay SDK-owned. Reduced motion removes decorative scaling/transitions independently of feedback preferences. Run `npm run lint` to reject palette drift, mismatched package versions and non-registry lockfile entries.
 
 <Callout type="warning" title="Validation boundary">
 
