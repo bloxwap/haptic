@@ -187,7 +187,9 @@ test('docs callouts and code controls use HIG presentation', async ({ page, base
   const callout = page.locator('.docs-callout [data-severity="warning"]');
   await expect(callout).toContainText('Not hardware-certified');
   await expect(callout).toContainText('cannot establish tactile output');
-  expect(await callout.evaluate(el => getComputedStyle(el).borderInlineStartWidth)).toBe('3px');
+  // The published HIG warning uses a 2px severity stroke and glow on every edge.
+  await expect(callout).toHaveCSS('border-width', '2px');
+  expect(await callout.evaluate(el => getComputedStyle(el).boxShadow)).not.toBe('none');
   await page.goto(baseURL!);
   const action = page.getByRole('link', { name: /try the haptic board/i });
   // HIG buttons are 44px by default (hig#80); touch keeps the comfortable 48px target role.
