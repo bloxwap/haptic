@@ -13,6 +13,18 @@ concurrency:
   group: publish-npm
   cancel-in-progress: false
 jobs:
+  security:
+    # Release scan, parallel with validate.
+    uses: bloxwap/.github/.github/workflows/security-scan.yml@0387d86d796b5a80509a9862b35991a160ff13b4 # v1.0.1
+    permissions:
+      contents: read
+    with:
+      runs-on: '["self-hosted","macOS","ARM64"]'
+      profile: release
+      secrets-days: "7"
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_SECURITY_WEBHOOK_URL }}
+
   validate:
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 25
@@ -59,7 +71,7 @@ jobs:
             SHA256SUMS
           if-no-files-found: error
   publish:
-    needs: validate
+    needs: [validate, security]
     runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 10
     permissions:
