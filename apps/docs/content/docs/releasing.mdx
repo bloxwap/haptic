@@ -15,9 +15,13 @@ Only `packages/haptic` is publishable. The root and documentation app are privat
 
 ## npm setup
 
-Verify permission to publish under the `@bloxwap` organization. A publicly unavailable package name is not a permission check. Establish a first-publish bootstrap using the reviewed real artifact, then publish later versions from CI with the org-level `NPM_TOKEN` secret.
+Only the `publish` job in `.github/workflows/publish_npm.yml` runs on GitHub-hosted `ubuntu-24.04`, a narrow exception to the Mac-mini-only runner policy because [npm trusted publishing requires GitHub-hosted runners](https://docs.npmjs.com/trusted-publishers/). Validation and security stay on the minis. Publishing uses Node 24, pinned npm 11.6.1, `contents: read` and `id-token: write`, and `--provenance`, including during token fallback. It downloads and SHA-256-verifies the exact `npm-package` tarball produced by validation; it does not repack it.
 
-[npm trusted publishing does not support self-hosted runners](https://docs.npmjs.com/trusted-publishers/). Publish from the Mac mini runners with `NODE_AUTH_TOKEN` from `NPM_TOKEN`. That drops OIDC trusted publishing and automatic provenance. See the [CI runner prerequisites](https://github.com/bloxwap/haptic/blob/main/docs/ci-runners.md).
+Create the GitHub `npm-release` environment and configure required reviewers in repository settings. The workflow references that environment, but YAML alone does not enable approval protection. On npmjs.com, configure the Trusted Publisher for `@bloxwap/haptic`: organization **bloxwap**, repository **haptic**, workflow filename **publish_npm.yml**, environment **npm-release**, with direct publishing allowed. Keep the workflow filename unchanged.
+
+Keep the org-level `NPM_TOKEN` available to this repository as a transitional fallback until trusted publishing is verified. It is exposed as `NODE_AUTH_TOKEN` only to the auth check and publish steps. npm tries OIDC first and falls back to the token if no trusted publisher is configured, so releases can continue before npm setup. After verifying an OIDC publication and its provenance, delete the secret and the two fallback env entries. The auth check accepts OIDC without a token; token-only commands such as `npm whoami`, collaborator checks, `npm deprecate`, and `npm access` still require separate token authentication.
+
+See the [CI runner prerequisites](https://github.com/bloxwap/haptic/blob/main/docs/ci-runners.md).
 
 ## Verify the release
 
