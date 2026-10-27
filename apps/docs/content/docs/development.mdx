@@ -41,4 +41,4 @@ npm run docs:preview
 
 The preview serves the static export, including its configured base path. Coverage gates runtime source; browser checks and physical-device observations supply separate evidence for interaction and hardware.
 
-GitHub Actions for this repository run on self-hosted Apple silicon Mac minis. Install Playwright browsers with `npx playwright install` (not `--with-deps`). Runner tools and labels are listed in [docs/ci-runners.md](https://github.com/bloxwap/haptic/blob/main/docs/ci-runners.md).
+GitHub Actions run on self-hosted Apple silicon Mac minis except the npm `publish` job in `publish_npm.yml`, which uses GitHub-hosted `ubuntu-24.04` for npm trusted publishing and provenance behind the `npm-release` environment gate. On the minis, install Playwright browsers with `npx playwright install` (not `--with-deps`). The Ubuntu publish job uses `npx playwright install --with-deps chromium`. Runner tools and labels are listed in [docs/ci-runners.md](https://github.com/bloxwap/haptic/blob/main/docs/ci-runners.md).

@@ -1,12 +1,14 @@
-// Verify the token npm publish will use, even when the current version is
-// already published. Never print or persist the token.
-// npm trusted publishing is not available on self-hosted runners:
-// https://docs.npmjs.com/trusted-publishers/
+// Verify fallback token access when supplied; OIDC only authorizes publishing.
+// Never print or persist credentials.
 import { readFile } from 'node:fs/promises';
 
 const { name } = JSON.parse(await readFile(new URL('../../packages/haptic/package.json', import.meta.url), 'utf8'));
 const token = process.env.NODE_AUTH_TOKEN || process.env.NPM_TOKEN;
 if (typeof token !== 'string' || !token) {
+  if (process.env.ACTIONS_ID_TOKEN_REQUEST_URL && process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN) {
+    console.log('::notice::No npm token supplied; publishing will rely on npm trusted publishing (OIDC).');
+    process.exit(0);
+  }
   throw new Error(
     'NPM_TOKEN is missing. The org-level NPM_TOKEN secret must be available to this repository with permission to publish this package.',
   );

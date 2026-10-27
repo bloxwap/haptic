@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-# BSD-portable SHA-256 digest/verify. Avoids GNU sha256sum.
+# Portable SHA-256 digest/verify: GNU on Linux, shasum on macOS.
 # Usage:
 #   sha256.sh digest <output> <file> [<file> ...]
 #   sha256.sh verify <sumfile>
@@ -23,10 +23,18 @@ case $cmd in
         exit 1
       fi
     done
-    shasum -a 256 "$@" > "$out"
+    if command -v sha256sum >/dev/null 2>&1; then
+      sha256sum "$@" > "$out"
+    else
+      shasum -a 256 "$@" > "$out"
+    fi
     ;;
   verify)
-    shasum -a 256 -c "${1:?}"
+    if command -v sha256sum >/dev/null 2>&1; then
+      sha256sum -c "${1:?}"
+    else
+      shasum -a 256 -c "${1:?}"
+    fi
     ;;
   *)
     echo "usage: sha256.sh digest|verify ..." >&2

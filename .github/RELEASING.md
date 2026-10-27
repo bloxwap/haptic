@@ -39,19 +39,23 @@ shasum -a 256 bloxwap-haptic-0.1.0-rc.0.tgz
 npm publish ./bloxwap-haptic-0.1.0-rc.0.tgz --access public --tag next
 ```
 
-This local publication uses the signed-in account and its required 2FA flow. Keep the bootstrap credential local. Verify the published prerelease's identity/tarball and record that limitation in #14. Subsequent CI publications authenticate with the org-level `NPM_TOKEN` secret.
+This local publication uses the signed-in account and its required 2FA flow. Keep the bootstrap credential local. Verify the published prerelease's identity/tarball and record that limitation in #14. Subsequent CI publications use the trusted-publishing migration below.
 
-## Configure npm token authentication
+## Configure npm trusted publishing
 
-[npm trusted publishing does not support self-hosted runners](https://docs.npmjs.com/trusted-publishers/). Every job, including publish, runs on the self-hosted Mac mini fleet (`runs-on: [self-hosted, macOS, ARM64]`). The publish job authenticates with the org-level `NPM_TOKEN` secret (`NODE_AUTH_TOKEN`) that has publish rights for `@bloxwap` packages. That drops OIDC trusted publishing and automatic provenance. Keep Node 24 and npm 11.6.1. Check [docs/ci-runners.md](../docs/ci-runners.md) when executing this step.
+Only the `publish` job in `.github/workflows/publish_npm.yml` runs on GitHub-hosted `ubuntu-24.04`, a narrow exception to the Mac-mini-only runner policy because [npm trusted publishing requires GitHub-hosted runners](https://docs.npmjs.com/trusted-publishers/). Validation and security stay on the minis. Publishing uses Node 24, pinned npm 11.6.1, `contents: read` and `id-token: write`, and `--provenance`, including during token fallback. It downloads and SHA-256-verifies the exact `npm-package` tarball produced by validation; it does not repack it.
 
-Record the actual account/team access and token availability in #13. A committed workflow alone does not complete that task.
+Create the GitHub `npm-release` environment and configure required reviewers in repository settings. The workflow references that environment, but YAML alone does not enable approval protection. On npmjs.com, configure the Trusted Publisher for `@bloxwap/haptic`: organization **bloxwap**, repository **haptic**, workflow filename **publish_npm.yml**, environment **npm-release**, with direct publishing allowed. Keep the workflow filename unchanged.
+
+Keep the org-level `NPM_TOKEN` available to this repository as a transitional fallback until trusted publishing is verified. It is exposed as `NODE_AUTH_TOKEN` only to the auth check and publish steps. npm tries OIDC first and falls back to the token if no trusted publisher is configured, so releases can continue before npm setup. After verifying an OIDC publication and its provenance, delete the secret and the two fallback env entries. The auth check accepts OIDC without a token; token-only commands such as `npm whoami`, collaborator checks, `npm deprecate`, and `npm access` still require separate token authentication.
+
+Record verified access, environment protection, and OIDC/provenance evidence in #13. A committed workflow alone does not complete that task.
 
 ## Publish a tagged release
 
 Commit the desired stable version, synchronize the docs dependency and lockfile, date the changelog, and update release notes. Recheck device evidence after any runtime/dependency change. Merge to main, wait for Tests and Documentation to pass, tag that exact main commit (`v0.3.0` for this release), then publish its GitHub release. Prerelease versions containing a hyphen use `next`; stable versions use `latest`.
 
-`publish_npm.yml` checks out the release tag and fails on a mismatched version, source outside main, dirty source, missing device evidence without a matching pending-certification `*-release.json` decision, already-published version, or unexpected registry response. Validation runs the full package and docs checks, then packs and uploads one archive with SHA-256. The publishing job downloads and verifies that archive, repeats the release gate, checks `NPM_TOKEN` authentication, and publishes it from the same Mac mini runners. Token publish does not attach provenance.
+`publish_npm.yml` checks out the release tag and fails on a mismatched version, source outside main, dirty source, missing device evidence without a matching pending-certification `*-release.json` decision, already-published version, or unexpected registry response. Validation runs the full package and docs checks, then packs and uploads one archive with SHA-256. The publishing job downloads and verifies that archive, repeats the release gate, checks token or OIDC availability, and publishes it on GitHub-hosted Ubuntu with provenance after the `npm-release` environment gate.
 
 The final registry check waits up to five minutes for npm's processing to expose the exact version and intended dist-tag. Unexpected auth/server responses fail immediately; a persistent missing version or incorrect tag fails when the wait expires. It then validates metadata, dist-tag, byte identity with the reviewed tarball, isolated ESM/CJS/types/SSR/bundler consumers, and real browser actions from installed registry bytes in both React versions.
 
