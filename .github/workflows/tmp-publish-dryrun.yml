@@ -1,0 +1,50 @@
+name: TEMPORARY Ubuntu publish dry-run (remove before merge)
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  publish-dryrun:
+    # Temporary proof of the npm publish runner exception; remove before merge.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - run: npm install --global npm@11.6.1
+      - run: npm ci
+      # PRs have no release tag. release:check requires a real tag at HEAD,
+      # source on origin/main, and a version not yet on npm; skip that gate.
+      # npm dry-run rejects versions already on npm; use a unique test prerelease.
+      - name: Compute temporary version and dist-tag without a release event
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
+          const manifest = JSON.parse(readFileSync('packages/haptic/package.json', 'utf8'));
+          let { version } = manifest;
+          if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version)) throw new Error('Invalid package version');
+          version += `${version.includes('-') ? '.' : '-'}dryrun.${process.env.GITHUB_RUN_ID}.${process.env.GITHUB_RUN_ATTEMPT}`;
+          writeFileSync('packages/haptic/package.json', JSON.stringify({ ...manifest, version }, null, 2) + '\n');
+          appendFileSync(process.env.GITHUB_ENV, `HAPTIC_REGISTRY_VERSION=${version}\nDIST_TAG=${version.includes('-') ? 'next' : 'latest'}\nHAPTIC_EXPECTED_TARBALL=.release-artifacts/bloxwap-haptic-${version}.tgz\n`);
+          NODE
+      # No validate artifact in this workflow: build and pack on Ubuntu itself.
+      - run: npm run pack:haptic
+      - run: |
+          mkdir -p .release-artifacts
+          mv bloxwap-haptic-*.tgz .release-artifacts/
+      - run: sh "$GITHUB_WORKSPACE/.github/scripts/sha256.sh" digest SHA256SUMS bloxwap-haptic-*.tgz
+        working-directory: .release-artifacts
+      - run: sh "$GITHUB_WORKSPACE/.github/scripts/sha256.sh" verify SHA256SUMS
+        working-directory: .release-artifacts
+      - run: npx playwright install --with-deps chromium
+      # Skip auth check: this PR workflow has neither secrets nor OIDC.
+      # Skip registry:check: it requires the new version to exist on npm.
+      # Dry-run does not generate provenance or request publishing credentials.
+      - run: npm publish "$HAPTIC_EXPECTED_TARBALL" --access public --tag "$DIST_TAG" --provenance --dry-run
