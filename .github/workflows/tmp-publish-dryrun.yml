@@ -7,7 +7,7 @@ jobs:
   publish-dryrun:
     # Temporary proof of the npm publish runner exception; remove before merge.
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -44,6 +44,7 @@ jobs:
       - run: sh "$GITHUB_WORKSPACE/.github/scripts/sha256.sh" verify SHA256SUMS
         working-directory: .release-artifacts
       - run: npx playwright install --with-deps chromium
+        timeout-minutes: 15
       # Skip auth check: this PR workflow has neither secrets nor OIDC.
       # Skip registry:check: it requires the new version to exist on npm.
       # Dry-run does not generate provenance or request publishing credentials.

@@ -71,7 +71,7 @@ jobs:
     needs: [validate, security]
     runs-on: ubuntu-24.04
     environment: npm-release
-    timeout-minutes: 10
+    timeout-minutes: 30
     permissions:
       contents: read
       id-token: write
@@ -104,9 +104,12 @@ jobs:
       - run: sh "$GITHUB_WORKSPACE/.github/scripts/sha256.sh" verify SHA256SUMS
         working-directory: .release-artifacts
       - run: npm run release:check
+      # Install registry:check browsers before publishing so an apt/browser download
+      # failure stops the release instead of failing after the upload.
+      - run: npx playwright install --with-deps chromium
+        timeout-minutes: 15
       - run: npm publish "$HAPTIC_EXPECTED_TARBALL" --access public --tag "$DIST_TAG" --provenance
         env:
           # Transitional fallback; delete once the npm Trusted Publisher works.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: npx playwright install --with-deps chromium
       - run: npm run registry:check
