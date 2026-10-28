@@ -4,7 +4,8 @@ name: security-weekly
 
 on:
   schedule:
-    - cron: "56 14 * * 6"   # Saturdays 14:56 UTC, staggered across repos after the nightlies
+    - cron: "6 3 * * 6"   # Saturdays 3:06 AM Pacific, staggered across repos after the nightlies
+      timezone: "America/Los_Angeles"
   workflow_dispatch:
   pull_request:
     paths:
