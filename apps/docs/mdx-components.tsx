@@ -1,7 +1,7 @@
 import defaults from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 import type { ReactNode } from 'react';
-import { Callout as HIGCallout } from '@bloxwap/hig-react/status';
+import { Callout as HIGCallout } from '@bloxwap/hig/react/status';
 import { InteractionDemo } from '@/components/interaction-demo';
 import { ImperativeDemo } from '@/components/imperative-demo';
 

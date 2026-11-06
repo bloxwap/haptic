@@ -1,7 +1,7 @@
 'use client';
 
 import { Haptic, useIOSNativeHaptics, type HapticInput } from '@bloxwap/haptic';
-import { Slider, Switch } from '@bloxwap/hig-react/selection';
+import { Slider, Switch } from '@bloxwap/hig/react/selection';
 import { useEffect, useState } from 'react';
 
 const presets = [

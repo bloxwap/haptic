@@ -1,7 +1,7 @@
 /*
  * Fumadocs bridge. The palette, spacing and control geometry come from the
- * @bloxwap/hig-tokens and @bloxwap/hig-react packages (including the radius
- * roles in @bloxwap/hig-tokens/css); this file only maps them onto Fumadocs/
+ * @bloxwap/hig/tokens and @bloxwap/hig/react (including the radius
+ * roles in @bloxwap/hig/tokens/css); this file only maps them onto Fumadocs/
  * Tailwind names and adds docs-only type steps.
  * Never add color literals here (npm run lint rejects them).
  */
