@@ -1,9 +1,9 @@
 'use client';
 
 import { Haptic } from '@bloxwap/haptic';
-import { Button } from '@bloxwap/hig-react/button';
-import { Field, Input } from '@bloxwap/hig-react/field';
-import { Switch } from '@bloxwap/hig-react/selection';
+import { Button } from '@bloxwap/hig/react/button';
+import { Field, Input } from '@bloxwap/hig/react/field';
+import { Switch } from '@bloxwap/hig/react/selection';
 import { useEffect, useRef, useState } from 'react';
 import { Drawer } from 'vaul';
 

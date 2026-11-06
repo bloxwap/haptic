@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { CodeWindow } from '@bloxwap/hig-react/recipes/code-window';
+import { CodeWindow } from '@bloxwap/hig/react/recipes/code-window';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { HapticBoard } from '@/components/haptic-board';
 import { InstallCommand } from '@/components/install-command';

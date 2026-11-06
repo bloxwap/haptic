@@ -1,7 +1,7 @@
 'use client';
 
 import { canTriggerHaptic, triggerHaptic, type HapticTriggerResult } from '@bloxwap/haptic';
-import { Button } from '@bloxwap/hig-react/button';
+import { Button } from '@bloxwap/hig/react/button';
 import { useEffect, useRef, useState } from 'react';
 
 /** Keep request results visible without presenting browser acceptance as tactile evidence. */
