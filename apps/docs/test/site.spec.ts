@@ -117,7 +117,7 @@ test('HIG palette and reduced motion retain the haptic action', async ({ page, b
   await page.goto(baseURL!);
   const target = page.getByRole('button', { name: /selection/i });
   expect(await target.evaluate(el => getComputedStyle(el).transitionDuration)).toBe('0s');
-  // HIG text role from @bloxwap/hig-tokens/css: sRGB fallback, or its oklch value where supported.
+  // HIG text role from @bloxwap/hig/tokens/css: sRGB fallback, or its oklch value where supported.
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--hig-text').trim())).toMatch(/^(#fafafa|oklch\((0\.985|98\.5%) 0 0\))$/);
   await expect(page.getByLabel('Feedback enabled', { exact: true })).toBeChecked();
   await target.click();

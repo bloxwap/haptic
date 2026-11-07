@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CheckIcon } from '@bloxwap/hig-react/brand';
-import { IconButton } from '@bloxwap/hig-react/button';
-import { Tabs } from '@bloxwap/hig-react/navigation';
+import { CheckIcon } from '@bloxwap/hig/react/brand';
+import { IconButton } from '@bloxwap/hig/react/button';
+import { Tabs } from '@bloxwap/hig/react/navigation';
 
 const managers = [
   { name: 'bun', command: 'bun add @bloxwap/haptic' },
