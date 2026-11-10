@@ -75,7 +75,7 @@ describe('platform contract', () => {
       Object.defineProperty(globalThis, 'navigator', navigatorDescriptor);
     }
     expect(navigatorRead).not.toHaveBeenCalled();
-    expect(markup).toBe('<span style="position:relative;display:inline-grid"><button>Hydrate</button></span>');
+    expect(markup).toBe('<span data-haptic-target="" style="position:relative;display:inline-grid"><button>Hydrate</button></span>');
     expect(renders).toEqual([false]);
     vi.stubGlobal('navigator', identity('iPhone', 'AppleWebKit', 5));
     expect(renderToString(tree)).toBe(markup);
