@@ -10,7 +10,7 @@
 npm install @bloxwap/haptic
 ```
 
-React and React DOM are external peers. Use matching React 18+ versions. ESM, CommonJS, and TypeScript declarations are included.
+React and React DOM are external peers. Use matching React 18 or 19 versions. ESM, CommonJS, and TypeScript declarations are included.
 
 ## Usage
 

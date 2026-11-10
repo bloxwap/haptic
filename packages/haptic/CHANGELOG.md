@@ -5,6 +5,7 @@
 - **Behavior change:** a target whose child renders more than one DOM node (a fragment, a component returning siblings, or text beside the element) now fails closed. It adds no iOS overlay and requests no vibration, so a tap can no longer run the first element's action instead of the one tapped (#57). Development builds log a `console.error`.
 - **Behavior change:** nested targets defer to the innermost target. On iOS the outer target adds no overlay, so the inner action runs exactly once; on vibration browsers a tap inside the inner target requests feedback once, with the inner props (#60). Development builds log a `console.error`.
 - The target wrapper now carries a `data-haptic-target` attribute, which appears in server-rendered markup.
+- **Peer dependency change:** `react` and `react-dom` are `^18.0.0 || ^19.0.0` instead of `>=18`. The component suite runs on React 18.3.1 and 19.3.0 in CI, and a peer range that admits another major fails the check (#66).
 
 Physical-device and VoiceOver certification remains pending in issue #9; automated checks do not establish tactile output.
 

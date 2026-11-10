@@ -17,6 +17,7 @@
     "build": "npm --workspace @bloxwap/haptic run build",
     "typecheck": "npm --workspace @bloxwap/haptic run typecheck",
     "typecheck:tsc": "npm --workspace @bloxwap/haptic run typecheck:tsc",
+    "typecheck:parity": "node packages/haptic/scripts/typecheck-parity.mjs",
     "test": "npm --workspace @bloxwap/haptic run test",
     "coverage": "npm --workspace @bloxwap/haptic run coverage",
     "test:matrix": "npm --workspace @bloxwap/haptic run test:matrix",
@@ -32,7 +33,7 @@
     "docs:check:tsc": "npm --workspace @bloxwap/haptic-docs run check:tsc",
     "docs:preview": "npm --workspace @bloxwap/haptic-docs run preview",
     "docs:smoke": "npm --workspace @bloxwap/haptic-docs run smoke",
-    "lint": "node .github/scripts/hig-check.mjs && git diff --check",
+    "lint": "node .github/scripts/hig-check.mjs && node .github/scripts/lockfiles-check.mjs && node .github/scripts/workspace-haptic-check.mjs && node .github/scripts/react-peer-check.mjs && node .github/scripts/ci-commands.mjs && git diff --check",
     "bench": "npm --workspace @bloxwap/haptic run bench"
   }
 }

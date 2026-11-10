@@ -64,9 +64,11 @@ jobs:
         with:
           bun-version: '1.4.2'
       - run: bun install --frozen-lockfile
-      - run: node --test .github/scripts/wait-for-registry.test.mjs .github/scripts/check-publish-auth.test.mjs .github/scripts/release-check.test.mjs
+      - run: node --test .github/scripts/wait-for-registry.test.mjs .github/scripts/check-publish-auth.test.mjs .github/scripts/release-check.test.mjs .github/scripts/semver.test.mjs .github/scripts/lockfiles-check.test.mjs .github/scripts/react-peer.test.mjs
       - run: bun run lint
       - run: bun run typecheck
+      - run: bun run typecheck:tsc
+      - run: bun run typecheck:parity
       - run: bun run coverage
       - run: bun run test:matrix
       - run: bun run size

@@ -35,7 +35,7 @@ SSR-safe, with graceful fallbacks. <a href="https://bloxwap.github.io/haptic/">T
 npm install @bloxwap/haptic
 ```
 
-Works with React 18 or newer. Requires matching React and React DOM peer versions.
+Works with React 18 or 19. Requires matching React and React DOM peer versions.
 
 ## Release status
 
