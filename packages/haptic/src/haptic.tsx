@@ -67,6 +67,16 @@ function dispose(engine: WebHaptics | null): void {
   engine.destroy();
 }
 
+/**
+ * web-haptics 0.0.6 freezes `isSupported` when its module evaluates.
+ * A Vibration API installed later would otherwise append a hidden switch
+ * label and never call `navigator.vibrate`. Refresh the flag before each trigger.
+ */
+function syncEngineSupport(): void {
+  const live = typeof navigator.vibrate === 'function';
+  if (WebHaptics.isSupported !== live) Reflect.set(WebHaptics, 'isSupported', live);
+}
+
 /** Add physical-tap feedback while keeping the original React target intact. */
 export function HapticTarget({
   children, enabled: intentEnabled = true, preferences, policyEnabled = true, disabled = false, feedback = 'selection',
@@ -151,6 +161,7 @@ export function HapticTarget({
       if (!host || !host.contains(target) || target.closest(NESTED) !== root || options.native || !options.enabled || options.disabled || hostDisabled(host)) return;
       if (typeof navigator.vibrate !== 'function' && !options.webHapticsOptions?.debug && !options.webHapticsOptions?.showSwitch) return;
       try {
+        syncEngineSupport();
         engine.current ??= new WebHaptics(options.webHapticsOptions);
         void engine.current.trigger(options.feedback, options.triggerOptions).catch(() => {});
       } catch {

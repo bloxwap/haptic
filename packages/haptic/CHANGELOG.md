@@ -6,6 +6,7 @@
 - **Behavior change:** nested targets defer to the innermost target. On iOS the outer target adds no overlay, so the inner action runs exactly once; on vibration browsers a tap inside the inner target requests feedback once, with the inner props (#60). Development builds log a `console.error`.
 - The target wrapper now carries a `data-haptic-target` attribute, which appears in server-rendered markup.
 - **Peer dependency change:** `react` and `react-dom` are `^18.0.0 || ^19.0.0` instead of `>=18`. The component suite runs on React 18.3.1 and 19.3.0 in CI, and a peer range that admits another major fails the check (#66).
+- **Behavior change:** a Vibration API installed after the bundle evaluates now vibrates on tap. `web-haptics` freezes support at import, so that tap previously appended a hidden switch label and never called `navigator.vibrate` (#58). Debug audio and the visible switch still use the engine's DOM path, and unmount removes that DOM and stops its animation-frame loop.
 
 Physical-device and VoiceOver certification remains pending in issue #9; automated checks do not establish tactile output.
 
