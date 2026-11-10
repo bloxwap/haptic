@@ -13,7 +13,7 @@ The imperative API reports iOS unavailable, including inside a synchronous click
 
 ## Vibration-capable browsers
 
-Browsers exposing `navigator.vibrate` use `web-haptics` for the selected input and options. If that API exists on an iOS-like device, it takes priority. An accepted API call does not prove that hardware physically vibrated.
+Browsers exposing `navigator.vibrate` use `web-haptics` for the selected input and options, including when that API is installed after the bundle evaluates. If that API exists on an iOS-like device, it takes priority. An accepted API call does not prove that hardware physically vibrated.
 
 ## Other devices
 
