@@ -1,4 +1,4 @@
-/** Structural compatibility with HIG 0.1.0; this entry has no platform imports. */
+/** Structural compatibility with @bloxwap/hig 0.2.0; this entry has no platform imports. */
 export type FeedbackIntent = 'press' | 'activate' | 'release' | 'cancel' | 'selection' | 'toggle' | 'disclosure' | 'success' | 'warning' | 'error' | 'notification';
 export interface FeedbackEvent {
   id: string; source: string; intent: FeedbackIntent;
