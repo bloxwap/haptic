@@ -61,19 +61,19 @@ export function createNativeHapticAdapter<Impact, Notification>(haptics: {
   impactAsync: (style: Impact) => Promise<void>;
   notificationAsync: (type: Notification) => Promise<void>;
 }, capability: HapticCapability) {
+  // A mapped type, not a switch: adding a SemanticHaptic member fails the type check until it is mapped here.
+  const cues: { [Cue in SemanticHaptic]: () => Promise<void> } = {
+    selection: () => haptics.selectionAsync(),
+    light: () => haptics.impactAsync(haptics.ImpactFeedbackStyle.Light),
+    medium: () => haptics.impactAsync(haptics.ImpactFeedbackStyle.Medium),
+    heavy: () => haptics.impactAsync(haptics.ImpactFeedbackStyle.Heavy),
+    success: () => haptics.notificationAsync(haptics.NotificationFeedbackType.Success),
+    warning: () => haptics.notificationAsync(haptics.NotificationFeedbackType.Warning),
+    error: () => haptics.notificationAsync(haptics.NotificationFeedbackType.Error),
+  };
   return createHapticAdapter({
     capability,
-    trigger(cue) {
-      switch (cue) {
-        case 'selection': return haptics.selectionAsync();
-        case 'light': return haptics.impactAsync(haptics.ImpactFeedbackStyle.Light);
-        case 'medium': return haptics.impactAsync(haptics.ImpactFeedbackStyle.Medium);
-        case 'heavy': return haptics.impactAsync(haptics.ImpactFeedbackStyle.Heavy);
-        case 'success': return haptics.notificationAsync(haptics.NotificationFeedbackType.Success);
-        case 'warning': return haptics.notificationAsync(haptics.NotificationFeedbackType.Warning);
-        case 'error': return haptics.notificationAsync(haptics.NotificationFeedbackType.Error);
-      }
-    },
+    trigger: cue => cues[cue](),
     // Expo exposes no cancellation/disposal handle for an already submitted tick.
     cancel() {}, dispose() {},
   });
