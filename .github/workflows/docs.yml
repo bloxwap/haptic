@@ -78,6 +78,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run build
       - run: bun run docs:check
+      - run: bun run docs:check:tsc
       - run: bun run docs:build
       - uses: ./.github/actions/playwright-browsers
         with:

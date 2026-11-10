@@ -4,6 +4,18 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { build } from 'esbuild';
 import { smokeConsumer } from './consumer-browser.mjs';
+import { matrixVersions } from './react-versions.mjs';
+
+function leadingDirectives(source) {
+  const directives = [];
+  for (const line of source.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*')) continue;
+    if (!/^(['"])use \w+\1;?$/.test(trimmed)) break;
+    directives.push(trimmed.replace(/['";]/g, ''));
+  }
+  return directives;
+}
 
 function run(command, args, cwd) {
   const result = spawnSync(command, args, { cwd, encoding: 'utf8', env: process.env });
@@ -27,7 +39,14 @@ try {
   if (Object.keys(manifest.dependencies).join(',') !== 'web-haptics') throw new Error('Unexpected runtime dependencies.');
   if (manifest.dependencies['web-haptics'] !== '0.0.6') throw new Error('Unexpected feedback engine version.');
   if (registryVersion && manifest.version !== registryVersion) throw new Error('Registry bytes do not match the requested version.');
-  for (const version of ['18.3.1', '19.3.0']) {
+  const readPacked = path => run('tar', ['-xOf', join(temporary, packed.filename), `package/${path}`], process.cwd());
+  for (const [path, required] of [['dist/index.js', true], ['dist/index.cjs', true], ['dist/feedback.js', false], ['dist/feedback.cjs', false]]) {
+    const directives = leadingDirectives(readPacked(path));
+    const hasClient = directives.includes('use client');
+    if (hasClient !== required) throw new Error(`${path} ${required ? 'must' : 'must not'} keep a leading "use client" directive (found: ${directives.join(', ') || 'none'}).`);
+  }
+  if (!leadingDirectives(readPacked('dist/index.cjs')).includes('use strict')) throw new Error('dist/index.cjs must keep its leading "use strict" directive.');
+  for (const version of matrixVersions) {
     const consumer = join(temporary, `react-${version}`);
     run('mkdir', ['-p', consumer], process.cwd());
     writeFileSync(join(consumer, 'package.json'), JSON.stringify({ private: true, type: 'module' }));

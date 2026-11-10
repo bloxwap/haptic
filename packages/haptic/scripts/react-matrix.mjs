@@ -2,6 +2,7 @@ import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } f
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { matrixVersions } from './react-versions.mjs';
 
 const source = process.cwd();
 const temporary = mkdtempSync(join(process.env.RUNNER_TEMP || tmpdir(), 'haptic-react-matrix-'));
@@ -10,7 +11,7 @@ function run(args, cwd) {
   if (result.status !== 0) throw new Error(`npm ${args.join(' ')} failed (${result.status})`);
 }
 try {
-  for (const version of ['18.3.1', '19.3.0']) {
+  for (const version of matrixVersions) {
     const root = join(temporary, version);
     const project = join(root, 'packages/haptic');
     mkdirSync(project, { recursive: true });
