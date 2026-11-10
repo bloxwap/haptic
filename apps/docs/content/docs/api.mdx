@@ -99,4 +99,8 @@ The original target element is rendered intact. Feedback runs before its React c
 
 Engine resources are created when first used and released on unmount or construction-option changes. Ordinary renders and feedback/intensity changes do not recreate the engine. Unmounting ends pending feedback. Feedback errors leave the original action available.
 
-The positioning wrapper is a `span`. Target fragments containing multiple hosts are outside the single-target contract; invalid children are rejected by React's single-element check.
+The positioning wrapper is a `span` marked with `data-haptic-target`. Non-element children (`null`, text, arrays) are rejected with an error.
+
+The child must render exactly one DOM element. A fragment, or a component that renders several elements or text beside its element, keeps its own actions but gets no feedback: no iOS overlay is added and no vibration is requested, and development builds log a `console.error`. A child that renders nothing is silently inactive.
+
+Nested targets defer to the innermost one. A tap inside an inner target runs its action once and requests feedback once, using the inner target's props. On iOS an outer target whose element contains another target adds no overlay, so taps on the rest of the outer element get no tick; on vibration browsers they still use the outer target's feedback. Development builds log a `console.error` for nesting.

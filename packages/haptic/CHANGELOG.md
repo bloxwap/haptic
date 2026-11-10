@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **Behavior change:** a target whose child renders more than one DOM node (a fragment, a component returning siblings, or text beside the element) now fails closed. It adds no iOS overlay and requests no vibration, so a tap can no longer run the first element's action instead of the one tapped (#57). Development builds log a `console.error`.
+- **Behavior change:** nested targets defer to the innermost target. On iOS the outer target adds no overlay, so the inner action runs exactly once; on vibration browsers a tap inside the inner target requests feedback once, with the inner props (#60). Development builds log a `console.error`.
+- The target wrapper now carries a `data-haptic-target` attribute, which appears in server-rendered markup.
+
+Physical-device and VoiceOver certification remains pending in issue #9; automated checks do not establish tactile output.
+
 ## 0.3.0 — 2026-10-20
 
 Performance release driven by the `npm run bench` suite (#35). Benchmark numbers are simulated-browser measurements, not physical-device results.

@@ -434,3 +434,118 @@ it('uses host preferences and application policy without changing the action', (
   view.rerender(<Haptic preferences={{ haptics: false }}><button onClick={action}>Save</button></Haptic>);
   expect(engine.cancel).toHaveBeenCalledOnce(); expect(engine.destroy).toHaveBeenCalledOnce();
 });
+
+describe('host structure invariants', () => {
+  function Pair({ a, b }: { a: () => void; b: () => void }) {
+    return <><button onClick={a}>A</button><button onClick={b}>B</button></>;
+  }
+  const silence = () => vi.spyOn(console, 'error').mockImplementation(() => {});
+
+  it.each(['fragment', 'component'])('fails closed on iOS for a %s child that renders several elements', kind => {
+    ios(); const errors = silence();
+    const a = vi.fn(), b = vi.fn();
+    const child = kind === 'fragment' ? <><button onClick={a}>A</button><button onClick={b}>B</button></> : <Pair a={a} b={b} />;
+    const view = render(<Haptic>{child}</Haptic>);
+    expect(view.container.querySelector('input, label')).toBeNull();
+    fireEvent.click(view.getByRole('button', { name: 'B' }));
+    expect(a).not.toHaveBeenCalled(); expect(b).toHaveBeenCalledTimes(1);
+    expect(errors).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('exactly one DOM element'));
+    view.rerender(<Haptic>{child}</Haptic>);
+    expect(errors).toHaveBeenCalledOnce();
+  });
+
+  it('fails closed on iOS when text renders beside the host', () => {
+    ios(); silence();
+    const view = render(<Haptic>{<>Label<button>Tap</button></>}</Haptic>);
+    expect(view.container.querySelector('input, label')).toBeNull();
+  });
+
+  it('gives no feedback to any element of a multi-element child on vibration browsers', () => {
+    silence(); const a = vi.fn(), b = vi.fn();
+    const view = render(<Haptic><Pair a={a} b={b} /></Haptic>);
+    fireEvent.click(view.getByRole('button', { name: 'A' }));
+    fireEvent.click(view.getByRole('button', { name: 'B' }));
+    expect(a).toHaveBeenCalledOnce(); expect(b).toHaveBeenCalledOnce();
+    expect(engine.trigger).not.toHaveBeenCalled();
+  });
+
+  it('recovers when a multi-element child becomes a single element', async () => {
+    ios(); const errors = silence();
+    function Toggle({ pair }: { pair: boolean }) { return pair ? <><button>A</button><button>B</button></> : <button>A</button>; }
+    const view = render(<Haptic><Toggle pair /></Haptic>);
+    expect(view.container.querySelector('input')).toBeNull();
+    view.rerender(<Haptic><Toggle pair={false} /></Haptic>);
+    await waitFor(() => expect(view.container.querySelector('input')).not.toBeNull());
+    expect(errors).toHaveBeenCalledOnce();
+  });
+
+  it('ignores comment nodes beside the host', async () => {
+    ios();
+    const view = render(<Haptic><button>Tap</button></Haptic>);
+    const wrapper = view.getByRole('button').parentElement!;
+    await act(async () => { wrapper.insertBefore(document.createComment('marker'), wrapper.firstChild); });
+    expect(view.container.querySelector('input')).not.toBeNull();
+  });
+
+  it('routes one action through the innermost iOS target when targets are nested', () => {
+    ios(); const errors = silence(); const action = vi.fn();
+    const view = render(<Haptic><Haptic><button onClick={action}>Nested</button></Haptic></Haptic>);
+    const inputs = view.container.querySelectorAll('input[switch]');
+    expect(inputs).toHaveLength(1);
+    fireEvent.click(view.container.querySelector('label')!);
+    expect(action).toHaveBeenCalledTimes(1);
+    expect(errors).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('nested targets'));
+  });
+
+  it('defers an outer iOS target whose host contains a target deeper inside', () => {
+    ios(); silence(); const action = vi.fn();
+    const view = render(<Haptic><div><Haptic><button onClick={action}>Deep</button></Haptic></div></Haptic>);
+    expect(view.container.querySelectorAll('input[switch]')).toHaveLength(1);
+    fireEvent.click(view.container.querySelector('label')!);
+    expect(action).toHaveBeenCalledTimes(1);
+  });
+
+  it('defers when an inner target mounts later on iOS', async () => {
+    ios(); silence();
+    function Late({ inner }: { inner: boolean }) {
+      return <div>{inner ? <Haptic><button>Inner</button></Haptic> : <button>Inner</button>}</div>;
+    }
+    const view = render(<Haptic><Late inner={false} /></Haptic>);
+    expect(view.container.querySelectorAll('input[switch]')).toHaveLength(1);
+    view.rerender(<Haptic><Late inner /></Haptic>);
+    await waitFor(() => expect(view.container.querySelectorAll('input[switch]')).toHaveLength(1));
+    expect(view.getByRole('button').parentElement!.querySelector('input[switch]')).not.toBeNull();
+  });
+
+  it('requests feedback once, from the innermost target, on vibration browsers', () => {
+    silence(); const action = vi.fn();
+    const view = render(<Haptic feedback="heavy"><div><button>Outer only</button><Haptic feedback="success"><button onClick={action}>Inner</button></Haptic></div></Haptic>);
+    fireEvent.click(view.getByRole('button', { name: 'Inner' }));
+    expect(action).toHaveBeenCalledOnce();
+    expect(engine.trigger).toHaveBeenCalledExactlyOnceWith('success', undefined);
+    fireEvent.click(view.getByRole('button', { name: 'Outer only' }));
+    expect(engine.trigger).toHaveBeenLastCalledWith('heavy', undefined);
+    expect(engine.trigger).toHaveBeenCalledTimes(2);
+  });
+
+  it('stays silent in production builds', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const errors = silence();
+    try {
+      render(<Haptic><Pair a={() => {}} b={() => {}} /></Haptic>);
+      expect(errors).not.toHaveBeenCalled();
+    } finally { vi.unstubAllEnvs(); }
+  });
+
+  it('skips diagnostics without a process global', () => {
+    const errors = silence();
+    const saved = globalThis.process;
+    let view: ReturnType<typeof render>;
+    try {
+      vi.stubGlobal('process', undefined);
+      view = render(<Haptic><Pair a={() => {}} b={() => {}} /></Haptic>);
+    } finally { vi.stubGlobal('process', saved); }
+    expect(errors).not.toHaveBeenCalled();
+    view!.unmount();
+  });
+});

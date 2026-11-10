@@ -9,6 +9,20 @@ import { useIOSNativeHaptics } from './platform';
 import type { FeedbackPreferences } from './feedback';
 
 const useCommittedEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
+/** Marks each target wrapper so nested targets can defer to the innermost one. */
+const TARGET = 'data-haptic-target';
+const NESTED = `[${TARGET}]`;
+
+declare const process: { env: { NODE_ENV?: string } };
+/** Development-only diagnostics; bundlers strip the body in production builds. */
+function warnInDevelopment(check: () => string | undefined): void {
+  try {
+    if (process.env.NODE_ENV !== 'production') {
+      const message = check();
+      if (message) console.error(`HapticTarget: ${message}`);
+    }
+  } catch { /* Unbundled browsers have no process global; diagnostics are optional. */ }
+}
 
 type HostProps = {
   disabled?: boolean;
@@ -17,7 +31,10 @@ type HostProps = {
 };
 
 export interface HapticTargetProps {
-  /** One target element. Its handlers, attributes, and ref are retained. */
+  /**
+   * One target element that renders exactly one DOM element. Its handlers, attributes, and ref are retained.
+   * A child that renders several elements (such as a fragment) keeps its actions but gets no feedback.
+   */
   children: ReactElement<HostProps>;
   /** Enable feedback. Defaults to true. */
   enabled?: boolean;
@@ -61,6 +78,7 @@ export function HapticTarget({
   const native = useIOSNativeHaptics();
   const wrapper = useRef<HTMLSpanElement>(null);
   const nativeSwitch = useRef<HTMLInputElement>(null);
+  const nativeLabel = useRef<HTMLLabelElement>(null);
   const engine = useRef<WebHaptics | null>(null);
   const current = useRef({ enabled, disabled, feedback, triggerOptions, webHapticsOptions, native });
   useCommittedEffect(() => {
@@ -78,10 +96,34 @@ export function HapticTarget({
   };
   const gesture = useRef<{ x: number; y: number; canceled: boolean } | null>(null);
   const switchId = useId();
+  /** The single rendered host, or null when the child rendered no element or more than one node. */
   const readHost = () => {
-    const element = wrapper.current!.firstElementChild;
-    return element === nativeSwitch.current ? null : element as HTMLElement | null;
+    let host: HTMLElement | null = null;
+    for (const node of wrapper.current!.childNodes) {
+      if (node === nativeSwitch.current || node === nativeLabel.current || node.nodeType === Node.COMMENT_NODE) continue;
+      if (host || node.nodeType !== Node.ELEMENT_NODE) return null;
+      host = node as HTMLElement;
+    }
+    return host;
   };
+  /** An inner target owns its own taps; an outer overlay would click the wrong element. */
+  const containsTarget = (host: HTMLElement) => host.matches(NESTED) || host.querySelector(NESTED) !== null;
+  const warned = useRef<string | undefined>(undefined);
+  useCommittedEffect(() => {
+    warnInDevelopment(() => {
+      const root = wrapper.current!;
+      const nodes = [...root.childNodes].filter(node =>
+        node !== nativeSwitch.current && node !== nativeLabel.current && node.nodeType !== Node.COMMENT_NODE);
+      const message = nodes.length > 1
+        ? 'the child must render exactly one DOM element; feedback is disabled for this target.'
+        : nodes[0]?.nodeType === Node.ELEMENT_NODE && containsTarget(nodes[0] as HTMLElement)
+          ? 'nested targets are not supported; the innermost target handles taps inside it.'
+          : undefined;
+      const report = message !== warned.current ? message : undefined;
+      warned.current = message;
+      return report;
+    });
+  });
 
   useCommittedEffect(() => {
     if (!native) {
@@ -91,7 +133,7 @@ export function HapticTarget({
     const root = wrapper.current!;
     const synchronize = () => {
       const host = readHost();
-      updateBlocked(host ? hostDisabled(host) : true);
+      updateBlocked(host ? hostDisabled(host) || containsTarget(host) : true);
     };
     synchronize();
     const observer = new MutationObserver(synchronize);
@@ -105,7 +147,8 @@ export function HapticTarget({
     const requestFeedback = (event: Event) => {
       const options = current.current;
       const host = readHost();
-      if (!host || !host.contains(event.target as Node) || options.native || !options.enabled || options.disabled || hostDisabled(host)) return;
+      const target = event.target as Element;
+      if (!host || !host.contains(target) || target.closest(NESTED) !== root || options.native || !options.enabled || options.disabled || hostDisabled(host)) return;
       if (typeof navigator.vibrate !== 'function' && !options.webHapticsOptions?.debug && !options.webHapticsOptions?.showSwitch) return;
       try {
         engine.current ??= new WebHaptics(options.webHapticsOptions);
@@ -165,7 +208,7 @@ export function HapticTarget({
   };
 
   return (
-    <span ref={wrapper} className={className} style={{ position: 'relative', display: 'inline-grid', ...style }}>
+    <span ref={wrapper} {...{ [TARGET]: '' }} className={className} style={{ position: 'relative', display: 'inline-grid', ...style }}>
       {child}
       {nativeTarget && <>
         <input
@@ -180,6 +223,7 @@ export function HapticTarget({
           style={{ appearance: 'auto', position: 'absolute', inset: 0, width: '100%', height: '100%', margin: 0, opacity: 0, pointerEvents: 'none' }}
         />
         <label
+          ref={nativeLabel}
           htmlFor={switchId}
           aria-hidden="true"
           onClick={guardLabel}
