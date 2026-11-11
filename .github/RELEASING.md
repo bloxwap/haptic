@@ -1,6 +1,6 @@
 # Releasing @bloxwap/haptic
 
-The first release is tracked in [#14](https://github.com/bloxwap/haptic/issues/14). Physical-device and VoiceOver certification is still pending in #9. Scoped pending-certification decisions live in [planning `*-release.json` files](planning/): [initial-release.json](planning/initial-release.json) covers `0.1.0-rc.0` and `0.1.0`; [0.2.0-release.json](planning/0.2.0-release.json) covers the imperative API release; [0.3.0-release.json](planning/0.3.0-release.json) covers the performance release. Each decision pins an implementation commit, requires pending-certification disclosure in the package and docs, rejects failed observations, and does not apply to later versions. Do not represent these decisions as hardware certification.
+The first release is tracked in [#14](https://github.com/bloxwap/haptic/issues/14). Physical-device and VoiceOver certification is still pending in #9. Scoped pending-certification decisions live in [planning `*-release.json` files](planning/): [initial-release.json](planning/initial-release.json) covers `0.1.0-rc.0` and `0.1.0`; [0.2.0-release.json](planning/0.2.0-release.json) covers the imperative API release; [0.3.0-release.json](planning/0.3.0-release.json) covers the performance release; [0.4.0-release.json](planning/0.4.0-release.json) covers the invariant release. Each decision pins an implementation commit, requires pending-certification disclosure in the package and docs, rejects failed observations, and does not apply to later versions. Do not represent these decisions as hardware certification.
 
 ## Validate the implementation
 
@@ -53,7 +53,7 @@ Record verified access, environment protection, and OIDC/provenance evidence in 
 
 ## Publish a tagged release
 
-Commit the desired stable version, synchronize the docs dependency and lockfile, date the changelog, and update release notes. Recheck device evidence after any runtime/dependency change. Merge to main, wait for Tests and Documentation to pass, tag that exact main commit (`v0.3.0` for this release), then publish its GitHub release. Prerelease versions containing a hyphen use `next`; stable versions use `latest`.
+Commit the desired stable version, synchronize the docs dependency and lockfile, date the changelog, and update release notes. Recheck device evidence after any runtime/dependency change. Merge to main, wait for Tests and Documentation to pass, tag that exact main commit (`v0.4.0` for this release), then publish its GitHub release. Prerelease versions containing a hyphen use `next`; stable versions use `latest`.
 
 `publish_npm.yml` checks out the release tag and fails on a mismatched version, source outside main, dirty source, missing device evidence without a matching pending-certification `*-release.json` decision, already-published version, or unexpected registry response. Validation runs the full package and docs checks, then packs and uploads one archive with SHA-256. The publishing job downloads and verifies that archive, repeats the release gate, checks token or OIDC availability, and publishes it on GitHub-hosted Ubuntu with provenance after the `npm-release` environment gate.
 
@@ -64,8 +64,8 @@ The final registry check waits up to five minutes for npm's processing to expose
 Do not retry publication blindly after a network failure. Query the exact version first. An existing immutable version cannot be overwritten. If publication succeeded but verification failed, inspect that version and rerun the **Registry smoke** workflow with the exact version; do not hide the failure by installing workspace source. Fix defects with a new version. If publication never reached npm, resolve the auth/network error and rerun the failed release workflow. Dist-tags are checked explicitly; repair a wrong tag through an authorized account or a publisher whose allowed actions include dist-tag management.
 
 ```sh
-npm view @bloxwap/haptic@0.3.0 version dist-tags repository dependencies peerDependencies dist.tarball --json
-HAPTIC_REGISTRY_VERSION=0.3.0 npm run registry:check
+npm view @bloxwap/haptic@0.4.0 version dist-tags repository dependencies peerDependencies dist.tarball --json
+HAPTIC_REGISTRY_VERSION=0.4.0 npm run registry:check
 DOCS_URL=https://bloxwap.github.io/haptic/ npm run docs:smoke
 ```
 

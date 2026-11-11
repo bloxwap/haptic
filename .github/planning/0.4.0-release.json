@@ -1,0 +1,7 @@
+{
+  "versions": ["0.4.0"],
+  "implementationCommit": "67ce1e4bdccd1020a59243603c9aa3c20de1f2cf",
+  "decidedAt": "2026-11-11T00:30:00Z",
+  "deviceCertification": "pending",
+  "reason": "The maintainer approved a minor release of the invariant fixes already on main: #57 and #60 (multi-element children fail closed; nested targets defer to the innermost), #58 (a Vibration API installed after import vibrates), #59 and #61–#66 (published client directive, bundle budgets, compiler parity, lockfile agreement, docs workspace dependency, React peers ^18.0.0 || ^19.0.0), and #67 (exhaustive native cue mapping), shipped in pull requests #68–#72. Verification is jsdom and CI only. No physical-device results were recorded. Physical-device and VoiceOver certification remains pending in #9 and is disclosed; this decision does not certify hardware or apply to later versions."
+}
