@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@bloxwap/font": "0.1.4",
-    "@bloxwap/haptic": "0.3.0",
+    "@bloxwap/haptic": "0.4.0",
     "@bloxwap/hig": "0.2.0",
     "fumadocs-core": "16.17.7",
     "fumadocs-mdx": "15.4.9",
