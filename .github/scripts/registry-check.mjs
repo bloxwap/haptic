@@ -7,11 +7,13 @@ import { waitForRegistryRelease } from './wait-for-registry.mjs';
 const version = process.env.HAPTIC_REGISTRY_VERSION;
 assert.match(version ?? '', /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, 'Set HAPTIC_REGISTRY_VERSION to an exact published version.');
 const { metadata, distTags } = await waitForRegistryRelease(version);
+// Compare against the tagged source manifest so peer range changes (#66, #71) do not fail the check.
+const source = JSON.parse(readFileSync('packages/haptic/package.json', 'utf8'));
 assert.equal(metadata.name, '@bloxwap/haptic'); assert.equal(metadata.version, version);
 assert.equal(metadata.repository.url, 'git+https://github.com/bloxwap/haptic.git');
 assert.equal(metadata.repository.directory, 'packages/haptic');
 assert.deepEqual(metadata.dependencies, { 'web-haptics': '0.0.6' });
-assert.deepEqual(metadata.peerDependencies, { react: '>=18', 'react-dom': '>=18' });
+assert.deepEqual(metadata.peerDependencies, source.peerDependencies);
 const expectedTag = version.includes('-') ? 'next' : 'latest';
 assert.equal(distTags[expectedTag], version);
 if (process.env.HAPTIC_EXPECTED_TARBALL) {
