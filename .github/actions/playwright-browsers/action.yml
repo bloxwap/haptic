@@ -12,6 +12,24 @@ runs:
     - shell: sh
       run: defaults write NSGlobalDomain AppleKeyboardUIMode -int 2
     - shell: bash
-      run: npx playwright install ${{ inputs.browsers }}
+      env:
+        PLAYWRIGHT_BROWSERS: ${{ inputs.browsers }}
+      run: |
+        set -euo pipefail
+        # Pass browser names through the environment and an allow-list so GitHub
+        # context interpolation cannot inject shell into this step.
+        allowed='chromium chromium-headless-shell firefox webkit chrome msedge ffmpeg'
+        set --
+        for name in $PLAYWRIGHT_BROWSERS; do
+          case " $allowed " in
+            *" $name "*) set -- "$@" "$name" ;;
+            *) echo "Unsupported Playwright browser: $name" >&2; exit 1 ;;
+          esac
+        done
+        if [ "$#" -eq 0 ]; then
+          echo "No Playwright browsers requested" >&2
+          exit 1
+        fi
+        npx playwright install "$@"
     - shell: sh
       run: xattr -cr "$HOME/Library/Caches/ms-playwright" || true
