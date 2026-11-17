@@ -1,0 +1,9 @@
+{
+  "versions": [
+    "0.5.0"
+  ],
+  "implementationCommit": "f67a9ec26664e845186e3ff16d5dc6269e00bba9",
+  "decidedAt": "2026-11-17T16:40:56Z",
+  "deviceCertification": "pending",
+  "reason": "The maintainer requested: Merge all changes and ship a new release. This scoped decision covers the cross-platform Expo-backed haptics API, explicit iOS web overlay opt-in, and the invariant fixes merged in #74, versioned as 0.5.0 in #76. Automated validation covers the React 18/19 suite at 100% coverage, browser interactions, documentation, package metadata and real Expo 52/58 Metro consumers for iOS and Android. The implementation commit includes the final versioned manifests and lockfiles. No physical-device observations were recorded. Physical-device and VoiceOver certification remains pending in #9 and is disclosed; this decision does not certify hardware or apply to later versions."
+}
