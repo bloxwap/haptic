@@ -34,20 +34,25 @@ export function createHapticAdapter(backend: HapticBackend) {
   return {
     capability: backend.capability,
     async play(event: FeedbackEvent, preferences: FeedbackPreferences): Promise<void> {
-      if (disposed || background || !backend.capability.available || !preferences.haptics || event.cancelled || event.disabled || event.busy || event.suppressed) return;
+      if (disposed) return;
       if (event.intent === 'cancel') { await attempt(() => backend.cancel()); return; }
+      if (background || !backend.capability.available || !preferences.haptics || event.cancelled || event.disabled || event.busy || event.suppressed) return;
       const cue = semanticHaptics[event.intent];
       if (cue) await attempt(() => backend.trigger(event.impact ?? cue));
     },
-    cancel: () => attempt(() => backend.cancel()),
+    async cancel(): Promise<void> {
+      if (!disposed) await attempt(() => backend.cancel());
+    },
     async setBackground(value: boolean): Promise<void> {
+      if (disposed) return;
       background = value;
       if (value) await attempt(() => backend.cancel());
     },
     async dispose(): Promise<void> {
       if (disposed) return;
       disposed = true;
-      await attempt(() => backend.cancel());
+      // Start cancellation first, but disposal must not depend on it settling.
+      void attempt(() => backend.cancel());
       await attempt(() => backend.dispose());
     },
   };

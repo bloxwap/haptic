@@ -3,15 +3,16 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { waitForRegistryRelease } from './wait-for-registry.mjs';
+import { assertRegistryManifest } from './registry-metadata.mjs';
 
 const version = process.env.HAPTIC_REGISTRY_VERSION;
 assert.match(version ?? '', /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, 'Set HAPTIC_REGISTRY_VERSION to an exact published version.');
 const { metadata, distTags } = await waitForRegistryRelease(version);
-assert.equal(metadata.name, '@bloxwap/haptic'); assert.equal(metadata.version, version);
-assert.equal(metadata.repository.url, 'git+https://github.com/bloxwap/haptic.git');
-assert.equal(metadata.repository.directory, 'packages/haptic');
-assert.deepEqual(metadata.dependencies, { 'web-haptics': '0.0.6' });
-assert.deepEqual(metadata.peerDependencies, { react: '>=18', 'react-dom': '>=18' });
+const expected = JSON.parse(process.env.HAPTIC_EXPECTED_TARBALL
+  ? execFileSync('tar', ['-xOf', process.env.HAPTIC_EXPECTED_TARBALL, 'package/package.json'], { encoding: 'utf8' })
+  : readFileSync('packages/haptic/package.json', 'utf8'));
+assert.equal(expected.version, version, 'Check out the requested release or supply HAPTIC_EXPECTED_TARBALL.');
+assertRegistryManifest(metadata, expected);
 const expectedTag = version.includes('-') ? 'next' : 'latest';
 assert.equal(distTags[expectedTag], version);
 if (process.env.HAPTIC_EXPECTED_TARBALL) {

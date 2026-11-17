@@ -48,16 +48,17 @@ scenarios; `lib/` holds sampling, subprocess capture, bundling, and resource pro
   latency. The desktop warmed batch repeatedly restarts one engine's pattern;
   it does not represent 200 completed animations.
 - **Routing:** each mode runs in its own process. Navigator is stubbed before
-  importing dist because `WebHaptics.isSupported` is static at module evaluation.
+  importing dist. The iOS worker explicitly opts into `iosPhysicalTap`; the desktop
+  worker opts into the visual preview with `showSwitch: true` and no audio.
   Vibration returns true; iOS has no vibration and uses iPhone/AppleWebKit;
   desktop has no vibration, Linux platform, and a UA without iPhone.
 - **Resources:** a separate production 100-instance mount instruments listener
   registration and MutationObserver creation. DOM counts include elements and
   text nodes below body, excluding the root container. Body node deltas after
-  taps include engine nodes outside the React tree. Desktop's hidden engine
+  taps include engine nodes outside the React tree. Desktop's visual preview
   label contains text and a switch: three nodes per engine. First-tap deltas
   refer to one instance; cumulative deltas follow one tap on each of 100 distinct
-  instances. Labels with `for="web-haptics-*"` independently count desktop engines.
+  instances. Labels with `data-haptic-preview` independently count desktop engines.
   Vibration engines create no labels; constructor counts therefore use the
   separate instrumented dist worker (reported as `n/a` if the construction
   site in dist changes). No allocation-per-tap estimate is attempted.
@@ -88,3 +89,16 @@ trusted iOS activation, tactile delivery, browser frame budgets, or accessibilit
 behavior. Profiling and resource observations explain work performed, but are
 not additive timing attribution. Source optimizations require separate A/B
 measurements and browser/hydration/accessibility regression checks.
+
+## Cross-platform `haptics` API (`npm run bench:api`)
+
+`haptics-api.mjs` A/B-tests the `haptics.*` object against the monorepo code it replaces, using snapshots in `bench/baseline/`:
+
+- **Native:** `dist/native.js` against the `ui-native` lane scheduler and a no-lane direct `expo-haptics` call. esbuild bundles each one with the same stubbed `expo-haptics`, whose latency is a microtask, never settles, or is a fixed timeout. Scenarios: an isolated tap (fire plus settlement on an idle lane), a burst on a busy lane (the collapse path), and 120 taps at 120 Hz against a 12 ms native round trip (bridge-call count).
+- **Web:** `dist/index.js` `haptics.selection()` against `triggerHaptic` and a `WebHaptics` singleton, under jsdom with a stubbed Vibration API. It runs two rounds in opposite order to expose JIT ordering effects.
+
+Each row has 3 warmups and 15 samples. GC events come from a `PerformanceObserver`. Results are written to `bench/results/haptics-api.json`. All numbers are JS dispatch costs: bridge latency, Taptic Engine response, and vibrator spin-up need a physical device.
+
+Benchmark JSON now includes the commit, a dirty-worktree flag, a source SHA-256 digest and the hashes of the distributed JavaScript being measured. Both benchmark entry points use this provenance. Dirty measurements are labeled explicitly and must not be attributed to the recorded commit alone. Native lanes track calls for at most one second; timed-out calls drop their trailing replay.
+
+The native imperative bundle budget is 1,280 gzip bytes (previously 1,024). Scoped backend restoration, the shared gate and hung-call recovery measured 1,121 bytes in the hardened build. The full browser and imperative budgets are unchanged.

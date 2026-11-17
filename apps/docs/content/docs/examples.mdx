@@ -12,11 +12,13 @@ description: Try actions, refs, forms, disabled targets, links, and drawer handl
 The target remains the same DOM element. A button ref still points to that button, and an iOS action focuses the original target.
 
 ```tsx
-const ref = useRef<HTMLButtonElement>(null);
+import { useRef } from 'react';
+import { Haptic } from '@bloxwap/haptic';
 
-<Haptic>
-  <button ref={ref} onClick={save}>Save</button>
-</Haptic>
+export function SaveButton({ save }: { save: () => void }) {
+  const ref = useRef<HTMLButtonElement>(null);
+  return <Haptic><button ref={ref} onClick={save}>Save</button></Haptic>;
+}
 ```
 
 ## Forms and links

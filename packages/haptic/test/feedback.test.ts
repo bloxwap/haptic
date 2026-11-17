@@ -77,3 +77,20 @@ it('maps every SemanticHaptic cue to exactly one Expo call', async () => {
     expect(calls, `cue ${cue}`).toBe(1);
   }
 });
+
+it('cancels despite disabled preferences, unavailable capability, background and event vetoes', async () => {
+  const { backend, adapter } = setup();
+  backend.capability.available = false;
+  await adapter.setBackground(true); backend.cancel.mockClear();
+  await adapter.play({ ...event, intent: 'cancel', cancelled: true, disabled: true, busy: true, suppressed: true }, { ...preferences, haptics: false });
+  expect(backend.cancel).toHaveBeenCalledOnce();
+});
+it('disposes without waiting for a hung cancellation and makes every lifecycle method terminal', async () => {
+  const { backend, adapter } = setup();
+  backend.cancel.mockImplementation(() => new Promise(() => {}));
+  await adapter.dispose(); expect(backend.dispose).toHaveBeenCalledOnce();
+  backend.cancel.mockClear();
+  await adapter.cancel(); await adapter.setBackground(true); await adapter.setBackground(false);
+  await adapter.play({ ...event, intent: 'cancel' }, preferences); await adapter.dispose();
+  expect(backend.cancel).not.toHaveBeenCalled(); expect(backend.dispose).toHaveBeenCalledOnce();
+});

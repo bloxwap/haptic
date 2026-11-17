@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { appendFileSync, readdirSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { assertBuildManifests, verifiedBuildPaths } from './release-inputs.mjs';
 
 const manifest = JSON.parse(readFileSync('packages/haptic/package.json', 'utf8'));
 const tag = process.env.RELEASE_TAG;
@@ -39,9 +40,9 @@ if (devices.status === 'certified') {
 }
 assert.match(verifiedCommit ?? '', /^[a-f0-9]{40}$/);
 git('merge-base', '--is-ancestor', verifiedCommit, 'HEAD');
-assert.equal(git('diff', verifiedCommit, 'HEAD', '--', 'packages/haptic/src'), '', 'Runtime changed after verification.');
+assert.equal(git('diff', verifiedCommit, 'HEAD', '--', ...verifiedBuildPaths), '', 'Runtime or build inputs changed after verification.');
 const testedManifest = JSON.parse(git('show', `${verifiedCommit}:packages/haptic/package.json`));
-for (const key of ['dependencies', 'peerDependencies']) assert.deepEqual(manifest[key], testedManifest[key], `${key} changed after verification.`);
+assertBuildManifests(testedManifest, manifest, JSON.parse(git('show', `${verifiedCommit}:package.json`)), JSON.parse(readFileSync('package.json', 'utf8')));
 const response = await fetch(`https://registry.npmjs.org/@bloxwap%2Fhaptic/${encodeURIComponent(manifest.version)}`, { signal: AbortSignal.timeout(30000) });
 assert.equal(response.status, 404, response.ok ? 'This immutable version is already published; run registry:check, do not republish.' : `Unexpected registry response: ${response.status}`);
 const distTag = manifest.version.includes('-') ? 'next' : 'latest';

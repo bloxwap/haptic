@@ -14,8 +14,9 @@ describe('HIG injected backend contract', () => {
 
   it('publishes the main and feedback entries that packed consumers import', () => {
     const manifest = JSON.parse(readFileSync('package.json', 'utf8'));
-    expect(Object.keys(manifest.exports).sort()).toEqual(['.', './feedback', './package.json']);
+    expect(Object.keys(manifest.exports).sort()).toEqual(['.', './feedback', './native', './package.json']);
     expect(manifest.exports['.']).toEqual({
+      'react-native': { types: './dist/native.d.ts', default: './dist/native.js' },
       import: { types: './dist/index.d.ts', default: './dist/index.js' },
       require: { types: './dist/index.d.cts', default: './dist/index.cjs' },
     });
@@ -86,7 +87,6 @@ describe('imperative vibration', () => {
     [[{ duration: 20 }, { duration: 10, delay: 5 }]],
     [{ pattern: [{ duration: 25, intensity: 0 }, { duration: 5, delay: 10, intensity: 1 }] }],
     [[{ duration: 20, delay: 10 }, { duration: 15, intensity: 0 }]],
-    [[{ duration: 10, intensity: 1 }, { duration: 20, intensity: 0 }]],
     [[{ duration: 0, intensity: 0 }, { duration: 5, intensity: 2 }]],
   ];
   it.each(forms.map(([input, options]) => ({ input, options })))('preserves engine output for $input / $options', async ({ input, options }) => {

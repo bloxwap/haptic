@@ -1,7 +1,7 @@
 {
   "name": "@bloxwap/haptic",
   "version": "0.4.0",
-  "description": "Physical-tap haptic feedback for React on iOS and vibration-capable browsers.",
+  "description": "Haptic feedback for React and React Native: physical-tap haptics on iOS WebKit, the Vibration API in browsers, and expo-haptics on iOS and Android.",
   "type": "module",
   "sideEffects": false,
   "license": "MIT",
@@ -21,8 +21,13 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "react-native": "./dist/native.js",
   "exports": {
     ".": {
+      "react-native": {
+        "types": "./dist/native.d.ts",
+        "default": "./dist/native.js"
+      },
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
@@ -42,6 +47,20 @@
         "types": "./dist/feedback.d.cts",
         "default": "./dist/feedback.cjs"
       }
+    },
+    "./native": {
+      "react-native": {
+        "types": "./dist/native.d.ts",
+        "default": "./dist/native.js"
+      },
+      "import": {
+        "types": "./dist/native.d.ts",
+        "default": "./dist/native.js"
+      },
+      "require": {
+        "types": "./dist/native.d.cts",
+        "default": "./dist/native.cjs"
+      }
     }
   },
   "files": [
@@ -58,17 +77,33 @@
     "ios",
     "webkit",
     "vibration",
-    "feedback"
+    "feedback",
+    "react-native",
+    "expo",
+    "expo-haptics"
   ],
   "peerDependencies": {
+    "expo-haptics": ">=14.0.0",
     "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "react-native": "*"
+  },
+  "peerDependenciesMeta": {
+    "expo-haptics": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "react-native": {
+      "optional": true
+    }
   },
   "dependencies": {
     "web-haptics": "0.0.6"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsup",
     "pretypecheck": "npm run build",
     "typecheck": "tsrs --noEmit",
     "pretypecheck:tsc": "npm run build",
@@ -81,7 +116,8 @@
     "pack:check": "npm run build && node scripts/pack-check.mjs",
     "prepack": "npm run build",
     "prepublishOnly": "npm run typecheck && npm run coverage && npm run pack:check",
-    "bench": "npm run build && node bench/run.mjs"
+    "bench": "npm run build && node bench/run.mjs",
+    "bench:api": "npm run build && node --expose-gc bench/haptics-api.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",

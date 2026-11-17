@@ -16,3 +16,9 @@ The first build retains `web-haptics` at `0.0.6` for the existing presets and in
 The new workspace separates `packages/haptic` from private `apps/docs`. Feedback remains optional, and unavailable hardware must not remove the original action. Native iOS feedback still requires a physical tap and uses the platform tick.
 
 Compared with the reference, the new wrapper deliberately keeps its engine across ordinary rerenders, handles failed feedback requests without removing the host action, and explicitly cancels moved/canceled overlay gestures. These changes strengthen the target-preservation contract rather than removing an input or consumption mode.
+
+## Interaction-preserving default
+
+By default, `Haptic` preserves the original pointer and click events. On iOS WebKit without vibration it stays silent. Set `iosPhysicalTap` to opt into the native switch overlay on a button or link that has no nested controls. That overlay intercepts pointer handlers, forwards an untrusted click without the original modifiers, coordinates or click count, and exposes auxiliary clicks to ancestor capture handlers. Keep it off for gesture controls, modified links, or capture-based actions. Unsupported hosts keep their original interaction without an overlay.
+
+Existing iOS integrations that need the overlay must add `iosPhysicalTap` explicitly. Vibration patterns now merge adjacent phases correctly, including silent events. Native backend restores are scoped and idempotent, and hung native calls expire after one second without replay. These changes require new release verification; previous hardware evidence is not automatically transferred.

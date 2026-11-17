@@ -10,6 +10,7 @@ description: Every component, prop, helper, and public type.
 | Prop | Type | Default |
 | --- | --- | --- |
 | `children` | One target React element | Required |
+| `iosPhysicalTap` | `boolean`; opt into the iOS overlay | `false` |
 | `enabled` | `boolean` | `true` |
 | `disabled` | `boolean` | `false` |
 | `feedback` | `HapticInput` | `'selection'` |
@@ -18,9 +19,11 @@ description: Every component, prop, helper, and public type.
 | `className` | `string` | Unspecified |
 | `style` | React `CSSProperties` | Wrapper uses `inline-grid` |
 
-`triggerOptions.intensity` adjusts vibration intensity from 0 to 1. It does not change the iOS system tick. `webHapticsOptions.debug` enables desktop preview audio; `showSwitch` controls the dependency's visible feedback switch.
+`triggerOptions.intensity` supplies the default intensity from 0 to 1 for events that do not specify their own. Named presets specify their own intensities, so this option affects custom patterns instead. It does not change the iOS system tick. `webHapticsOptions.debug` enables desktop preview audio; `showSwitch` controls the visible preview checkbox.
 
 ```tsx
+import { Haptic } from '@bloxwap/haptic';
+
 <Haptic
   feedback="light"
   triggerOptions={{ intensity: 0.7 }}
@@ -38,7 +41,9 @@ description: Every component, prop, helper, and public type.
 `triggerHaptic(cue?: HapticInput, options?: TriggerOptions): Promise<HapticTriggerResult>` submits the request before returning its promise. The default cue is `selection`. Vibration presets, custom forms, the per-event 1000ms duration cap, and intensity modulation match `HapticTarget`. No engine, auxiliary controls, tab stops, or accessibility nodes are created.
 
 ```tsx
-function SaveAction() {
+import { triggerHaptic } from '@bloxwap/haptic';
+
+function SaveAction({ save }: { save: () => void }) {
   return <button onClick={() => {
     save();
     void triggerHaptic('success').then(result => {
@@ -50,7 +55,7 @@ function SaveAction() {
 
 The result contains `delivered`, `mechanism`, and an optional `reason`. `delivered: true` means `navigator.vibrate` accepted the request; it does not prove a physical response. A rejection, exception, unavailable environment, invalid input, or silent pattern resolves `delivered: false` with mechanism `none`. Feedback failures never reject the returned promise.
 
-On iOS WebKit without vibration, imperative feedback resolves unavailable even inside a synchronous click handler. Transient activation alone does not make a script-created click trusted. [WebKit's trusted-event change](https://github.com/WebKit/WebKit/commit/fc1ef83eae10068fe468587d959e868041ddfe03) explicitly rejects programmatic label activation. Use `HapticTarget` for eligible physical taps; its iOS feedback is a system tick, without success/warning/error patterns. Timers and calls after an `await` do not gain an iOS delivery promise. Physical certification remains tracked in [#9](https://github.com/bloxwap/haptic/issues/9) and the remaining native API request in [#27](https://github.com/bloxwap/haptic/issues/27).
+On iOS WebKit without vibration, imperative feedback resolves unavailable even inside a synchronous click handler. Transient activation alone does not make a script-created click trusted. [WebKit's trusted-event change](https://github.com/WebKit/WebKit/commit/fc1ef83eae10068fe468587d959e868041ddfe03) explicitly rejects programmatic label activation. Use `<HapticTarget iosPhysicalTap>` for eligible physical taps after reviewing the overlay limitations; its iOS feedback is a system tick, without success/warning/error patterns. Timers and calls after an `await` do not gain an iOS delivery promise. Physical certification remains tracked in [#9](https://github.com/bloxwap/haptic/issues/9) and the remaining native API request in [#27](https://github.com/bloxwap/haptic/issues/27).
 
 | Reason | Meaning |
 | --- | --- |
@@ -91,13 +96,15 @@ import type {
 - `TriggerOptions`: `{ intensity?: number }`.
 - `WebHapticsOptions`: `{ debug?: boolean; showSwitch?: boolean }`.
 
-Feedback types come from the retained `web-haptics` dependency. All timings use milliseconds.
+Feedback types come from the retained `web-haptics` dependency. All timings use milliseconds, rounded down to whole milliseconds. Both the component and imperative API accept at most 64 events (128 alternating numeric entries), 1,024 encoded segments and 10 seconds including delays. Oversized input is rejected as `invalid-input`; each vibration duration is capped at 1,000 ms. Browser-specific truncation may impose tighter limits.
 
 ## Lifecycle and events
 
+By default, `Haptic` preserves the original pointer and click events. On iOS WebKit without vibration it stays silent. Set `iosPhysicalTap` to opt into the native switch overlay on a button or link that has no nested controls. That overlay intercepts pointer handlers, forwards an untrusted click without the original modifiers, coordinates or click count, and exposes auxiliary clicks to ancestor capture handlers. Keep it off for gesture controls, modified links, or capture-based actions. Unsupported hosts keep their original interaction without an overlay.
+
 The original target element is rendered intact. Feedback runs before its React click handler, including handlers that stop propagation or prevent default. Original handlers still control bubbling and browser defaults.
 
-Engine resources are created when first used and released on unmount or construction-option changes. Ordinary renders and feedback/intensity changes do not recreate the engine. Unmounting ends pending feedback. Feedback errors leave the original action available.
+Engine resources are created when first used and released on unmount or construction-option changes. Ordinary renders and feedback/intensity changes do not recreate the engine. Unmounting invalidates pending preview work and cancels only vibration still owned by that component. Direct actuator calls outside this package cannot participate in ownership tracking. Feedback errors leave the original action available.
 
 The positioning wrapper is a `span` marked with `data-haptic-target`. Non-element children (`null`, text, arrays) are rejected with an error.
 

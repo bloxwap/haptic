@@ -35,7 +35,7 @@ const full = await build({
   external: ['react', 'react-dom'],
 });
 const fullBytes = gzipSync(full.outputFiles[0].contents).byteLength;
-console.log(`Browser bundle including web-haptics, excluding React: ${fullBytes} gzip bytes (budget ${FULL_BUDGET}).`);
+console.log(`Browser bundle excluding React: ${fullBytes} gzip bytes (budget ${FULL_BUDGET}).`);
 if (fullBytes > FULL_BUDGET) throw new Error('Haptic exceeds its measured bundle-size budget.');
 
 async function assertImperative(name) {
@@ -49,6 +49,15 @@ async function assertImperative(name) {
 
 await assertImperative('triggerHaptic');
 await assertImperative('canTriggerHaptic');
+await assertImperative('haptics');
+
+// Shared gate, scoped installations and hung-call recovery add ~100 gzip bytes.
+const NATIVE_BUDGET = 1280;
+const native = await bundle(`import { haptics } from './dist/native.js'; console.log(haptics);`, ['expo-haptics', 'react-native']);
+const nativeForbidden = native.inputs.filter(path => path.includes('web-haptics/') || path.includes('/react/') || path.includes('/react-dom/'));
+console.log(`native haptics: ${native.gzip} gzip bytes (budget ${NATIVE_BUDGET}); forbidden inputs: ${nativeForbidden.length}.`);
+if (nativeForbidden.length > 0) throw new Error(`@bloxwap/haptic/native bundles a forbidden dependency: ${nativeForbidden.join(', ')}`);
+if (native.gzip > NATIVE_BUDGET) throw new Error(`native haptics exceeds its ${NATIVE_BUDGET} byte gzip budget (${native.gzip}).`);
 
 const feedback = await bundle(`import { createHapticAdapter } from './dist/feedback.js'; console.log(createHapticAdapter);`);
 const forbidden = feedback.inputs.filter(path => path.includes('web-haptics/') || path.includes('/react/') || path.includes('/react-dom/'));

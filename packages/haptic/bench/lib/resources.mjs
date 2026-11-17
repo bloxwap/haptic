@@ -47,7 +47,10 @@ export async function measureResources({ mount, unmount, ios, mode }) {
     constructor(cb) {
       super(cb);
       created++;
+    }
+    observe(target, options) {
       observers.add(this);
+      return super.observe(target, options);
     }
     disconnect() {
       disconnected++;
@@ -75,7 +78,8 @@ export async function measureResources({ mount, unmount, ios, mode }) {
   function tapAndDrain(target) {
     target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
     // Simulate 60Hz frames until the selection pattern completes.
-    let timestamp = 100;
+    let timestamp = performance.now();
+    const deadline = timestamp + 10000;
     while (frames.size) {
       const pending = [...frames.values()];
       frames.clear();
@@ -83,7 +87,7 @@ export async function measureResources({ mount, unmount, ios, mode }) {
         callback(timestamp);
       }
       timestamp += 1000 / 60;
-      if (timestamp > 10000) {
+      if (timestamp > deadline) {
         throw Error('Pattern did not finish');
       }
     }
@@ -95,7 +99,7 @@ export async function measureResources({ mount, unmount, ios, mode }) {
     nodes: bodyNodeCount() - preTap,
     listeners: adds - mounted.adds,
     observers: created - mounted.created,
-    labels: document.body.querySelectorAll('label[for^="web-haptics-"]').length,
+    labels: document.body.querySelectorAll('label[data-haptic-preview]').length,
     raf: scheduledFrames,
     milliseconds: firstTapMilliseconds,
   };
@@ -106,7 +110,7 @@ export async function measureResources({ mount, unmount, ios, mode }) {
   const remainingMilliseconds = performance.now() - remainingStarted;
   const allTaps = {
     nodes: bodyNodeCount() - preTap,
-    labels: document.body.querySelectorAll('label[for^="web-haptics-"]').length,
+    labels: document.body.querySelectorAll('label[data-haptic-preview]').length,
     rafPerTap: scheduledFrames / 100,
     millisecondsPerTap: remainingMilliseconds / 99,
   };

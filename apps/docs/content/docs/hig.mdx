@@ -25,22 +25,31 @@ const adapter = createHapticAdapter({
 
 `createNativeHapticAdapter(Haptics, capability)` accepts the host-imported Expo module and maps selection to Expo selectionAsync, light/medium/heavy to impactAsync, and success/warning/error to notificationAsync. Import Expo only in that host. A vibration browser host may inject WebHaptics trigger/cancel/destroy with `{ debug: false, showSwitch: false }`. Check `navigator.vibrate` before advertising browser-vibration availability; a successful call is not observed tactile output. Never represent iOS physical ticks as an imperative native backend.
 
-`adapter.play(event, preferences)` checks haptics, capability, cancellation, disabled/busy/suppressed state and background. Exceptions/rejections are absorbed. `setBackground(true)` cancels pending feedback; forward host AppState changes. Dispose once on unmount. Backend owners must implement actual resource cleanup. Expo exposes no cancellation handle for an already submitted native tick; its bridge cancellation only gates subsequent requests via background/disposal. Use HIG's controller for bounded deduplication and cooldowns, rather than invoking both an adapter and a vibration wrapper for the same click.
+`cancel` events bypass playback eligibility until disposal. Disposal starts cancellation and resource release without waiting for cancellation to finish; all methods become inert after disposal. Other `adapter.play(event, preferences)` calls check haptics, capability, cancellation, disabled/busy/suppressed state and background. Exceptions/rejections are absorbed. `setBackground(true)` cancels pending feedback; forward host AppState changes. Dispose once on unmount. Backend owners must implement actual resource cleanup. Expo exposes no cancellation handle for an already submitted native tick; its bridge cancellation only gates subsequent requests via background/disposal. Use HIG's controller for bounded deduplication and cooldowns, rather than invoking both an adapter and a vibration wrapper for the same click.
 
 ## Physical target and preferences
 
+By default, `Haptic` preserves the original pointer and click events. On iOS WebKit without vibration it stays silent. Set `iosPhysicalTap` to opt into the native switch overlay on a button or link that has no nested controls. That overlay intercepts pointer handlers, forwards an untrusted click without the original modifiers, coordinates or click count, and exposes auxiliary clicks to ancestor capture handlers. Keep it off for gesture controls, modified links, or capture-based actions. Unsupported hosts keep their original interaction without an overlay.
+
+Both the direct `HapticTarget` API and HIG's `HapticFeedbackTarget` forward `iosPhysicalTap`. With the HIG wrapper, set both `eligible` and `iosPhysicalTap` explicitly after reviewing the interaction limitations.
+
 ```tsx
-const physicalTap = useIOSNativeHaptics();
-const eligible = true, busy = false, applicationAllowsHaptics = true;
-const preferences = { haptics: true };
-<HapticTarget
-  enabled={physicalTap && eligible}
-  preferences={preferences}
-  policyEnabled={applicationAllowsHaptics}
-  webHapticsOptions={{ debug: false, showSwitch: false }}
->
-  <button disabled={busy} onClick={save}>Save</button>
-</HapticTarget>
+import { HapticTarget, useIOSNativeHaptics } from '@bloxwap/haptic';
+
+function PhysicalSave({ save }: { save: () => void }) {
+  const physicalTap = useIOSNativeHaptics();
+  const eligible = true, busy = false, applicationAllowsHaptics = true;
+  const preferences = { haptics: true };
+  return <HapticTarget
+    iosPhysicalTap
+    enabled={physicalTap && eligible}
+    preferences={preferences}
+    policyEnabled={applicationAllowsHaptics}
+    webHapticsOptions={{ debug: false, showSwitch: false }}
+  >
+    <button disabled={busy} onClick={save}>Save</button>
+  </HapticTarget>;
+}
 ```
 
 Pre-approve a single physical target before the gesture; do not put nested controls under an iOS overlay. The iOS tick precedes delegated handlers and cannot be retracted by later preventDefault. Keyboard actions retain the original target; do not synthesize an iOS tactile promise. Presets and intensity all become the same OS tick on this path.

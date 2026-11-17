@@ -4,7 +4,8 @@ import {
   isValidElement, useEffect, useId, useLayoutEffect, useRef, useState,
   type CSSProperties, type MouseEvent, type ReactElement,
 } from 'react';
-import { WebHaptics, type HapticInput, type TriggerOptions, type WebHapticsOptions } from 'web-haptics';
+import type { HapticInput, TriggerOptions, WebHapticsOptions } from 'web-haptics';
+import { BrowserFeedback } from './preview';
 import { useIOSNativeHaptics } from './platform';
 import type { FeedbackPreferences } from './feedback';
 
@@ -36,6 +37,13 @@ export interface HapticTargetProps {
    * A child that renders several elements (such as a fragment) keeps its actions but gets no feedback.
    */
   children: ReactElement<HostProps>;
+  /**
+   * Opt into the iOS switch overlay for a button or link host. Defaults to false.
+   * The overlay intercepts pointer events, forwards an untrusted click without its
+   * original metadata, and exposes auxiliary clicks to ancestor capture handlers.
+   * Leave off when the original event sequence matters.
+   */
+  iosPhysicalTap?: boolean;
   /** Enable feedback. Defaults to true. */
   enabled?: boolean;
   /** Host-owned HIG preferences; motion is independent from haptics. */
@@ -56,40 +64,34 @@ export interface HapticTargetProps {
   style?: CSSProperties;
 }
 
-function hostDisabled(host: HTMLElement): boolean {
+function hostDisabled(host: Element): boolean {
   return host.matches(':disabled') || host.getAttribute('aria-disabled') === 'true' ||
     host.closest('[inert]') !== null;
 }
 
-function dispose(engine: WebHaptics | null): void {
-  if (!engine) return;
-  try { engine.cancel(); } catch { /* A removed vibration API must not prevent resource cleanup. */ }
-  engine.destroy();
+function isPhysicalTarget(host: Element): host is HTMLElement {
+  return host.namespaceURI === 'http://www.w3.org/1999/xhtml' &&
+    host.matches('button, a[href], input[type="button"], input[type="submit"], input[type="reset"]') &&
+    !host.querySelector('button, a[href], input, select, textarea, [contenteditable], [role="button"]');
 }
 
-/**
- * web-haptics 0.0.6 freezes `isSupported` when its module evaluates.
- * A Vibration API installed later would otherwise append a hidden switch
- * label and never call `navigator.vibrate`. Refresh the flag before each trigger.
- */
-function syncEngineSupport(): void {
-  const live = typeof navigator.vibrate === 'function';
-  if (WebHaptics.isSupported !== live) Reflect.set(WebHaptics, 'isSupported', live);
+function dispose(engine: BrowserFeedback | null): void {
+  engine?.destroy();
 }
 
 /** Add physical-tap feedback while keeping the original React target intact. */
 export function HapticTarget({
-  children, enabled: intentEnabled = true, preferences, policyEnabled = true, disabled = false, feedback = 'selection',
+  children, iosPhysicalTap = false, enabled: intentEnabled = true, preferences, policyEnabled = true, disabled = false, feedback = 'selection',
   triggerOptions, webHapticsOptions, className, style,
 }: HapticTargetProps): ReactElement {
   if (!isValidElement(children)) throw new Error('HapticTarget expects exactly one React element child.');
   const enabled = intentEnabled && policyEnabled && (preferences?.haptics ?? true);
   const child = children;
-  const native = useIOSNativeHaptics();
+  const native = useIOSNativeHaptics() && iosPhysicalTap;
   const wrapper = useRef<HTMLSpanElement>(null);
   const nativeSwitch = useRef<HTMLInputElement>(null);
   const nativeLabel = useRef<HTMLLabelElement>(null);
-  const engine = useRef<WebHaptics | null>(null);
+  const engine = useRef<BrowserFeedback | null>(null);
   const current = useRef({ enabled, disabled, feedback, triggerOptions, webHapticsOptions, native });
   useCommittedEffect(() => {
     // A suspended render must not change the visible target's event behavior.
@@ -108,16 +110,16 @@ export function HapticTarget({
   const switchId = useId();
   /** The single rendered host, or null when the child rendered no element or more than one node. */
   const readHost = () => {
-    let host: HTMLElement | null = null;
+    let host: Element | null = null;
     for (const node of wrapper.current!.childNodes) {
       if (node === nativeSwitch.current || node === nativeLabel.current || node.nodeType === Node.COMMENT_NODE) continue;
       if (host || node.nodeType !== Node.ELEMENT_NODE) return null;
-      host = node as HTMLElement;
+      host = node as Element;
     }
     return host;
   };
   /** An inner target owns its own taps; an outer overlay would click the wrong element. */
-  const containsTarget = (host: HTMLElement) => host.matches(NESTED) || host.querySelector(NESTED) !== null;
+  const containsTarget = (host: Element) => host.matches(NESTED) || host.querySelector(NESTED) !== null;
   const warned = useRef<string | undefined>(undefined);
   useCommittedEffect(() => {
     warnInDevelopment(() => {
@@ -128,7 +130,9 @@ export function HapticTarget({
         ? 'the child must render exactly one DOM element; feedback is disabled for this target.'
         : nodes[0]?.nodeType === Node.ELEMENT_NODE && containsTarget(nodes[0] as HTMLElement)
           ? 'nested targets are not supported; the innermost target handles taps inside it.'
-          : undefined;
+          : native && nodes[0]?.nodeType === Node.ELEMENT_NODE && !isPhysicalTarget(nodes[0] as Element)
+            ? 'iosPhysicalTap requires a button or link host without nested controls; the original target remains interactive.'
+            : undefined;
       const report = message !== warned.current ? message : undefined;
       warned.current = message;
       return report;
@@ -141,13 +145,20 @@ export function HapticTarget({
       return;
     }
     const root = wrapper.current!;
+    const attributes = ['disabled', 'aria-disabled', 'inert', 'data-haptic-target', 'href', 'type', 'role', 'contenteditable'];
     const synchronize = () => {
+      observer.disconnect();
+      observer.observe(root, { subtree: true, childList: true, attributes: true, attributeFilter: attributes });
+      // Effective :disabled and inert can come from outside this wrapper. Watch
+      // ancestor structure too, so moving the target refreshes the observed chain.
+      for (let ancestor = root.parentElement; ancestor; ancestor = ancestor.parentElement) {
+        observer.observe(ancestor, { childList: true, attributes: true, attributeFilter: attributes });
+      }
       const host = readHost();
-      updateBlocked(host ? hostDisabled(host) || containsTarget(host) : true);
+      updateBlocked(!host || !isPhysicalTarget(host) || hostDisabled(host) || containsTarget(host));
     };
-    synchronize();
     const observer = new MutationObserver(synchronize);
-    observer.observe(root, { subtree: true, childList: true, attributes: true, attributeFilter: ['disabled', 'aria-disabled', 'inert'] });
+    synchronize();
 
     return () => observer.disconnect();
   }, [native]);
@@ -161,8 +172,7 @@ export function HapticTarget({
       if (!host || !host.contains(target) || target.closest(NESTED) !== root || options.native || !options.enabled || options.disabled || hostDisabled(host)) return;
       if (typeof navigator.vibrate !== 'function' && !options.webHapticsOptions?.debug && !options.webHapticsOptions?.showSwitch) return;
       try {
-        syncEngineSupport();
-        engine.current ??= new WebHaptics(options.webHapticsOptions);
+        engine.current ??= new BrowserFeedback(options.webHapticsOptions);
         void engine.current.trigger(options.feedback, options.triggerOptions).catch(() => {});
       } catch {
         // Feedback failure must leave the original action available.
@@ -194,12 +204,13 @@ export function HapticTarget({
     !child.props.disabled && child.props['aria-disabled'] !== true && child.props['aria-disabled'] !== 'true';
 
   const focusHost = () => {
-    readHost()?.focus({ preventScroll: true });
+    const host = readHost();
+    if (host && isPhysicalTarget(host)) host.focus({ preventScroll: true });
   };
   const guardLabel = (event: MouseEvent<HTMLLabelElement>) => {
     event.stopPropagation();
     const host = readHost();
-    if (!host || gesture.current?.canceled || hostDisabled(host)) {
+    if (!host || !isPhysicalTarget(host) || gesture.current?.canceled || hostDisabled(host)) {
       gesture.current = null;
       event.preventDefault();
     }
@@ -209,7 +220,7 @@ export function HapticTarget({
     const host = readHost();
     const canceled = gesture.current?.canceled;
     gesture.current = null;
-    if (!host || canceled || hostDisabled(host)) {
+    if (!host || !isPhysicalTarget(host) || canceled || hostDisabled(host)) {
       event.preventDefault();
       return;
     }

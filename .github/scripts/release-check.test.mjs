@@ -25,3 +25,17 @@ test('pending-certification decisions have unique versions and a recorded implem
   assert.ok(seen.has('0.3.0'));
   assert.ok(seen.has('0.4.0'));
 });
+
+import { assertBuildManifests, verifiedBuildPaths } from './release-inputs.mjs';
+test('verification covers export routing, packaging and build tooling while allowing release prose', () => {
+  const library = JSON.parse(readFileSync('packages/haptic/package.json', 'utf8'));
+  const root = JSON.parse(readFileSync('package.json', 'utf8'));
+  assertBuildManifests(library, { ...library, description: 'Release prose' }, root, root);
+  for (const key of ['exports', 'main', 'react-native', 'files', 'sideEffects', 'devDependencies', 'peerDependenciesMeta', 'scripts']) {
+    assert.throws(() => assertBuildManifests(library, { ...library, [key]: null }, root, root), new RegExp(key));
+  }
+  for (const key of ['overrides', 'scripts', 'engines']) {
+    assert.throws(() => assertBuildManifests(library, library, root, { ...root, [key]: null }), new RegExp(key));
+  }
+  for (const path of ['packages/haptic/tsup.config.ts', 'package-lock.json', 'bun.lock', '.github/workflows/publish_npm.yml']) assert.ok(verifiedBuildPaths.includes(path));
+});

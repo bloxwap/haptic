@@ -1,3 +1,4 @@
+import { provenance } from './lib/provenance.mjs';
 import { measureBundles } from './lib/bundles.mjs';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { run } from './lib/process.mjs';
@@ -11,7 +12,7 @@ const environment = {
   cpu: cpus()[0]?.model,
   cores: cpus().length,
   totalMemory: totalmem(),
-  commit: (await run('git', ['rev-parse', 'HEAD'], { cwd })).trim(),
+  ...provenance(cwd),
   date: new Date().toISOString(),
 };
 const bundles = await measureBundles(cwd);
@@ -61,7 +62,7 @@ for (const mode of ['ssr', 'vibration', 'ios', 'desktop']) {
 const source = await readFile(`${cwd}/dist/index.js`, 'utf8');
 const instrumented = source
   .replace('  if (!isValidElement(children))', '  globalThis.__hapticBench.renders++;\n  if (!isValidElement(children))')
-  .replace('new WebHaptics(options.webHapticsOptions)', '(globalThis.__hapticBench.engines++, new WebHaptics(options.webHapticsOptions))');
+  .replace('new BrowserFeedback(options.webHapticsOptions)', '(globalThis.__hapticBench.engines++, new BrowserFeedback(options.webHapticsOptions))');
 if (!instrumented.includes('__hapticBench.renders++')) {
   throw Error('Render instrumentation failed: HapticTarget entry point not found in dist/index.js');
 }
@@ -82,7 +83,7 @@ try {
 }
 const formatNumber = value => value === null ? '—' : value.toFixed(6);
 const lines = [
-  `Environment: ${environment.node}; ${environment.os}; ${environment.cpu}; ${environment.cores} cores; ${(environment.totalMemory / 2 ** 30).toFixed(1)} GiB RAM; ${environment.commit}; ${environment.date}`,
+  `Environment: ${environment.node}; ${environment.os}; ${environment.cpu}; ${environment.cores} cores; ${(environment.totalMemory / 2 ** 30).toFixed(1)} GiB RAM; ${environment.commit}${environment.dirty ? " (dirty worktree)" : ""}; source ${environment.sourceDigest}; ${environment.date}`,
   'Build: production React for timings; production profiling renderer + instrumented dist for untimed counts.',
   '',
   '| Bundle | Min bytes | Gzip bytes | Brotli bytes | web-haptics bytes¹ |',
