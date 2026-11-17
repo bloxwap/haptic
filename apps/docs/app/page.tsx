@@ -15,7 +15,7 @@ export default function Home() {
         <p className="hero-description">Wrap a React target in Haptic. Taps get feedback, and your button keeps its handlers, ref, focus, and accessibility.</p>
         <div className="hero-actions"><a href="#board" className="hig-button" data-intent="primary">Try the haptic board <span aria-hidden="true">↓</span></a><Link className="hig-button" data-intent="secondary" href="/docs">Read the docs <span aria-hidden="true">→</span></Link></div>
         <InstallCommand />
-        <p className="support-note">The first npm release is in preparation. <a className="text-link" href={`${repository}/issues/1`}>Follow the release plan</a>.</p>
+        <p className="support-note">Available on npm. <a className="text-link" href={`${repository}/releases/latest`}>Read the release notes</a>.</p>
       </div>
       {/* HIG CodeWindow recipe (language label + focusable code); its entry imports no overlay or Radix peer. */}
       <figure className="code-window" aria-label="React usage example">

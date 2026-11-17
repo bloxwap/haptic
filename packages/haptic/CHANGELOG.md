@@ -1,8 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.5.0 — 2026-11-17
 
-- Preserve original events by default. The iOS switch overlay now requires `iosPhysicalTap`; unsupported hosts remain unobstructed. The opt-in's pointer interception, synthetic click and ancestor capture differences are documented.
+- **Behavior change:** preserve original events by default. The iOS switch overlay now requires `iosPhysicalTap`; unsupported hosts remain unobstructed. The opt-in's pointer interception, synthetic click and ancestor capture differences are documented.
 - Correct adjacent vibration/silence encoding and bound input size, expansion and total duration. Own component vibration cancellation across all package entries and prevent preview work after disposal.
 - Restore native backend scopes safely in any order, isolate pending work across backend changes, contain initialization/thenable failures and expire hung calls after one second without replay.
 - Share the enable gate across module formats and queue reentrant settings notifications. Cancellation bypasses playback eligibility; adapter disposal releases resources without waiting for cancellation and is terminal.
@@ -13,7 +13,9 @@
 - **New:** cross-platform `haptics` object (`selection`, `light`, `medium`, `heavy`, `success`, `warning`, `error`) plus `useHaptics`, `setHapticsEnabled`, `hapticsEnabled`, and `subscribeHapticsEnabled`, exported from both entries.
 - **New:** React Native entry backed by `expo-haptics`, at `@bloxwap/haptic/native` and through the `react-native` condition on `@bloxwap/haptic`. Android uses `HapticFeedbackConstants`. Per-cue lanes keep one native call in flight and collapse bursts into a single trailing replay. This replaces the monorepo's `ui-native` lane scheduler and `apps/mobile` backend.
 - **Peer dependency change:** `expo-haptics` (>=14) and `react-native` are new optional peers. `react-dom` is now optional, because nothing imports it at runtime and React Native apps should not install it.
-- Web `haptics.*` skips the engine and calls `navigator.vibrate` with cached preset arrays. `npm run bench:api` measured 4–7 ns per tap, against 132–144 ns for a `WebHaptics` singleton (jsdom, M3 Max). On a busy native lane, a tap costs 3–4 ns against 9–15 ns for the `ui-native` scheduler.
+- Web `haptics.*` skips the engine and calls `navigator.vibrate` with cached preset arrays. Native lanes collapse bursts without retaining stale work. Benchmark results include source and artifact fingerprints; timings measure JavaScript dispatch, not physical-device response.
+
+Physical-device and VoiceOver certification remains pending in issue #9; automated checks do not establish tactile output.
 
 ## 0.4.0 — 2026-11-11
 

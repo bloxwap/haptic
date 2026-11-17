@@ -20,9 +20,9 @@ npm run docs:smoke
 npm audit --audit-level=high
 ```
 
-The packed-consumer check verifies eight allowlisted files, ESM/CJS imports and declarations, all public types, JSX, SSR without browser globals, React 18/19, and browser bundling outside the workspace. The gzip budget includes `web-haptics` and excludes React. The matrix runs the entire component/hook/hydration/lifecycle suite in isolated React installations.
+The packed-consumer check verifies sixteen allowlisted files, ESM/CJS imports and declarations, all public types, JSX, SSR without browser globals, React 18/19, and browser bundling outside the workspace. Bundle budgets exclude external React and native peers; the browser runtime uses the local encoder. The matrix runs the entire component/hook/hydration/lifecycle suite in isolated React installations.
 
-Use [DEVICE_TESTING.md](DEVICE_TESTING.md) and record real observations in `planning/device-results.json`. Commit the evidence after testing. Record the tested implementation commit; the release gate requires its runtime source and runtime/peer dependency declarations to match the tagged source. Documentation, test reports, and version-only changes can follow that commit. Keep failed/unsupported observations explicit and investigate failures. Until those checks occur, the initial release uses the scoped decision above and keeps device results pending.
+Use [DEVICE_TESTING.md](DEVICE_TESTING.md) and record real observations in `planning/device-results.json`. Commit the evidence after testing. Record the tested implementation commit; the release gate requires its runtime source, build configuration, scripts, lockfiles, and manifest build fields to match the tagged source. Documentation, test reports, and version-only changes can follow that commit. Keep failed/unsupported observations explicit and investigate failures. Until those checks occur, the initial release uses the scoped decision above and keeps device results pending.
 
 ## Establish npm access and bootstrap
 
@@ -53,7 +53,7 @@ Record verified access, environment protection, and OIDC/provenance evidence in 
 
 ## Publish a tagged release
 
-Commit the desired stable version, synchronize the docs dependency and lockfile, date the changelog, and update release notes. Recheck device evidence after any runtime/dependency change. Merge to main, wait for Tests and Documentation to pass, tag that exact main commit (`v0.4.0` for this release), then publish its GitHub release. Prerelease versions containing a hyphen use `next`; stable versions use `latest`.
+Commit the desired stable version, synchronize the docs dependency and lockfile, date the changelog, and update release notes. Recheck device evidence after any runtime/dependency change. Merge to main, wait for Tests and Documentation to pass, tag that exact main commit (`v0.5.0` for this release), then publish its GitHub release. Prerelease versions containing a hyphen use `next`; stable versions use `latest`.
 
 `publish_npm.yml` checks out the release tag and fails on a mismatched version, source outside main, dirty source, missing device evidence without a matching pending-certification `*-release.json` decision, already-published version, or unexpected registry response. Validation runs the full package and docs checks, then packs and uploads one archive with SHA-256. The publishing job downloads and verifies that archive, repeats the release gate, checks token or OIDC availability, and publishes it on GitHub-hosted Ubuntu with provenance after the `npm-release` environment gate.
 
@@ -64,8 +64,8 @@ The final registry check waits up to five minutes for npm's processing to expose
 Do not retry publication blindly after a network failure. Query the exact version first. An existing immutable version cannot be overwritten. If publication succeeded but verification failed, inspect that version and rerun the **Registry smoke** workflow with the exact version; do not hide the failure by installing workspace source. Fix defects with a new version. If publication never reached npm, resolve the auth/network error and rerun the failed release workflow. Dist-tags are checked explicitly; repair a wrong tag through an authorized account or a publisher whose allowed actions include dist-tag management.
 
 ```sh
-npm view @bloxwap/haptic@0.4.0 version dist-tags repository dependencies peerDependencies dist.tarball --json
-HAPTIC_REGISTRY_VERSION=0.4.0 npm run registry:check
+npm view @bloxwap/haptic@0.5.0 version dist-tags repository dependencies peerDependencies dist.tarball --json
+HAPTIC_REGISTRY_VERSION=0.5.0 npm run registry:check
 DOCS_URL=https://bloxwap.github.io/haptic/ npm run docs:smoke
 ```
 
