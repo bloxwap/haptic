@@ -1,6 +1,6 @@
 {
   "name": "@bloxwap/haptic",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Haptic feedback for React and React Native: physical-tap haptics on iOS WebKit, the Vibration API in browsers, and expo-haptics on iOS and Android.",
   "type": "module",
   "sideEffects": false,
