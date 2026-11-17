@@ -4,6 +4,29 @@ declare global {
   interface Window { imperativeRequests: unknown[] }
 }
 
+test('the intensity control changes the custom pattern while presets retain their strengths', async ({ page, baseURL }) => {
+  await page.addInitScript(() => {
+    window.imperativeRequests = [];
+    Object.defineProperty(navigator, 'vibrate', { configurable: true, value: (pattern: unknown) => { window.imperativeRequests.push(pattern); return true; } });
+  });
+  await page.goto(baseURL!);
+  const custom = page.getByRole('button', { name: /custom/i });
+  const preset = page.getByRole('button', { name: /selection/i });
+  const slider = page.getByRole('slider', { name: 'Custom pattern intensity' });
+  await custom.click();
+  const customBefore = await page.evaluate(() => window.imperativeRequests.at(-1));
+  await preset.click();
+  const presetBefore = await page.evaluate(() => window.imperativeRequests.at(-1));
+  await slider.focus();
+  await page.keyboard.press('End');
+  await expect(slider).toHaveValue('1');
+  await custom.click();
+  expect(await page.evaluate(() => window.imperativeRequests.at(-1))).toEqual([30, 60, 30]);
+  expect(await page.evaluate(() => window.imperativeRequests.at(-1))).not.toEqual(customBefore);
+  await preset.click();
+  expect(await page.evaluate(() => window.imperativeRequests.at(-1))).toEqual(presetBefore);
+});
+
 test('imperative requests report browser acceptance for sync, awaited and timer calls', async ({ page, baseURL }) => {
   await page.addInitScript(() => {
     const requests: unknown[] = [];

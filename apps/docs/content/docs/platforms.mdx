@@ -5,7 +5,7 @@ description: Physical iOS taps, browser vibration, hydration, and device verific
 
 ## iOS
 
-Eligible iOS WebKit targets use a native switch interaction. A physical tap can produce the platform's system tick. Synthetic clicks, timers, and asynchronous callbacks cannot promise physical iOS feedback. Choosing a preset or intensity does not change that tick.
+By default, `Haptic` preserves the original pointer and click events. On iOS WebKit without vibration it stays silent. Set `iosPhysicalTap` to opt into the native switch overlay on a button or link that has no nested controls. That overlay intercepts pointer handlers, forwards an untrusted click without the original modifiers, coordinates or click count, and exposes auxiliary clicks to ancestor capture handlers. Keep it off for gesture controls, modified links, or capture-based actions. Unsupported hosts keep their original interaction without an overlay. A physical tap can produce the platform's system tick. Synthetic clicks, timers, and asynchronous callbacks cannot promise physical iOS feedback. Choosing a preset or intensity does not change that tick.
 
 WebKit introduced its switch control in Safari 17.4. That is a control baseline, not a claim that every device or OS version has been physically tested. System-haptic settings and hardware capability still matter.
 
@@ -13,7 +13,7 @@ The imperative API reports iOS unavailable, including inside a synchronous click
 
 ## Vibration-capable browsers
 
-Browsers exposing `navigator.vibrate` use `web-haptics` for the selected input and options, including when that API is installed after the bundle evaluates. If that API exists on an iOS-like device, it takes priority. An accepted API call does not prove that hardware physically vibrated.
+Browsers exposing `navigator.vibrate` use the shared bounded encoder for the selected input and options, including when that API is installed after the bundle evaluates. If that API exists on an iOS-like device, it takes priority. An accepted API call does not prove that hardware physically vibrated.
 
 ## Other devices
 

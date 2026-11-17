@@ -17,9 +17,11 @@ description: Eleven feedback presets and four ways to describe custom vibration.
 | `nudge` | Strong tap followed by soft tap |
 | `buzz` | Longer vibration |
 
-Presets use the pinned `web-haptics` engine. Duration, patterns, and intensity apply on vibration-capable browsers. Native iOS interactions use the same system tick for every preset.
+Presets retain the pinned `web-haptics` definitions and use the shared bounded encoder. Explicit preset intensities override the default supplied through `triggerOptions.intensity`. The demo slider is therefore labeled “Custom pattern intensity.” Duration, patterns, and intensity apply on vibration-capable browsers. Opted-in native iOS interactions use the same system tick for every preset.
 
 ```tsx
+import { Haptic } from '@bloxwap/haptic';
+
 // One duration in milliseconds.
 <Haptic feedback={80}><button>Single</button></Haptic>;
 

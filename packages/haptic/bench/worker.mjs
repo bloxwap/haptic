@@ -34,7 +34,7 @@ if (mode === 'ssr') {
   const ios = mode === 'ios';
   let vibrations = 0;
   let activations = 0;
-  // Stub before importing dist: WebHaptics.isSupported is evaluated once.
+  // Each worker exercises one fixed platform route.
   Object.defineProperties(navigator, {
     vibrate: {
       configurable: true,
@@ -66,9 +66,10 @@ if (mode === 'ssr') {
   );
   if (isIOSWebKitWithoutVibration() !== ios) throw Error('Routing stub failed');
   const stable = {
+    iosPhysicalTap: ios,
     feedback: 'selection',
     triggerOptions: { intensity: 0.5 },
-    webHapticsOptions: { debug: false },
+    webHapticsOptions: { debug: false, showSwitch: mode === 'desktop' },
   };
   function tree(count, props = stable) {
     const targets = Array.from({ length: count }, (_, key) => React.createElement(

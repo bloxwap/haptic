@@ -60,7 +60,7 @@ describe('platform contract', () => {
     const renders: boolean[] = [];
     function Example() {
       renders.push(useIOSNativeHaptics());
-      return <Haptic><button>Hydrate</button></Haptic>;
+      return <Haptic iosPhysicalTap><button>Hydrate</button></Haptic>;
     }
     const tree = <Example />;
     // Server rendering must not read browser globals, even when they exist.

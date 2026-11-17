@@ -70,3 +70,7 @@ DOCS_URL=https://bloxwap.github.io/haptic/ npm run docs:smoke
 ```
 
 Attach the release/tag, exact npm version, tarball digest, validation/publish/registry/docs run URLs, and device results to #14. Update docs and README release status/badges to the real published version, then close completed issues and #1 only when every prerequisite is substantiated.
+
+### Build evidence and native consumers
+
+Record verification only after final runtime, manifest, build configuration and lockfile changes. The gate now compares export routing, packaging, build tooling, scripts and lockfiles as well as source; metadata-only release descriptions can change, but build changes require a new verified commit. `pack:check` installs real minimum/current Expo and React Native peers, type-checks the native condition, and bundles both native entries for iOS and Android with Metro. Registry metadata is checked against the expected tarball manifest when supplied, otherwise the matching source version.

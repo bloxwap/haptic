@@ -22,7 +22,7 @@ export function HapticBoard() {
   const native = useIOSNativeHaptics();
   const record = (name: string) => { setActions(count => count + 1); setLast(name); };
   const target = (name: string, input: HapticInput, description: string) => (
-    <Haptic key={name} enabled={enabled} feedback={input} triggerOptions={{ intensity }} webHapticsOptions={{ debug }} style={{ display: 'grid' }}>
+    <Haptic iosPhysicalTap key={name} enabled={enabled} feedback={input} triggerOptions={{ intensity }} webHapticsOptions={{ debug }} style={{ display: 'grid' }}>
       <button type="button" disabled={!ready} className="preset" data-active={last === name} onClick={() => record(name)}><strong>{name}</strong><small>{description}</small></button>
     </Haptic>
   );
@@ -32,8 +32,9 @@ export function HapticBoard() {
       <div className="settings">
         <Switch label="Feedback enabled" disabled={!ready} checked={enabled} onCheckedChange={setEnabled} />
         <Switch label="Desktop audio preview" disabled={!ready} checked={debug} onCheckedChange={setDebug} />
-        <div className="board-slider"><Slider label="Intensity" disabled={!ready} min={0} max={1} step={0.1} value={intensity} onValueChange={value => setIntensity(Math.round(value * 10) / 10)} /></div>
+        <div className="board-slider"><Slider label="Custom pattern intensity" disabled={!ready} min={0} max={1} step={0.1} value={intensity} onValueChange={value => setIntensity(Math.round(value * 10) / 10)} /></div>
       </div>
+      <p className="support-note">Presets keep their own strengths. The intensity slider changes the custom pattern.</p>
       <div className="preset-grid">
         {presets.map(([name, description]) => target(name, name, description))}
         {target('custom', [{ duration: 30 }, { delay: 60, duration: 30 }], 'Your own two-tap pattern')}

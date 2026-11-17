@@ -24,8 +24,8 @@ SSR-safe, with graceful fallbacks. <a href="https://bloxwap.github.io/haptic/">T
 
 - **One component wrapping the original React target.** `Haptic` and `HapticTarget` are aliases for a single wrapper that preserves your element's handlers, ref, focus, and accessibility.
 - **Eleven vibration presets and custom patterns.** Choose from presets like `selection`, `success`, and `error`, or specify custom durations, alternating patterns, and event objects with delay and intensity.
-- **Native iOS physical-tap ticks.** Physical taps on iOS trigger the system haptic, while vibration-capable browsers use the Vibration API with pattern and intensity support.
-- **Full target behavior preservation.** Handlers, refs, focus, accessibility, keyboard, forms, links, and drawer integration all retain the original target's behavior.
+- **Opt-in iOS physical-tap ticks.** With `iosPhysicalTap`, physical taps on iOS can trigger the system haptic, while vibration-capable browsers use the Vibration API with pattern and intensity support.
+- **Original events by default.** Handlers, refs, focus, accessibility, keyboard, forms, links, and drawer integration retain the original target's behavior. The optional iOS overlay has the event limitations described below.
 - **Server-safe rendering.** Works with SSR and hydration, providing both ESM and CommonJS builds with TypeScript declarations.
 - **Independently written wrapper.** Platform-specific code with `web-haptics` as a declared dependency.
 
@@ -42,6 +42,8 @@ Works with React 18 or 19. Requires matching React and React DOM peer versions.
 `0.4.0` is public; physical iPhone/Android/iPadOS/VoiceOver certification is still pending (see issues [#7](https://github.com/bloxwap/haptic/issues/7) and [#9](https://github.com/bloxwap/haptic/issues/9)). Automated checks establish browser interactions and API calls, not tactile output.
 
 ## Usage
+
+By default, `Haptic` preserves the original pointer and click events. On iOS WebKit without vibration it stays silent. Set `iosPhysicalTap` to opt into the native switch overlay on a button or link that has no nested controls. That overlay intercepts pointer handlers, forwards an untrusted click without the original modifiers, coordinates or click count, and exposes auxiliary clicks to ancestor capture handlers. Keep it off for gesture controls, modified links, or capture-based actions. Unsupported hosts keep their original interaction without an overlay.
 
 Wrap any React element to add haptic feedback.
 
@@ -97,11 +99,11 @@ import {
 
 `feedback` accepts a preset string, duration in milliseconds, alternating on/off `number[]`, vibration event objects, or `{ pattern: [...] }`. The default is `selection`.
 
-`delivered` means the browser accepted the request, not that tactile output was observed. iOS imperative requests report unavailable even inside a click handler because programmatic clicks cannot establish a trusted physical tap. Use `HapticTarget` for the eligible iOS physical path. See the [API guide](https://bloxwap.github.io/haptic/docs/api/).
+`delivered` means the browser accepted the request, not that tactile output was observed. iOS imperative requests report unavailable even inside a click handler because programmatic clicks cannot establish a trusted physical tap. Use `<HapticTarget iosPhysicalTap>` for the eligible iOS physical path after reviewing the overlay limitations above. See the [API guide](https://bloxwap.github.io/haptic/docs/api/).
 
 ## Platforms
 
-iOS feedback requires a physical tap and always uses the native system tick. Timers, synthetic clicks, and asynchronous callbacks cannot promise physical feedback. Presets and intensity apply to vibration-capable browsers.
+iOS feedback requires `iosPhysicalTap` and a physical tap and always uses the native system tick. Timers, synthetic clicks, and asynchronous callbacks cannot promise physical feedback. Presets and intensity apply to vibration-capable browsers.
 
 Desktop audio preview is opt-in with `webHapticsOptions={{ debug: true }}`. Hardware and browser settings determine actual feedback; iPadOS routing alone does not prove haptic hardware. Browser automation does not establish tactile output.
 

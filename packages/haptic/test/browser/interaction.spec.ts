@@ -111,3 +111,26 @@ test('real debug audio, visible engine switch, interrupted patterns, and teardow
   await expect(page.getByText('Haptic feedback', { exact: true })).toHaveCount(0);
   expect(errors).toEqual([]);
 });
+
+
+test('default iOS interactions stay trusted and unsupported opt-ins remain unobstructed', async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperties(navigator, {
+    platform: { configurable: true, value: 'iPhone' }, userAgent: { configurable: true, value: 'AppleWebKit' }, vibrate: { configurable: true, value: undefined },
+  }));
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/');
+  await expect(page.locator('#preserved-events input, #preserved-events label')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Original events', exact: true }).click({ modifiers: ['Shift'] });
+  expect(await page.evaluate(() => window.originalEvents)).toEqual([
+    expect.objectContaining({ kind: 'pointer', target: 'BUTTON', shift: true, trusted: true }),
+    expect.objectContaining({ kind: 'capture', target: 'BUTTON', shift: true, detail: 1, trusted: true }),
+    expect.objectContaining({ kind: 'action', target: 'BUTTON', shift: true, detail: 1, trusted: true }),
+  ]);
+  await page.getByRole('button', { name: 'Wrapped descendant' }).click();
+  await page.getByRole('button', { name: 'SVG target' }).click();
+  expect(await page.evaluate(() => window.originalEvents.slice(-2).map(event => event.kind))).toEqual(['nested', 'svg']);
+  await expect(page.locator('#inherited-disabled input[switch]')).toHaveCount(0);
+  await page.locator('#inherited-disabled').evaluate(element => (element as HTMLFieldSetElement).disabled = false);
+  await expect(page.locator('#inherited-disabled input[switch]')).toHaveCount(1);
+  expect(errors).toEqual([]);
+});

@@ -31,13 +31,16 @@ Your element keeps its handlers, ref, focus, and accessibility attributes. The w
 
 ## Device behavior
 
-On supported physical iOS devices, tapping the target uses the system tick. Vibration-capable browsers use the selected preset or pattern. On a desktop without vibration hardware, `webHapticsOptions={{ debug: true }}` enables the dependency's audio preview.
+On supported physical iOS devices, explicitly setting `iosPhysicalTap` enables the system tick. The default preserves the original events and stays silent there; read the [overlay limitations](/docs/platforms) before opting in. Vibration-capable browsers use the selected preset or pattern. On a desktop without vibration hardware, `webHapticsOptions={{ debug: true }}` enables audio preview.
 
 Physical feedback depends on device support and settings. The [platform guide](/docs/platforms) separates interaction tests from physical-device certification.
 
 ## Disable feedback
 
 ```tsx
+import { Haptic } from '@bloxwap/haptic';
+const save = () => console.log('Saved');
+
 <Haptic enabled={false}>
   <button onClick={save}>Save without feedback</button>
 </Haptic>

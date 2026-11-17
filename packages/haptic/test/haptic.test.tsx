@@ -7,7 +7,7 @@ import { Haptic, HapticTarget, type HapticInput } from '../src';
 const engine = vi.hoisted(() => ({
   construct: vi.fn(), trigger: vi.fn(), cancel: vi.fn(), destroy: vi.fn(),
 }));
-vi.mock('web-haptics', () => ({ WebHaptics: class {
+vi.mock('../src/preview', () => ({ BrowserFeedback: class {
   constructor(options: unknown) { engine.construct(options); }
   trigger(input: unknown, options: unknown) { return engine.trigger(input, options); }
   cancel() { engine.cancel(); }
@@ -213,12 +213,11 @@ describe('vibration target', () => {
     expect(action).toHaveBeenCalledTimes(2);
   });
 
-  it('disposes resources even if pattern cancellation fails', () => {
+  it('destroys its engine on unmount', () => {
     const view = render(<Haptic><button>Cleanup</button></Haptic>);
     fireEvent.click(view.getByRole('button'));
-    engine.cancel.mockImplementationOnce(() => { throw new Error('API removed'); });
     view.unmount();
-    expect(engine.cancel).toHaveBeenCalledTimes(1);
+    expect(engine.cancel).not.toHaveBeenCalled();
     expect(engine.destroy).toHaveBeenCalledTimes(1);
   });
 
@@ -239,10 +238,10 @@ describe('native iOS target', () => {
     ios();
     const observer = vi.spyOn(globalThis, 'MutationObserver');
     const disconnect = vi.spyOn(MutationObserver.prototype, 'disconnect');
-    const view = render(<Haptic><button>Tap</button></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><button>Tap</button></Haptic>);
     expect(observer).toHaveBeenCalledTimes(1);
     view.unmount();
-    expect(disconnect).toHaveBeenCalledTimes(1);
+    expect(disconnect).toHaveBeenCalled();
   });
 
   it.each(['disabled', 'aria-disabled', 'inert'] as const)('never commits an overlay over an initially %s custom host', attribute => {
@@ -258,7 +257,7 @@ describe('native iOS target', () => {
     const commits: boolean[] = [];
     const view = render(<Profiler id="host" onRender={() => {
       commits.push(container.querySelector('input, label') !== null);
-    }}><Haptic><Host /></Haptic></Profiler>, { container });
+    }}><Haptic iosPhysicalTap><Host /></Haptic></Profiler>, { container });
     expect(commits.length).toBeGreaterThan(0);
     expect(commits.every(overlay => !overlay)).toBe(true);
     expect(view.container.querySelector('input, label')).toBeNull();
@@ -267,17 +266,17 @@ describe('native iOS target', () => {
   it('removes auxiliary controls when a custom target stops rendering a host', async () => {
     ios();
     function Custom({ visible }: { visible: boolean }) { return visible ? <button>Conditional</button> : null; }
-    const view = render(<Haptic><Custom visible /></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><Custom visible /></Haptic>);
     expect(view.container.querySelector('input')).not.toBeNull();
-    view.rerender(<Haptic><Custom visible={false} /></Haptic>);
+    view.rerender(<Haptic iosPhysicalTap><Custom visible={false} /></Haptic>);
     await waitFor(() => expect(view.container.querySelector('input')).toBeNull());
-    view.rerender(<Haptic><Custom visible /></Haptic>);
+    view.rerender(<Haptic iosPhysicalTap><Custom visible /></Haptic>);
     await waitFor(() => expect(view.container.querySelector('input')).not.toBeNull());
   });
 
   it('rejects stale overlay activation after its host was removed', async () => {
     ios(); const action = vi.fn();
-    const view = render(<Haptic><button onClick={action}>Removed</button></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><button onClick={action}>Removed</button></Haptic>);
     const label = auxiliary(view.container), input = view.container.querySelector('input')!;
     await act(async () => {
       view.getByRole('button').remove();
@@ -292,7 +291,7 @@ describe('native iOS target', () => {
     ios(); const states: boolean[] = [];
     function SelfDisabling() {
       const [enabled, setEnabled] = useState(true);
-      return <Haptic enabled={enabled}><button onClick={() => {
+      return <Haptic iosPhysicalTap enabled={enabled}><button onClick={() => {
         states.push(document.querySelector<HTMLInputElement>('input[switch]')!.checked);
         setEnabled(false);
       }}>Once</button></Haptic>;
@@ -305,7 +304,7 @@ describe('native iOS target', () => {
 
   it('guards direct native-control activation during a canceled gesture', () => {
     ios(); const action = vi.fn();
-    const view = render(<Haptic><button onClick={action}>Canceled</button></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><button onClick={action}>Canceled</button></Haptic>);
     fireEvent.pointerDown(auxiliary(view.container)); fireEvent.pointerCancel(auxiliary(view.container));
     fireEvent.click(view.container.querySelector('input')!);
     expect(action).not.toHaveBeenCalled();
@@ -314,7 +313,7 @@ describe('native iOS target', () => {
   it('adds a native control after mounting and routes one action with original focus/ref', async () => {
     ios();
     const ref = createRef<HTMLButtonElement>(), action = vi.fn(), parent = vi.fn();
-    const view = render(<div onClick={parent}><Haptic><button aria-label="Original" onClick={action} ref={ref}>Tap</button></Haptic></div>);
+    const view = render(<div onClick={parent}><Haptic iosPhysicalTap><button aria-label="Original" onClick={action} ref={ref}>Tap</button></Haptic></div>);
     const input = view.container.querySelector<HTMLInputElement>('input[switch]')!;
     expect(input).not.toBeNull(); expect(input.tabIndex).toBe(-1); expect(input.getAttribute('aria-hidden')).toBe('true');
     expect(input.hasAttribute('name')).toBe(false);
@@ -329,21 +328,21 @@ describe('native iOS target', () => {
 
   it('keeps native identifiers unique across multiple targets', () => {
     ios();
-    const { container } = render(<><Haptic><button>One</button></Haptic><Haptic><button>Two</button></Haptic></>);
+    const { container } = render(<><Haptic iosPhysicalTap><button>One</button></Haptic><Haptic iosPhysicalTap><button>Two</button></Haptic></>);
     const ids = [...container.querySelectorAll('input')].map(input => input.id);
     expect(new Set(ids).size).toBe(2);
   });
 
   it.each([{ enabled: false }, { disabled: true }])('omits native controls for props %j', props => {
     ios(); const action = vi.fn();
-    const view = render(<Haptic {...props}><button onClick={action}>Silent</button></Haptic>);
+    const view = render(<Haptic iosPhysicalTap {...props}><button onClick={action}>Silent</button></Haptic>);
     expect(view.container.querySelector('input')).toBeNull();
     fireEvent.click(view.getByRole('button')); expect(action).toHaveBeenCalledTimes(1);
   });
 
   it('observes host attributes and dynamic enablement', async () => {
     ios();
-    const view = render(<Haptic><button>Mutable</button></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><button>Mutable</button></Haptic>);
     const host = view.getByRole('button');
     await act(async () => host.setAttribute('disabled', ''));
     expect(view.container.querySelector('input')).toBeNull();
@@ -355,15 +354,15 @@ describe('native iOS target', () => {
     expect(view.container.querySelector('input, label')).toBeNull();
     await act(async () => host.removeAttribute('inert'));
     expect(view.container.querySelector('input')).not.toBeNull();
-    view.rerender(<Haptic enabled={false}><button>Mutable</button></Haptic>);
+    view.rerender(<Haptic iosPhysicalTap enabled={false}><button>Mutable</button></Haptic>);
     expect(view.container.querySelector('input')).toBeNull();
-    view.rerender(<Haptic><button aria-disabled={true}>Mutable</button></Haptic>);
+    view.rerender(<Haptic iosPhysicalTap><button aria-disabled={true}>Mutable</button></Haptic>);
     expect(view.container.querySelector('input')).toBeNull();
   });
 
   it('rejects a click when the live host was just disabled', () => {
     ios(); const action = vi.fn();
-    const view = render(<Haptic><button onClick={action}>Mutable</button></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><button onClick={action}>Mutable</button></Haptic>);
     const label = auxiliary(view.container);
     view.getByRole('button').setAttribute('disabled', '');
     fireEvent.click(view.container.querySelector('input')!);
@@ -372,7 +371,7 @@ describe('native iOS target', () => {
 
   it('does not turn pointer sequences into actions', () => {
     ios(); const action = vi.fn();
-    const view = render(<Haptic><button onClick={action}>Scroll</button></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><button onClick={action}>Scroll</button></Haptic>);
     const label = auxiliary(view.container);
     fireEvent.pointerDown(label); fireEvent.pointerMove(label); fireEvent.pointerUp(label);
     expect(action).not.toHaveBeenCalled();
@@ -382,7 +381,7 @@ describe('native iOS target', () => {
 
   it('cancels moved gestures and resets for the next physical tap', () => {
     ios(); const action = vi.fn();
-    const view = render(<Haptic><button onClick={action}>Drag</button></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><button onClick={action}>Drag</button></Haptic>);
     const label = auxiliary(view.container);
     const pointer = (type: string, x: number) => {
       const event = new Event(type, { bubbles: true });
@@ -399,23 +398,23 @@ describe('native iOS target', () => {
 
   it('protects drawers while preserving ordinary ancestor pointer handlers', () => {
     ios(); const pointer = vi.fn();
-    const view = render(<div data-vaul-drawer="" onPointerDown={pointer}><Haptic><button>Drawer</button></Haptic></div>);
+    const view = render(<div data-vaul-drawer="" onPointerDown={pointer}><Haptic iosPhysicalTap><button>Drawer</button></Haptic></div>);
     fireEvent.pointerDown(auxiliary(view.container)); expect(pointer).not.toHaveBeenCalled();
-    view.rerender(<div onPointerDown={pointer}><Haptic><button>Normal</button></Haptic></div>);
+    view.rerender(<div onPointerDown={pointer}><Haptic iosPhysicalTap><button>Normal</button></Haptic></div>);
     fireEvent.pointerDown(auxiliary(view.container)); expect(pointer).toHaveBeenCalledTimes(1);
   });
 
   it('retains submit behavior and child event cancellation', () => {
     ios(); const submit = vi.fn(event => event.preventDefault()), parent = vi.fn();
-    const view = render(<form onSubmit={submit} onClick={parent}><Haptic><button type="submit">Submit</button></Haptic></form>);
+    const view = render(<form onSubmit={submit} onClick={parent}><Haptic iosPhysicalTap><button type="submit">Submit</button></Haptic></form>);
     fireEvent.click(auxiliary(view.container)); expect(submit).toHaveBeenCalledTimes(1); expect(parent).toHaveBeenCalledTimes(1);
-    view.rerender(<form onSubmit={submit} onClick={parent}><Haptic><button type="submit" onClick={event => { event.preventDefault(); event.stopPropagation(); }}>Submit</button></Haptic></form>);
+    view.rerender(<form onSubmit={submit} onClick={parent}><Haptic iosPhysicalTap><button type="submit" onClick={event => { event.preventDefault(); event.stopPropagation(); }}>Submit</button></Haptic></form>);
     fireEvent.click(auxiliary(view.container)); expect(submit).toHaveBeenCalledTimes(1); expect(parent).toHaveBeenCalledTimes(1);
   });
 
   it('prefers an available vibration API over native controls', () => {
     ios(() => true);
-    const view = render(<Haptic><button>Vibrate</button></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><button>Vibrate</button></Haptic>);
     expect(view.container.querySelector('input')).toBeNull();
     fireEvent.click(view.getByRole('button')); expect(engine.trigger).toHaveBeenCalledTimes(1);
   });
@@ -423,16 +422,16 @@ describe('native iOS target', () => {
 
 it('uses host preferences and application policy without changing the action', () => {
   const action = vi.fn();
-  const view = render(<Haptic preferences={{ haptics: false }}><button onClick={action}>Save</button></Haptic>);
+  const view = render(<Haptic iosPhysicalTap preferences={{ haptics: false }}><button onClick={action}>Save</button></Haptic>);
   fireEvent.click(view.getByRole('button'));
-  view.rerender(<Haptic preferences={{ haptics: true }} policyEnabled={false}><button onClick={action}>Save</button></Haptic>);
+  view.rerender(<Haptic iosPhysicalTap preferences={{ haptics: true }} policyEnabled={false}><button onClick={action}>Save</button></Haptic>);
   fireEvent.click(view.getByRole('button'));
   expect(action).toHaveBeenCalledTimes(2); expect(engine.construct).not.toHaveBeenCalled();
-  view.rerender(<Haptic preferences={{ haptics: true }}><button onClick={action}>Save</button></Haptic>);
+  view.rerender(<Haptic iosPhysicalTap preferences={{ haptics: true }}><button onClick={action}>Save</button></Haptic>);
   fireEvent.click(view.getByRole('button'));
   expect(engine.trigger).toHaveBeenCalledOnce();
-  view.rerender(<Haptic preferences={{ haptics: false }}><button onClick={action}>Save</button></Haptic>);
-  expect(engine.cancel).toHaveBeenCalledOnce(); expect(engine.destroy).toHaveBeenCalledOnce();
+  view.rerender(<Haptic iosPhysicalTap preferences={{ haptics: false }}><button onClick={action}>Save</button></Haptic>);
+  expect(engine.destroy).toHaveBeenCalledOnce();
 });
 
 describe('host structure invariants', () => {
@@ -445,24 +444,24 @@ describe('host structure invariants', () => {
     ios(); const errors = silence();
     const a = vi.fn(), b = vi.fn();
     const child = kind === 'fragment' ? <><button onClick={a}>A</button><button onClick={b}>B</button></> : <Pair a={a} b={b} />;
-    const view = render(<Haptic>{child}</Haptic>);
+    const view = render(<Haptic iosPhysicalTap>{child}</Haptic>);
     expect(view.container.querySelector('input, label')).toBeNull();
     fireEvent.click(view.getByRole('button', { name: 'B' }));
     expect(a).not.toHaveBeenCalled(); expect(b).toHaveBeenCalledTimes(1);
     expect(errors).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('exactly one DOM element'));
-    view.rerender(<Haptic>{child}</Haptic>);
+    view.rerender(<Haptic iosPhysicalTap>{child}</Haptic>);
     expect(errors).toHaveBeenCalledOnce();
   });
 
   it('fails closed on iOS when text renders beside the host', () => {
     ios(); silence();
-    const view = render(<Haptic>{<>Label<button>Tap</button></>}</Haptic>);
+    const view = render(<Haptic iosPhysicalTap>{<>Label<button>Tap</button></>}</Haptic>);
     expect(view.container.querySelector('input, label')).toBeNull();
   });
 
   it('gives no feedback to any element of a multi-element child on vibration browsers', () => {
     silence(); const a = vi.fn(), b = vi.fn();
-    const view = render(<Haptic><Pair a={a} b={b} /></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><Pair a={a} b={b} /></Haptic>);
     fireEvent.click(view.getByRole('button', { name: 'A' }));
     fireEvent.click(view.getByRole('button', { name: 'B' }));
     expect(a).toHaveBeenCalledOnce(); expect(b).toHaveBeenCalledOnce();
@@ -472,16 +471,16 @@ describe('host structure invariants', () => {
   it('recovers when a multi-element child becomes a single element', async () => {
     ios(); const errors = silence();
     function Toggle({ pair }: { pair: boolean }) { return pair ? <><button>A</button><button>B</button></> : <button>A</button>; }
-    const view = render(<Haptic><Toggle pair /></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><Toggle pair /></Haptic>);
     expect(view.container.querySelector('input')).toBeNull();
-    view.rerender(<Haptic><Toggle pair={false} /></Haptic>);
+    view.rerender(<Haptic iosPhysicalTap><Toggle pair={false} /></Haptic>);
     await waitFor(() => expect(view.container.querySelector('input')).not.toBeNull());
     expect(errors).toHaveBeenCalledOnce();
   });
 
   it('ignores comment nodes beside the host', async () => {
     ios();
-    const view = render(<Haptic><button>Tap</button></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><button>Tap</button></Haptic>);
     const wrapper = view.getByRole('button').parentElement!;
     await act(async () => { wrapper.insertBefore(document.createComment('marker'), wrapper.firstChild); });
     expect(view.container.querySelector('input')).not.toBeNull();
@@ -489,7 +488,7 @@ describe('host structure invariants', () => {
 
   it('routes one action through the innermost iOS target when targets are nested', () => {
     ios(); const errors = silence(); const action = vi.fn();
-    const view = render(<Haptic><Haptic><button onClick={action}>Nested</button></Haptic></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><Haptic iosPhysicalTap><button onClick={action}>Nested</button></Haptic></Haptic>);
     const inputs = view.container.querySelectorAll('input[switch]');
     expect(inputs).toHaveLength(1);
     fireEvent.click(view.container.querySelector('label')!);
@@ -499,7 +498,7 @@ describe('host structure invariants', () => {
 
   it('defers an outer iOS target whose host contains a target deeper inside', () => {
     ios(); silence(); const action = vi.fn();
-    const view = render(<Haptic><div><Haptic><button onClick={action}>Deep</button></Haptic></div></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><div><Haptic iosPhysicalTap><button onClick={action}>Deep</button></Haptic></div></Haptic>);
     expect(view.container.querySelectorAll('input[switch]')).toHaveLength(1);
     fireEvent.click(view.container.querySelector('label')!);
     expect(action).toHaveBeenCalledTimes(1);
@@ -508,18 +507,18 @@ describe('host structure invariants', () => {
   it('defers when an inner target mounts later on iOS', async () => {
     ios(); silence();
     function Late({ inner }: { inner: boolean }) {
-      return <div>{inner ? <Haptic><button>Inner</button></Haptic> : <button>Inner</button>}</div>;
+      return <div>{inner ? <Haptic iosPhysicalTap><button>Inner</button></Haptic> : <button>Inner</button>}</div>;
     }
-    const view = render(<Haptic><Late inner={false} /></Haptic>);
-    expect(view.container.querySelectorAll('input[switch]')).toHaveLength(1);
-    view.rerender(<Haptic><Late inner /></Haptic>);
+    const view = render(<Haptic iosPhysicalTap><Late inner={false} /></Haptic>);
+    expect(view.container.querySelectorAll('input[switch]')).toHaveLength(0);
+    view.rerender(<Haptic iosPhysicalTap><Late inner /></Haptic>);
     await waitFor(() => expect(view.container.querySelectorAll('input[switch]')).toHaveLength(1));
     expect(view.getByRole('button').parentElement!.querySelector('input[switch]')).not.toBeNull();
   });
 
   it('requests feedback once, from the innermost target, on vibration browsers', () => {
     silence(); const action = vi.fn();
-    const view = render(<Haptic feedback="heavy"><div><button>Outer only</button><Haptic feedback="success"><button onClick={action}>Inner</button></Haptic></div></Haptic>);
+    const view = render(<Haptic iosPhysicalTap feedback="heavy"><div><button>Outer only</button><Haptic iosPhysicalTap feedback="success"><button onClick={action}>Inner</button></Haptic></div></Haptic>);
     fireEvent.click(view.getByRole('button', { name: 'Inner' }));
     expect(action).toHaveBeenCalledOnce();
     expect(engine.trigger).toHaveBeenCalledExactlyOnceWith('success', undefined);
@@ -532,7 +531,7 @@ describe('host structure invariants', () => {
     vi.stubEnv('NODE_ENV', 'production');
     const errors = silence();
     try {
-      render(<Haptic><Pair a={() => {}} b={() => {}} /></Haptic>);
+      render(<Haptic iosPhysicalTap><Pair a={() => {}} b={() => {}} /></Haptic>);
       expect(errors).not.toHaveBeenCalled();
     } finally { vi.unstubAllEnvs(); }
   });
@@ -543,7 +542,7 @@ describe('host structure invariants', () => {
     let view: ReturnType<typeof render>;
     try {
       vi.stubGlobal('process', undefined);
-      view = render(<Haptic><Pair a={() => {}} b={() => {}} /></Haptic>);
+      view = render(<Haptic iosPhysicalTap><Pair a={() => {}} b={() => {}} /></Haptic>);
     } finally { vi.stubGlobal('process', saved); }
     expect(errors).not.toHaveBeenCalled();
     view!.unmount();

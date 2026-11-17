@@ -48,3 +48,9 @@ Additional independent black-box consumers now record [custom components, fragme
 React 18/19 packed-consumer checks validate installed builds, and `npm run test:matrix` runs the entire component/hook/hydration/lifecycle/engine suite in isolated React 18.3.1 and 19.3.0 installations. Physical VoiceOver/device tests remain distinct checks. Do not replace them with coverage percentages.
 
 The complete release additionally requires #9 physical-device observations, #12 deployed docs/CI evidence, #13 npm account/trust preparation, and #14 actual registry/provenance verification. Pending results remain pending.
+
+## Current invariant hardening
+
+By default, `Haptic` preserves the original pointer and click events. On iOS WebKit without vibration it stays silent. Set `iosPhysicalTap` to opt into the native switch overlay on a button or link that has no nested controls. That overlay intercepts pointer handlers, forwards an untrusted click without the original modifiers, coordinates or click count, and exposes auxiliary clicks to ancestor capture handlers. Keep it off for gesture controls, modified links, or capture-based actions. Unsupported hosts keep their original interaction without an overlay.
+
+The historical reference observations above describe the earlier compatibility baseline. Current defaults intentionally require overlay opt-in, and the shared encoder corrects upstream phase-concatenation defects rather than preserving them. Current regression tests and release evidence must cover these changes. The browser runtime owns preview lifecycle and vibration cancellation; `web-haptics` supplies compatible public types and preset definitions.

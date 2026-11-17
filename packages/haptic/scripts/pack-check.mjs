@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { build } from 'esbuild';
 import { smokeConsumer } from './consumer-browser.mjs';
 import { matrixVersions } from './react-versions.mjs';
+import { checkNativeConsumers } from './native-consumer.mjs';
 
 function leadingDirectives(source) {
   const directives = [];
@@ -28,11 +29,11 @@ try {
   const specifier = registryVersion ? `@bloxwap/haptic@${registryVersion}` : '.';
   const [packed] = JSON.parse(run('npm', ['pack', specifier, '--ignore-scripts', '--json', '--pack-destination', temporary], process.cwd()));
   const paths = packed.files.map(file => file.path);
-  for (const required of ['dist/index.js', 'dist/index.cjs', 'dist/index.d.ts', 'dist/index.d.cts', 'dist/feedback.js', 'dist/feedback.cjs', 'dist/feedback.d.ts', 'dist/feedback.d.cts', 'package.json', 'README.md', 'LICENSE', 'CHANGELOG.md']) {
+  for (const required of ['dist/index.js', 'dist/index.cjs', 'dist/index.d.ts', 'dist/index.d.cts', 'dist/feedback.js', 'dist/feedback.cjs', 'dist/feedback.d.ts', 'dist/feedback.d.cts', 'dist/native.js', 'dist/native.cjs', 'dist/native.d.ts', 'dist/native.d.cts', 'package.json', 'README.md', 'LICENSE', 'CHANGELOG.md']) {
     if (!paths.includes(required)) throw new Error(`Missing published file: ${required}`);
   }
   for (const path of paths) {
-    if (!/^(dist\/(index|feedback)\.(js|cjs|d\.ts|d\.cts)|package\.json|README\.md|LICENSE|CHANGELOG\.md)$/.test(path)) throw new Error(`Unexpected published file: ${path}`);
+    if (!/^(dist\/(index|feedback|native)\.(js|cjs|d\.ts|d\.cts)|package\.json|README\.md|LICENSE|CHANGELOG\.md)$/.test(path)) throw new Error(`Unexpected published file: ${path}`);
   }
   const manifest = JSON.parse(run('tar', ['-xOf', join(temporary, packed.filename), 'package/package.json'], process.cwd()));
   if (manifest.name !== '@bloxwap/haptic' || manifest.publishConfig.access !== 'public') throw new Error('Incorrect publication identity.');
@@ -40,7 +41,7 @@ try {
   if (manifest.dependencies['web-haptics'] !== '0.0.6') throw new Error('Unexpected feedback engine version.');
   if (registryVersion && manifest.version !== registryVersion) throw new Error('Registry bytes do not match the requested version.');
   const readPacked = path => run('tar', ['-xOf', join(temporary, packed.filename), `package/${path}`], process.cwd());
-  for (const [path, required] of [['dist/index.js', true], ['dist/index.cjs', true], ['dist/feedback.js', false], ['dist/feedback.cjs', false]]) {
+  for (const [path, required] of [['dist/index.js', true], ['dist/index.cjs', true], ['dist/feedback.js', false], ['dist/feedback.cjs', false], ['dist/native.js', false], ['dist/native.cjs', false]]) {
     const directives = leadingDirectives(readPacked(path));
     const hasClient = directives.includes('use client');
     if (hasClient !== required) throw new Error(`${path} ${required ? 'must' : 'must not'} keep a leading "use client" directive (found: ${directives.join(', ') || 'none'}).`);
@@ -67,10 +68,18 @@ try {
       Reflect.deleteProperty(globalThis, 'navigator');
       const esm = await import('@bloxwap/haptic');
       const cjs = createRequire(import.meta.url)('@bloxwap/haptic');
+      const changes = [];
+      const unsubscribe = cjs.subscribeHapticsEnabled(on => changes.push(on));
+      esm.setHapticsEnabled(false);
+      assert.equal(cjs.hapticsEnabled(), false);
+      cjs.setHapticsEnabled(true);
+      assert.equal(esm.hapticsEnabled(), true);
+      assert.deepEqual(changes, [false, true]);
+      unsubscribe();
       assert.equal(typeof (await import('@bloxwap/haptic/feedback')).createHapticAdapter, 'function');
       assert.equal(typeof createRequire(import.meta.url)('@bloxwap/haptic/feedback').createNativeHapticAdapter, 'function');
       for (const api of [esm, cjs]) {
-        assert.deepEqual(Object.keys(api).sort(), ['Haptic', 'HapticTarget', 'isIOSWebKitWithoutVibration', 'useIOSNativeHaptics', 'canTriggerHaptic', 'triggerHaptic'].sort());
+        assert.deepEqual(Object.keys(api).sort(), ['Haptic', 'HapticTarget', 'isIOSWebKitWithoutVibration', 'useIOSNativeHaptics', 'canTriggerHaptic', 'triggerHaptic', 'haptics', 'useHaptics', 'hapticsEnabled', 'setHapticsEnabled', 'subscribeHapticsEnabled'].sort());
         assert.equal(api.Haptic, api.HapticTarget);
         assert.equal(api.isIOSWebKitWithoutVibration(), false);
         assert.deepEqual(api.canTriggerHaptic(), { available: false, mechanism: 'none', observed: false, reason: 'browser-unavailable' });
@@ -105,6 +114,7 @@ function Hook() { return <Haptic enabled={useIOSNativeHaptics()}><button>Hook</b
     if (registryVersion) console.log(run('npm', ['audit', 'signatures'], consumer).trim());
     if (registryVersion || process.env.HAPTIC_BROWSER_SMOKE === '1') await smokeConsumer(consumer, version);
   }
+  checkNativeConsumers(join(temporary, packed.filename), temporary);
   console.log(`Verified exact tarball allowlist (${paths.length} files), metadata, and isolated consumers.`);
 } finally {
   rmSync(temporary, { recursive: true, force: true });

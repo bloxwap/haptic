@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- Preserve original events by default. The iOS switch overlay now requires `iosPhysicalTap`; unsupported hosts remain unobstructed. The opt-in's pointer interception, synthetic click and ancestor capture differences are documented.
+- Correct adjacent vibration/silence encoding and bound input size, expansion and total duration. Own component vibration cancellation across all package entries and prevent preview work after disposal.
+- Restore native backend scopes safely in any order, isolate pending work across backend changes, contain initialization/thenable failures and expire hung calls after one second without replay.
+- Share the enable gate across module formats and queue reentrant settings notifications. Cancellation bypasses playback eligibility; adapter disposal releases resources without waiting for cancellation and is terminal.
+- Validate exact documentation snippets, registry metadata from the expected manifest, release build inputs, and real Expo/React Native packed consumers. Record benchmark worktree and artifact fingerprints. Clarify the demo's custom-pattern intensity control.
+- Resolve the root and explicit native entry to the same Metro module so they share backend state. The native bundle budget is now 1,280 gzip bytes (measured 1,121) to accommodate the lifetime safeguards.
+- Update the docs site's Next.js dependency to 16.4.6 to clear the security advisory reported during build verification.
+
+- **New:** cross-platform `haptics` object (`selection`, `light`, `medium`, `heavy`, `success`, `warning`, `error`) plus `useHaptics`, `setHapticsEnabled`, `hapticsEnabled`, and `subscribeHapticsEnabled`, exported from both entries.
+- **New:** React Native entry backed by `expo-haptics`, at `@bloxwap/haptic/native` and through the `react-native` condition on `@bloxwap/haptic`. Android uses `HapticFeedbackConstants`. Per-cue lanes keep one native call in flight and collapse bursts into a single trailing replay. This replaces the monorepo's `ui-native` lane scheduler and `apps/mobile` backend.
+- **Peer dependency change:** `expo-haptics` (>=14) and `react-native` are new optional peers. `react-dom` is now optional, because nothing imports it at runtime and React Native apps should not install it.
+- Web `haptics.*` skips the engine and calls `navigator.vibrate` with cached preset arrays. `npm run bench:api` measured 4–7 ns per tap, against 132–144 ns for a `WebHaptics` singleton (jsdom, M3 Max). On a busy native lane, a tap costs 3–4 ns against 9–15 ns for the `ui-native` scheduler.
+
 ## 0.4.0 — 2026-11-11
 
 Invariant release for issues #57–#67 (pull requests #68–#72). Verification for this release is jsdom and CI only. No physical-device results were recorded.
