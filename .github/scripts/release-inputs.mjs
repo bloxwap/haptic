@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 /** Byte changes here require verification of the resulting build again. */
 export const verifiedBuildPaths = [
   'packages/haptic/src', 'packages/haptic/tsup.config.ts', 'packages/haptic/tsconfig.json',
-  'packages/haptic/scripts', 'package-lock.json', 'bun.lock', '.npmrc', 'packages/haptic/.npmrc',
+  'packages/haptic/scripts', 'bun.lock', '.npmrc', 'packages/haptic/.npmrc',
   '.github/workflows/publish_npm.yml',
 ];
 export function assertBuildManifests(tested, current, testedRoot, currentRoot) {

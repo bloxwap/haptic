@@ -4,19 +4,23 @@ import assert from 'node:assert/strict';
 const version = '0.2.0';
 const name = '@bloxwap/hig';
 const docs = JSON.parse(readFileSync('apps/docs/package.json', 'utf8'));
-const lock = JSON.parse(readFileSync('package-lock.json', 'utf8'));
+const bunLock = new Function(`return (${readFileSync('bun.lock', 'utf8')})`)();
 assert.equal(docs.dependencies[name], version, `${name} must use the coordinated registry version`);
 const installed = JSON.parse(readFileSync(`node_modules/${name}/package.json`, 'utf8'));
-const entry = lock.packages[`node_modules/${name}`];
+const entry = bunLock.packages[name];
+assert.ok(entry, `${name} must be recorded in bun.lock`);
+const lockedVersion = entry[0].slice(entry[0].lastIndexOf('@') + 1);
+const lockedResolved = entry[1] || `https://registry.npmjs.org/${name}/-/${name.split('/')[1]}-${version}.tgz`;
+const lockedIntegrity = [...entry].reverse().find((value) => typeof value === 'string' && value.startsWith('sha')) ?? '';
 assert.equal(installed.version, version, `${name} installed version drift`);
-assert.equal(entry.version, version, `${name} lockfile version drift`);
-assert.equal(entry.resolved, `https://registry.npmjs.org/${name}/-/${name.split('/')[1]}-${version}.tgz`, `${name} must resolve from npm`);
-assert.match(entry.integrity, /^sha512-/, `${name} needs registry integrity`);
+assert.equal(lockedVersion, version, `${name} lockfile version drift`);
+assert.equal(lockedResolved, `https://registry.npmjs.org/${name}/-/${name.split('/')[1]}-${version}.tgz`, `${name} must resolve from npm`);
+assert.match(lockedIntegrity, /^sha512-/, `${name} needs registry integrity`);
 
 const retired = ['@bloxwap/hig-tokens', '@bloxwap/hig-contracts', '@bloxwap/hig-react', '@bloxwap/hig-native', '@bloxwap/hig-chart', '@bloxwap/hig-feedback', '@bloxwap/hig-native-fonts', '@bloxwap/hig-og-fonts'];
 for (const retiredName of retired) {
   assert.equal(docs.dependencies[retiredName], undefined, `${retiredName} is unpublished; depend on ${name}`);
-  assert.equal(lock.packages[`node_modules/${retiredName}`], undefined, `${retiredName} must not remain in the lockfile`);
+  assert.equal(bunLock.packages[retiredName], undefined, `${retiredName} must not remain in the lockfile`);
 }
 
 // Web tokens ship no font binaries since hig#64; docs fonts come from @bloxwap/font only.
