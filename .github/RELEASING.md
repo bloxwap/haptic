@@ -7,7 +7,7 @@ The first release is tracked in [#14](https://github.com/bloxwap/haptic/issues/1
 Use Node 24 and npm 11.6.1. From a clean checkout:
 
 ```sh
-npm ci
+bun install --frozen-lockfile
 npm run typecheck
 npm run test:matrix
 npm run size
@@ -17,7 +17,7 @@ npm run test:browser
 npm run docs:check
 NEXT_PUBLIC_BASE_PATH=/haptic npm run docs:build
 npm run docs:smoke
-npm audit --audit-level=high
+bun audit --audit-level=high
 ```
 
 The packed-consumer check verifies sixteen allowlisted files, ESM/CJS imports and declarations, all public types, JSX, SSR without browser globals, React 18/19, and browser bundling outside the workspace. Bundle budgets exclude external React and native peers; the browser runtime uses the local encoder. The matrix runs the entire component/hook/hydration/lifecycle suite in isolated React installations.

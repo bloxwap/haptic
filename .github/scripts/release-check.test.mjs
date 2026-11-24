@@ -37,5 +37,5 @@ test('verification covers export routing, packaging and build tooling while allo
   for (const key of ['overrides', 'scripts', 'engines']) {
     assert.throws(() => assertBuildManifests(library, library, root, { ...root, [key]: null }), new RegExp(key));
   }
-  for (const path of ['packages/haptic/tsup.config.ts', 'package-lock.json', 'bun.lock', '.github/workflows/publish_npm.yml']) assert.ok(verifiedBuildPaths.includes(path));
+  for (const path of ['packages/haptic/tsup.config.ts', 'bun.lock', '.github/workflows/publish_npm.yml']) assert.ok(verifiedBuildPaths.includes(path));
 });
