@@ -7,7 +7,7 @@ The first release is tracked in [#14](https://github.com/bloxwap/haptic/issues/1
 Use Node 24 and npm 11.6.1. From a clean checkout:
 
 ```sh
-npm ci
+bun install --frozen-lockfile
 npm run typecheck
 npm run test:matrix
 npm run size

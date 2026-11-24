@@ -9,7 +9,7 @@ export function provenance(cwd) {
   const root = git('rev-parse', '--show-toplevel');
   const files = git('-C', root, 'ls-files', '--cached', '--others', '--exclude-standard', '-z').split('\0').filter(Boolean);
   const relevant = files.filter(path => ['src', 'bench', 'scripts'].some(directory => path.startsWith(`packages/haptic/${directory}/`)) ||
-    ['package.json', 'package-lock.json', 'bun.lock', '.npmrc', 'packages/haptic/.npmrc', 'packages/haptic/package.json', 'packages/haptic/tsup.config.ts', 'packages/haptic/tsconfig.json'].includes(path));
+    ['package.json', 'bun.lock', '.npmrc', 'packages/haptic/.npmrc', 'packages/haptic/package.json', 'packages/haptic/tsup.config.ts', 'packages/haptic/tsconfig.json'].includes(path));
   const hash = createHash('sha256');
   for (const path of [...new Set(relevant)].sort()) {
     hash.update(path + '\0');

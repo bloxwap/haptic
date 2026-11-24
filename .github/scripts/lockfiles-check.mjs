@@ -36,15 +36,6 @@ function add(versions, name, version) {
   versions.get(name).add(version);
 }
 
-export function versionsFromPackageLock(lock) {
-  const versions = new Map();
-  for (const [path, meta] of Object.entries(lock.packages ?? {})) {
-    if (!path.includes('node_modules') || meta.link || !meta.version) continue;
-    add(versions, meta.name ?? path.split('node_modules/').pop(), meta.version);
-  }
-  return versions;
-}
-
 export function versionsFromBunLock(lock) {
   const versions = new Map();
   for (const value of Object.values(lock.packages ?? {})) {
@@ -57,28 +48,12 @@ export function versionsFromBunLock(lock) {
   return versions;
 }
 
-export function lockfileDiffs(npmLock, bunLock) {
-  const npm = versionsFromPackageLock(npmLock);
-  const bun = versionsFromBunLock(bunLock);
-  const names = new Set([...npm.keys(), ...bun.keys()]);
-  const diffs = [];
-  for (const name of [...names].sort()) {
-    const npmVersions = [...(npm.get(name) ?? [])].sort().join(', ');
-    const bunVersions = [...(bun.get(name) ?? [])].sort().join(', ');
-    if (npmVersions !== bunVersions) diffs.push(`${name}: package-lock.json [${npmVersions || 'missing'}] vs bun.lock [${bunVersions || 'missing'}]`);
-  }
-  return { packages: npm.size, diffs };
-}
-
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  const npmLock = JSON.parse(readFileSync(resolve(repoRoot, 'package-lock.json'), 'utf8'));
   const bunLock = parseJsonc(readFileSync(resolve(repoRoot, 'bun.lock'), 'utf8'));
-  const { packages, diffs } = lockfileDiffs(npmLock, bunLock);
-  if (diffs.length > 0) {
-    console.error(diffs.join('\n'));
-    throw new Error('bun.lock and package-lock.json resolve different versions.');
-  }
-  console.log(`bun.lock and package-lock.json resolve the same ${packages} packages.`);
+  const versions = versionsFromBunLock(bunLock);
+  if (versions.size === 0) throw new Error('bun.lock does not resolve any packages.');
+  const pairs = [...versions.values()].reduce((n, set) => n + set.size, 0);
+  console.log(`bun.lock resolves ${versions.size} packages (${pairs} name/version pairs).`);
 }

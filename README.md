@@ -120,7 +120,7 @@ The [evaluation](.github/planning/EVALUATION.md), [compatibility contract](.gith
 This repository is an npm workspace: the library lives in [`packages/haptic`](packages/haptic) and the documentation site in [`apps/docs`](apps/docs).
 
 ```sh
-npm ci
+bun install --frozen-lockfile
 npm test            # run the test suite
 npm run coverage    # tests with 100% line/branch/function coverage enforcement
 npm run build       # build the library

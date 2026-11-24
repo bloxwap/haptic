@@ -48,7 +48,6 @@ jobs:
               - 'vendor/**'
               - 'package.json'
               - '**/package.json'
-              - '**/package-lock.json'
               - 'bun.lock'
               - '**/npm-shrinkwrap.json'
               - '**/.npmrc'
